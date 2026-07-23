@@ -1,10 +1,7 @@
-function App() {
+import LandingPage from './components/landing/LandingPage'
 
-  return (
-    <>
-    <h1>APolo</h1>
-    </>
-  )
+function App() {
+  return <LandingPage />
 }
 
 export default App

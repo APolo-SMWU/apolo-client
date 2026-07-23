@@ -51,10 +51,11 @@
     font-size: var(--text-body-01);
     color: var(--color-ink);
     background-color: var(--color-white);
+    min-width: 1280px;
   }
 
   #root {
+    min-height: 100vh;
     width: 100%;
-    margin: 0 auto;
   }
 }
