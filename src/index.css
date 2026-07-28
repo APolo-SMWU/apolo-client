@@ -5,13 +5,17 @@
 @theme {
 
   /* font-size */
-  --text-headline: 24px;
+  --text-display-01: 36px;
+  --text-display-02: 32px;
+  --text-heading-01: 30px;
+  --text-heading-02: 28px;
+  --text-heading-03: 24px;
   --text-title-01: 20px;
   --text-title-02: 18px;
-  --text-subtitle: 16px;
-  --text-body-01: 14px;
-  --text-body-02: 12px;
-  --text-caption: 10px;
+  --text-body-01: 16px;
+  --text-body-02: 14px;
+  --text-caption-01: 12px;
+  --text-caption-02: 10px;
 
   /* font-weight */
   --font-weight-light: 300;
