@@ -1,4 +1,4 @@
-import { WindowCard } from './WindowCard'
+import { WindowCard } from '../components/WindowCard'
 
 type ChipProps = {
   active?: boolean
