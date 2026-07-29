@@ -33,6 +33,7 @@
   --color-tip: #FFFCE8;
   --color-success: #31C867;
   --color-danger: #F04438;
+  --color-placeholder: #667085;
 }
 
 @layer base {
