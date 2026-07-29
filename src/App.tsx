@@ -1,9 +1,13 @@
-function App() {
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import LandingPage from "./pages/LandingPage"
 
+function App() {
   return (
-    <>
-    <h1>APolo</h1>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
