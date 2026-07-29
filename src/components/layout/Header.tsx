@@ -2,8 +2,8 @@ import { NavLink } from "react-router-dom"
 
 export default function Header() {
   return (
-    <header className="w-full flex h-22 px-16 items-center justify-between bg-white border-b border-focus">
-      <div className="flex flex-col w-22 gap-0.5 items-center justify-center">
+    <header className="w-full flex h-20 px-16 items-center justify-between bg-white border-b border-focus">
+      <div className="flex flex-col w-22 items-center justify-center">
         <h3 className="text-heading-02 font-bold text-ink">
           APolo
         </h3>
