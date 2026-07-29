@@ -76,7 +76,7 @@ export function LandingPage() {
 
           <div className="relative z-10 h-full">
             <WindowCard
-              label="C://APOLO_INTRO"
+              label="APOLO_INTRO"
               variant="black"
               className="absolute left-[64px] top-[163px] w-[400px]"
               bodyClassName="px-[28px] pb-3 pt-[24px]"
@@ -95,7 +95,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://JOB_SELECT"
+              label="JOB_SELECT"
               className="absolute left-[518px] top-[109px] w-[320px]"
               bodyClassName="px-4 pb-4 pt-4"
             >
@@ -114,7 +114,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://CAREER_LEVEL"
+              label="CAREER_LEVEL"
               className="absolute left-[936px] top-[168px] w-[314px]"
               bodyClassName="px-4 pb-4 pt-4"
             >
@@ -130,7 +130,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://PROMPT"
+              label="PROMPT"
               className="absolute left-[246px] top-[399px] w-[470px]"
               bodyClassName="px-[18px] pb-4 pt-[18px]"
             >
@@ -145,7 +145,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://GENERATED_PORTFOLIO"
+              label="GENERATED_PORTFOLIO"
               variant="black"
               className="absolute left-[792px] top-[392px] w-[428px]"
               bodyClassName="px-5 pb-5 pt-[18px]"
@@ -162,7 +162,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://APOLO_INTRO"
+              label="APOLO_INTRO"
               variant="black"
               className="absolute left-[91px] top-[650px] w-[330px]"
               bodyClassName="px-[18px] pb-4 pt-[18px]"
@@ -179,7 +179,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://BLOCK_EDITOR"
+              label="BLOCK_EDITOR"
               className="absolute left-[498px] top-[682px] w-[560px]"
               bodyClassName="px-5 pb-4 pt-[18px]"
             >
@@ -202,7 +202,7 @@ export function LandingPage() {
             </WindowCard>
 
             <WindowCard
-              label="C://SHARE"
+              label="SHARE"
               variant="black"
               className="absolute left-[1182px] top-[710px] w-[174px]"
               bodyClassName="px-3 pb-3 pt-3"
