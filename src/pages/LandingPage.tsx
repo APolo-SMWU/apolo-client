@@ -2,6 +2,7 @@ import Header from '../components/layout/Header'
 import { WindowCard } from '../components/WindowCard'
 import LandingChip from '../components/LandingChip'
 import Footer from '../components/layout/Footer';
+import { useNavigate } from 'react-router-dom';
 
 function ListRow({ active = false, children }: { active?: boolean; children: string }) {
   return (
@@ -16,6 +17,7 @@ function ListRow({ active = false, children }: { active?: boolean; children: str
 }
 
 export function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
@@ -48,7 +50,13 @@ export function LandingPage() {
                 <br />
                 포트폴리오를 빠르게 만들 수 있습니다.
               </p>
-              <LandingChip active className="w-[120px] h-[36px] text-body-02">시작하기</LandingChip>
+              <LandingChip 
+                onClick={() => navigate(`/signup`)}
+                active
+                className="w-[120px] h-[36px] text-body-02 transition-transform duration-100 active:scale-90"
+              >
+                시작하기
+              </LandingChip>
             </WindowCard>
 
             <WindowCard
