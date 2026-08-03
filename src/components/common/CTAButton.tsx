@@ -17,7 +17,7 @@ export default function CTAButton({
       disabled={disabled}
       className={`
         flex items-center justify-center border border-ink
-        ${disabled ? 'bg-white text-placeholder font-regular' : 'bg-primary text-white font-bold'}
+        ${disabled ? 'bg-white text-placeholder font-regular': 'bg-primary text-white font-bold'}
         ${className}
       `}
       {...props}

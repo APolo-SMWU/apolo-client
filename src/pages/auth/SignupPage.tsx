@@ -1,12 +1,145 @@
 import { useNavigate } from "react-router-dom";
-import AuthInput from "../../components/auth/AuthInput";
-import Footer from "../../components/layout/Footer";
-import Header from "../../components/layout/Header";
-import { WindowCard } from "../../components/WindowCard";
-import CTAButton from "../../components/common/CTAButton";
+import AuthInput from "@/components/auth/AuthInput";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import { WindowCard } from "@/components/WindowCard";
+import CTAButton from "@/components/common/CTAButton";
+import {
+  mapServerErrors,
+  type ApiErrorResponse,
+} from '@/api/api';
+import { useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
+import { type SignupRequest, signup } from "@/api/auth";
+
+type SignupErrors = Partial<
+  Record<"nickname" | "email" | "password" | "passwordCheck", string>
+>;
 
 export default function SignupPage() {
   const navigate = useNavigate();
+
+  const [form, setForm] = useState<SignupRequest>({
+    nickname: "",
+    email: "",
+    password: "",
+    passwordCheck: "",
+  });
+
+  const [errors, setErrors] = useState<SignupErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  }
+
+  function validate(values: SignupRequest): SignupErrors {
+    const nextErrors: SignupErrors = {};
+
+    const nicknameError = validateField("nickname", values.nickname);
+    const emailError = validateField("email", values.email);
+    const passwordError = validateField("password", values.password);
+    const passwordCheckError = validateField("passwordCheck", values.passwordCheck);
+
+    if (nicknameError) nextErrors.nickname = nicknameError;
+    if (emailError) nextErrors.email = emailError;
+    if (passwordError) nextErrors.password = passwordError;
+    if (passwordCheckError) nextErrors.passwordCheck = passwordCheckError;
+
+    return nextErrors;
+  }
+
+  function validateField(name: keyof SignupRequest, value: string) {
+    switch (name) {
+      case "nickname":
+        if (!value.trim()) return "닉네임을 입력해주세요.";
+        return "";
+
+      case "email":
+        if (!value.trim()) return "이메일을 입력해주세요.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return "올바른 이메일 형식이 아닙니다.";
+        }
+        return "";
+
+      case "password":
+        if (!value) return "비밀번호를 입력해주세요.";
+        if (value.length < 8) return "비밀번호는 8자 이상이어야 합니다.";
+        return "";
+
+      case "passwordCheck":
+        if (!value) return "비밀번호 확인을 입력해주세요.";
+        if (value !== form.password) return "비밀번호가 일치하지 않습니다.";
+        return "";
+
+      default:
+        return "";
+    }
+  }
+
+  function handleBlur(event: FocusEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name as keyof SignupRequest, value),
+    }));
+  }
+
+  const isFormComplete =
+    form.nickname.trim() !== "" &&
+    form.email.trim() !== "" &&
+    form.password.trim() !== "" &&
+    form.passwordCheck.trim() !== "";
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextErrors = validate(form);
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrors({});
+
+      await signup(form);
+
+      navigate("/login");
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+
+      if (apiError.errors?.length) {
+        setErrors(mapServerErrors(apiError.errors) as SignupErrors);
+        return;
+      }
+
+      if (apiError.status === 409) {
+        setErrors({
+          email: apiError.message || "이미 사용 중인 이메일입니다.",
+        });
+        return;
+      }
+
+      setErrors({
+        email: apiError.message || "회원가입 중 오류가 발생했습니다.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <Header/>
@@ -33,27 +166,47 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <form className="flex flex-col w-full gap-3">
+          <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
             <AuthInput
               label="닉네임"
+              name="nickname"
+              value={form.nickname}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={errors.nickname}
               placeholder="닉네임을 입력해주세요"
               className="w-full"
             />
             <AuthInput
               label="이메일"
               type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={errors.email}
               placeholder="email@example.com"
               className="w-full"
             />
             <AuthInput
               label="비밀번호"
               type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={errors.password}
               placeholder="8자 이상 입력해주세요"
               className="w-full"
             />
             <AuthInput
               label="비밀번호 확인"
               type="password"
+              name="passwordCheck"
+              value={form.passwordCheck}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={errors.passwordCheck}
               placeholder="비밀번호를 다시 입력해주세요"
               className="w-full"
             />
@@ -71,9 +224,11 @@ export default function SignupPage() {
               </div>
 
               <CTAButton
+                type="submit"
+                disabled={!isFormComplete || isSubmitting}
                 className="w-[210px] h-10"
               >
-                회원가입
+                {isSubmitting ? "가입 중..." : "회원가입"}
               </CTAButton>
             </div>
           </form>
