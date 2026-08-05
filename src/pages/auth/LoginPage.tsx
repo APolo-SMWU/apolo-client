@@ -192,8 +192,6 @@ export default function LoginPage() {
           <div className="flex w-full items-center justify-center gap-[10px] text-body-02 text-placeholder leading-none">
             <span onClick={() => navigate(`/signup`)}>회원가입</span>
             <div className="h-3 w-px bg-placeholder" />
-            <span onClick={() => navigate(`/find-email`)}>이메일 찾기</span>
-            <div className="h-3 w-px bg-placeholder" />
             <span onClick={() => navigate(`/find-password`)}>비밀번호 찾기</span>
           </div>
         </WindowCard>
