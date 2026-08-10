@@ -1,12 +1,32 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import CTAButton from "@/components/common/CTAButton";
+import Button from "@/components/common/Button";
 import EmptyCard from "@/components/common/EmptyCard";
 import FilterChip from "./components/FilterChip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getPortfolios, type Portfolio } from "@/api/portfolios";
+import PortfolioCard from "./components/PortfolioCard";
 
 export default function DashboardPage() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const data = await getPortfolios();
+        setPortfolios(data.portfolios);
+      } catch {
+        setError("포트폴리오를 불러오지 못했어요");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPortfolios();
+  }, []);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -18,9 +38,9 @@ export default function DashboardPage() {
             <h1 className="text-display-01 font-bold text-ink leading-none ">내 포트폴리오</h1>
             <p className="text-body-02 text-placeholder leading-none">최근 작업, 공유 상태, 공개 여부를 한 화면에서 관리해요.</p>
           </div>
-          <CTAButton type="button" className="w-[140px] h-9">
+          <Button className="w-[140px] h-9">
             + 새로 만들기
-          </CTAButton>
+          </Button>
         </div>
 
         <div className="flex items-center justify-center gap-4">
@@ -53,10 +73,31 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* 포폴 그리드 */}
-        <section className="flex w-full pt-[30px]">
-          <EmptyCard/>
-        </section>
+        {isLoading ? (
+          <section className="flex w-full pt-[30px]">
+            <p>불러오는 중...</p>
+          </section>
+        ) : error ? (
+          <section className="flex w-full pt-[30px]">
+            <p>{error}</p>
+          </section>
+        ) : portfolios.length === 0 ? (
+          <section className="flex w-full pt-[30px]">
+            <EmptyCard />
+          </section>
+        ) : (
+          <div className="grid w-[1200px] grid-cols-3 gap-20">
+            {portfolios.map((portfolio) => (
+              <PortfolioCard 
+                key={portfolio.id}
+                id={portfolio.id}
+                title={portfolio.title}
+                updatedAt={portfolio.updatedAt}
+                isPublic={portfolio.isPublic}
+              />
+            ))}
+          </div>
+        )}
       </main>
       <Footer />
     </div>
