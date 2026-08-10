@@ -3,8 +3,30 @@ import Footer from "@/components/layout/Footer";
 import EmptyCard from "@/components/common/EmptyCard";
 import { WindowCard } from "@/components/WindowCard";
 import Button from "@/components/common/Button";
+import { useEffect, useState } from "react";
+import { getPortfolios, type Portfolio } from "@/api/portfolios";
+import PortfoliosList from "./components/PortfoliosList";
 
 export default function MyPage() {
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const data = await getPortfolios();
+        setPortfolios(data.portfolios);
+      } catch {
+        setError("포트폴리오를 불러오지 못했어요");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPortfolios();
+  }, []);
+
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
@@ -46,7 +68,28 @@ export default function MyPage() {
           bodyClassName="flex flex-col items-start justify-center px-5 py-8 gap-[30px]"
         >
           <h2 className="text-heading-03 font-bold text-ink leading-none">내 포트폴리오 목록</h2>
-          <EmptyCard/>
+          {isLoading ? (
+            <section className="flex w-full pt-[30px]">
+              <p>불러오는 중...</p>
+            </section>
+          ) : error ? (
+            <section className="flex w-full pt-[30px]">
+              <p>{error}</p>
+            </section>
+          ) : portfolios.length === 0 ? (
+              <EmptyCard />
+          ) : (
+            <div className="flex flex-col w-full gap-5">
+              {portfolios.map((portfolio) => (
+                <PortfoliosList
+                  key={portfolio.id}
+                  title={portfolio.title}
+                  updatedAt={portfolio.updatedAt}
+                  isPublic={portfolio.isPublic}
+                />
+              ))}
+            </div>
+          )}
         </WindowCard>
       </main>
       <Footer />
