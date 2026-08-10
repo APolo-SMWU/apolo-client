@@ -101,7 +101,7 @@ export default function LoginPage() {
 
       const response = await login(form);
       localStorage.setItem("accessToken", response.accessToken);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
 
