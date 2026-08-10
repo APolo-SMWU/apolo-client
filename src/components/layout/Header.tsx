@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom"
 
 export default function Header() {
-  const isLoggedIn = false;
+  const isLoggedIn = !!localStorage.getItem("accessToken");
   
   return (
     <header className="w-full flex h-16 px-16 items-center justify-between bg-white border-b border-focus">
