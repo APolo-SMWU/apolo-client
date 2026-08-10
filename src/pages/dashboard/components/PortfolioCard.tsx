@@ -1,7 +1,17 @@
 import Button from "@/components/common/Button";
 import { WindowCard } from "@/components/WindowCard";
 
-export default function PortfolioCard() {
+type PortfolioCardProps = {
+  title: string;
+  updatedAt: string;
+  isPublic: boolean;
+}
+
+export default function PortfolioCard({
+  title,
+  updatedAt,
+  isPublic,
+}: PortfolioCardProps) {
   return (
     <WindowCard 
       label={`PORTFOLIO_`}
@@ -12,8 +22,8 @@ export default function PortfolioCard() {
       <div className="w-full border border-ink bg-surface" />
       <div className="flex w-full items-center justify-between">
         <div className="flex flex-col gap-1 items-start">
-          <h3 className="text-body-01 font-bold text-ink leading-none"></h3>
-          <p className="text-caption-02 text-placeholder"></p>
+          <h3 className="text-body-01 font-bold text-ink leading-none">{title}</h3>
+          <p className="text-caption-02 text-placeholder">수정일 {updatedAt} · 공개  {isPublic ? "ON" : "OFF"}</p>
         </div>
 
         <div className="flex gap-1 items-center">

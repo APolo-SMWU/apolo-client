@@ -3,10 +3,30 @@ import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button";
 import EmptyCard from "@/components/common/EmptyCard";
 import FilterChip from "./components/FilterChip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getPortfolios, type Portfolio } from "@/api/portfolios";
+import PortfolioCard from "./components/PortfolioCard";
 
 export default function DashboardPage() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const data = await getPortfolios();
+        setPortfolios(data.portfolios);
+      } catch {
+        setError("포트폴리오를 불러오지 못했어요");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPortfolios();
+  }, []);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -53,10 +73,30 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* 포폴 그리드 */}
-        <section className="flex w-full pt-[30px]">
-          <EmptyCard/>
-        </section>
+        {isLoading ? (
+          <section className="flex w-full pt-[30px]">
+            <p>불러오는 중...</p>
+          </section>
+        ) : error ? (
+          <section className="flex w-full pt-[30px]">
+            <p>{error}</p>
+          </section>
+        ) : portfolios.length === 0 ? (
+          <section className="flex w-full pt-[30px]">
+            <EmptyCard />
+          </section>
+        ) : (
+          <div className="grid w-[1200px] grid-cols-3 gap-20">
+            {portfolios.map((portfolio) => (
+              <PortfolioCard 
+                key={portfolio.id}
+                title={portfolio.title}
+                updatedAt={portfolio.updatedAt}
+                isPublic={portfolio.isPublic}
+              />
+            ))}
+          </div>
+        )}
       </main>
       <Footer />
     </div>
