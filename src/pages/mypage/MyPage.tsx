@@ -26,12 +26,12 @@ export default function MyPage() {
 
           <div className="flex flex-col gap-5 items-center justify-center">
             <Button
-              className="w-[120px] h-8 hover:bg-primary hover:text-white"
+              className="w-[120px] h-8"
             >
               프로필 수정
             </Button>
             <Button
-              className="w-[120px] h-8 hover:bg-primary hover:text-white"
+              className="w-[120px] h-8"
             >
               로그아웃
             </Button>
