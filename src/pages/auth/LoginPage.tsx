@@ -1,8 +1,8 @@
-import AuthInput from "../../components/auth/AuthInput";
-import Footer from "../../components/layout/Footer";
-import Header from "../../components/layout/Header";
-import { WindowCard } from "../../components/WindowCard";
-import CTAButton from "../../components/common/CTAButton";
+import AuthInput from "@/components/auth/AuthInput";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import { WindowCard } from "@/components/WindowCard";
+import CTAButton from "@/components/common/CTAButton";
 import Button from "@/components/common/Button";
 import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
