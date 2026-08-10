@@ -90,6 +90,7 @@ export default function DashboardPage() {
             {portfolios.map((portfolio) => (
               <PortfolioCard 
                 key={portfolio.id}
+                id={portfolio.id}
                 title={portfolio.title}
                 updatedAt={portfolio.updatedAt}
                 isPublic={portfolio.isPublic}
