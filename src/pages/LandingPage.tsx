@@ -1,6 +1,6 @@
-import Header from '../components/layout/Header'
-import { WindowCard } from '../components/WindowCard'
-import LandingChip from '../components/LandingChip'
+import Header from '@/components/layout/Header'
+import { WindowCard } from '@/components/WindowCard'
+import LandingChip from '@/components/LandingChip'
 import Footer from '../components/layout/Footer';
 import { useNavigate } from 'react-router-dom';
 

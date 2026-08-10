@@ -1,6 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import CTAButton from "@/components/common/CTAButton";
+import Button from "@/components/common/Button";
 import EmptyCard from "@/components/common/EmptyCard";
 import FilterChip from "./components/FilterChip";
 import { useState } from "react";
@@ -18,9 +18,9 @@ export default function DashboardPage() {
             <h1 className="text-display-01 font-bold text-ink leading-none ">내 포트폴리오</h1>
             <p className="text-body-02 text-placeholder leading-none">최근 작업, 공유 상태, 공개 여부를 한 화면에서 관리해요.</p>
           </div>
-          <CTAButton type="button" className="w-[140px] h-9">
+          <Button className="w-[140px] h-9">
             + 새로 만들기
-          </CTAButton>
+          </Button>
         </div>
 
         <div className="flex items-center justify-center gap-4">
