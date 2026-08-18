@@ -6,8 +6,10 @@ import FilterChip from "./components/FilterChip";
 import { useEffect, useState } from "react";
 import { getPortfolios, type Portfolio } from "@/api/portfolios";
 import PortfolioCard from "./components/PortfolioCard";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +40,11 @@ export default function DashboardPage() {
             <h1 className="text-display-01 font-bold text-ink leading-none ">내 포트폴리오</h1>
             <p className="text-body-02 text-placeholder leading-none">최근 작업, 공유 상태, 공개 여부를 한 화면에서 관리해요.</p>
           </div>
-          <Button className="w-[140px] h-9">
+          <Button 
+            type="button"
+            className="w-[140px] h-9"
+            onClick={() => navigate(`/prompt`)}
+          >
             + 새로 만들기
           </Button>
         </div>
