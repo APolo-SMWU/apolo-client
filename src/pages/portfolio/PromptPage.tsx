@@ -204,7 +204,7 @@ export default function PromptPage() {
                   className="min-h-[90px] w-full resize-none bg-transparent outline-none caret-primary text-body-02 text-ink placeholder:text-placeholder leading-[1.4]"
                   placeholder="예: 프로젝트마다 내가 맡은 역할과 트러블 슈팅이 잘 보이게 구성해줘."
                 />
-                <div className="flex items-end justify-between">
+                <div className="flex items-center h-6 justify-between">
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       ref={fileInputRef}
