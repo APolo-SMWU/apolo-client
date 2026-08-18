@@ -1,6 +1,7 @@
 import { apiFetch } from "./api";
 
 export type JobRoleOption = "DEVELOPER" | "DESIGNER" | "POSTGRADUATE" | "CUSTOM";
+export type CareerOption = "JUNIOR" | "MID_LEVEL" | "SENIOR" | "LEAD"
 
 export const JOB_ROLE_LABEL: Record<JobRoleOption, string> = {
   DEVELOPER: "개발자",
@@ -8,6 +9,13 @@ export const JOB_ROLE_LABEL: Record<JobRoleOption, string> = {
   POSTGRADUATE: "대학원 CV",
   CUSTOM: "입력하기",
 };
+
+export const CAREER_LABEL: Record<CareerOption, string> = {
+  JUNIOR: "신입",
+  MID_LEVEL: "3년 이상",
+  SENIOR: "5년 이상",
+  LEAD: "10년 이상",
+}
 
 export type PortfolioExternalLink = {
   label: string;
