@@ -5,6 +5,7 @@ import LoginPage from "./pages/auth/LoginPage"
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import MyPage from "./pages/mypage/MyPage"
 import PromptPage from "./pages/portfolio/PromptPage"
+import GenerateLoadingPage from "./pages/portfolio/GenerateLoadingPage"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
 
         <Route path="/prompt" element={<PromptPage />} />
+        <Route path="/generate-loading" element={<GenerateLoadingPage />} />
 
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
