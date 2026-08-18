@@ -1,19 +1,28 @@
+import { useRef, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { WindowCard } from "@/components/WindowCard";
 import CTAButton from "@/components/common/CTAButton";
 import SingleSelectGroup from "@/components/common/SingleSelectGroup";
+import PlusIcon from "@/assets/Plus.svg?react";
+import DeleteIcon from "@/assets/Delete.svg?react";
 import {
   CAREER_LABEL,
   JOB_ROLE_LABEL,
   type CareerOption,
   type JobRoleOption,
 } from "@/api/portfolios";
-import { useState } from "react";
 
 export default function PromptPage() {
   const [jobRole, setJobRole] = useState<JobRoleOption | null>(null);
   const [careerLevel, setCareerLevel] = useState<CareerOption | null>(null);
+  const [linkInput, setLinkInput] = useState("");
+  const [externalLinks, setExternalLinks] = useState<string[]>([]);
+  const [userPrompt, setUserPrompt] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const linkInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const maxPromptLength = 2000;
 
   const jobRoleOptions = Object.entries(JOB_ROLE_LABEL).map(([value, label]) => ({
     label,
@@ -24,6 +33,66 @@ export default function PromptPage() {
     label,
     value: value as CareerOption,
   }));
+
+  const isSubmitDisabled = !jobRole || !careerLevel || !userPrompt.trim();
+
+  const handleAttachmentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextFiles = Array.from(event.target.files ?? []);
+
+    if (nextFiles.length === 0) {
+      return;
+    }
+
+    setAttachments((current) => [...current, ...nextFiles]);
+    event.target.value = "";
+  };
+
+  const handleRemoveAttachment = (targetIndex: number) => {
+    setAttachments((current) =>
+      current.filter((_, index) => index !== targetIndex),
+    );
+  };
+
+  const commitExternalLink = () => {
+    const nextLink = linkInput.trim();
+
+    if (!nextLink) {
+      setLinkInput("");
+      return;
+    }
+
+    setExternalLinks((current) =>
+      current.includes(nextLink) ? current : [...current, nextLink],
+    );
+    setLinkInput("");
+  };
+
+  const handleRemoveExternalLink = (targetIndex: number) => {
+    setExternalLinks((current) =>
+      current.filter((_, index) => index !== targetIndex),
+    );
+  };
+
+  const handleEditExternalLink = (targetIndex: number) => {
+    setExternalLinks((current) => {
+      const targetLink = current[targetIndex];
+
+      if (!targetLink) {
+        return current;
+      }
+
+      setLinkInput(targetLink);
+      requestAnimationFrame(() => {
+        const input = linkInputRef.current;
+        input?.focus();
+        if (input) {
+          const cursorPosition = input.value.length;
+          input.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      });
+      return current.filter((_, index) => index !== targetIndex);
+    });
+  };
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -71,21 +140,117 @@ export default function PromptPage() {
               <h2 className="text-title-02 font-bold text-ink leading-none">
                 3. 외부 페이지 링크
               </h2>
-              <div>
+              <div className="flex min-h-11 w-full flex-wrap items-center gap-2 border border-ink bg-white px-4 py-2">
+                {externalLinks.map((link, index) => (
+                  <div
+                    key={`${link}-${index}`}
+                    className="flex max-w-full items-center gap-1 rounded-full bg-focus/70 px-2 py-1 text-body-02 text-placeholder"
+                  >
+                    <button
+                      type="button"
+                      className="max-w-[240px] truncate text-left"
+                      onClick={() => handleEditExternalLink(index)}
+                    >
+                      {link}
+                    </button>
+                    <button
+                      type="button"
+                      className="shrink-0"
+                      onClick={() => handleRemoveExternalLink(index)}
+                      aria-label={`${link} 삭제`}
+                    >
+                      <DeleteIcon className="size-3" />
+                    </button>
+                  </div>
+                ))}
+                <input
+                  ref={linkInputRef}
+                  value={linkInput}
+                  onChange={(event) => setLinkInput(event.target.value)}
+                  onBlur={commitExternalLink}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      commitExternalLink();
+                    }
 
+                    if (
+                      (event.key === "Backspace" || event.key === "Delete") &&
+                      linkInput.length === 0 &&
+                      externalLinks.length > 0
+                    ) {
+                      event.preventDefault();
+                      handleRemoveExternalLink(externalLinks.length - 1);
+                    }
+                  }}
+                  className="h-7 min-w-[240px] flex-1 bg-transparent outline-none caret-primary text-body-02 text-ink placeholder:text-placeholder leading-none"
+                  placeholder={
+                    externalLinks.length === 0
+                      ? "GitHub, 배포 링크, Behance, 논문 정리 페이지 등의 링크를 넣어주세요."
+                      : ""
+                  }
+                />
               </div>
             </div>
             <div className="flex flex-col gap-4 items-start">
               <h2 className="text-title-02 font-bold text-ink leading-none">
                 4. 원하는 방향
               </h2>
-              <div>
-
+              <div className="flex w-full flex-col border border-ink bg-white px-4 py-3">
+                <textarea
+                  value={userPrompt}
+                  onChange={(event) => setUserPrompt(event.target.value)}
+                  maxLength={maxPromptLength}
+                  className="min-h-[90px] w-full resize-none bg-transparent outline-none caret-primary text-body-02 text-ink placeholder:text-placeholder leading-[1.4]"
+                  placeholder="예: 프로젝트마다 내가 맡은 역할과 트러블 슈팅이 잘 보이게 구성해줘."
+                />
+                <div className="flex items-end justify-between">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+                      className="hidden"
+                      onChange={handleAttachmentChange}
+                    />
+                    <button
+                      type="button"
+                      className="size-5 outline-none"
+                      onClick={() => fileInputRef.current?.click()}
+                      aria-label="사진이나 문서 첨부"
+                    >
+                      <PlusIcon className="size-5"/>
+                    </button>
+                    {attachments.length > 0 ? (
+                      attachments.map((file, index) => (
+                        <div
+                          key={`${file.name}-${index}`}
+                          className="flex max-w-[220px] items-center gap-1 bg-focus/80 rounded-full px-2 py-1 text-caption-01 text-placeholder"
+                        >
+                          <span className="truncate">{file.name}</span>
+                          <button
+                            type="button"
+                            className="shrink-0"
+                            onClick={() => handleRemoveAttachment(index)}
+                            aria-label={`${file.name} 삭제`}
+                          >
+                            <DeleteIcon className="size-3" />
+                          </button>
+                        </div>
+                      ))
+                    ) : null}
+                  </div>
+                  <p className="text-caption-01 text-placeholder">
+                    {userPrompt.length} / {maxPromptLength}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="w-full flex items-end">
+            <div className="w-full flex justify-end">
               <CTAButton
                 type="submit"
+                disabled={isSubmitDisabled}
                 className="w-[210px] h-10"
               >
                 생성하기
