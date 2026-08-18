@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { WindowCard } from "@/components/WindowCard";
+import Button from "@/components/common/Button";
 import CTAButton from "@/components/common/CTAButton";
 import SingleSelectGroup from "@/components/common/SingleSelectGroup";
 import PlusIcon from "@/assets/Plus.svg?react";
@@ -14,6 +16,7 @@ import {
 } from "@/api/portfolios";
 
 export default function PromptPage() {
+  const navigate = useNavigate();
   const [jobRole, setJobRole] = useState<JobRoleOption | null>(null);
   const [careerLevel, setCareerLevel] = useState<CareerOption | null>(null);
   const [linkInput, setLinkInput] = useState("");
@@ -97,11 +100,35 @@ export default function PromptPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="relative flex flex-1 flex-col grid-cols-[minmax(160px,1fr)_760px_minmax(160px,1fr)] items-start overflow-hidden p-10">
-        {/* 왼쪽 필드 */}
-        <section className="flex flex-col items-start ">
+      <main className="relative flex flex-1 grid-cols-[minmax(160px,1fr)_760px_minmax(160px,1fr)] items-start overflow-hidden p-10">
 
+        {/* 왼쪽 필드 */}
+        <section className="flex flex-col items-start gap-75 px-9">
+          <Button
+            type="button"
+            className="w-[140px] h-9"
+            onClick={() => navigate(-1)}
+          >
+            뒤로가기
+          </Button>
+          <WindowCard
+            label="LINK_PRECAUTION"
+            variant="black"
+            className="relative z-10"
+            bodyClassName="flex flex-col p-4 gap-5"
+          >
+            <div className="flex flex-col gap-2 items-start">
+              <h3 className="text-title-01 font-bold text-danger leading-none">링크 첨부 주의사항</h3>
+              <p className="text-caption-01 text-placeholder leading-none">접근할 수 있는 페이지여야 해요.</p>
+            </div>
+            <ul className="list-disc pl-4 text-body-02 text-ink whitespace-nowrap">
+              <li>Github - public으로 되어있나요?</li>
+              <li>Notion - 외부 게시가 되어있나요?</li>
+              <li>기타 - 접근 권한이 허용되어 있나요?</li>
+            </ul>
+          </WindowCard>
         </section>
+
         {/* 중앙 prompt */}
         <section className="flex flex-col items-start gap-5">
           <div className="flex flex-col gap-2 items-start">
@@ -257,11 +284,43 @@ export default function PromptPage() {
               </CTAButton>
             </div>
           </WindowCard>
-
         </section>
-        {/* 오른쪽 필드 */}
-        <section>
 
+        {/* 오른쪽 필드 */}
+        <section className="flex flex-col items-start gap-30 px-9">
+          <WindowCard
+            label="TIP"
+            variant="black"
+            className="relative z-10 w-[266px]"
+            bodyClassName="p-4"
+          >
+            <p className=" text-body-02 text-ink">
+              프로젝트 링크, 담당 역할,<br />
+              원하는 블록을 함께 적으면 더 정확해요.
+            </p>
+          </WindowCard>
+          <WindowCard
+            label="PROMPT_GUIDE"
+            variant="black"
+            className="relative z-10 w-[266px]"
+            bodyClassName="flex flex-col p-4 gap-5"
+          >
+            <div className="flex flex-col gap-2 items-start">
+              <h3 className="text-title-01 font-bold text-ink leading-none">입력 가이드</h3>
+              <p className="text-caption-01 text-placeholder leading-[1.4]">
+                아래의 내용을 포함시키면<br/>
+                더 좋은 결과물을 만들어낼 수 있어요.
+              </p>
+            </div>
+            <ul className="list-disc pl-4 text-body-02 text-ink whitespace-nowrap">
+              <li>프로젝트 개수</li>
+              <li>원하는 분위기</li>
+              <li>맡은 역할</li>
+              <li>사용 기술/툴</li>
+              <li>어려웠던 문제</li>
+              <li>첨부 파일 (예: jpg, pdf, pptx)</li>
+            </ul>
+          </WindowCard>
         </section>
       </main>
       <Footer />
