@@ -279,6 +279,7 @@ export default function PromptPage() {
                 type="submit"
                 disabled={isSubmitDisabled}
                 className="w-[210px] h-10"
+                onClick={() => navigate(`/generate-loading`)}
               >
                 생성하기
               </CTAButton>
