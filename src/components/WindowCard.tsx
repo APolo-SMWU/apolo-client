@@ -22,7 +22,7 @@ export function WindowCard({
 }: WindowCardProps) {
   return (
     <section
-      className={`overflow-hidden border border-ink bg-white ${className}`}
+      className={`flex h-full flex-col overflow-hidden border border-ink bg-white ${className}`}
     >
       <header
         className={`flex h-[30px] items-center justify-between border-b border-ink px-4 text-caption-02 font-bold text-white ${variantClasses[variant]}`}
@@ -34,7 +34,7 @@ export function WindowCard({
           <i className="block h-3 w-3 border border-current" />
         </span>
       </header>
-      <div className={bodyClassName}>{children}</div>
+      <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
     </section>
   )
 }
