@@ -22,7 +22,7 @@ export function WindowCard({
 }: WindowCardProps) {
   return (
     <section
-      className={`flex h-full flex-col overflow-hidden border border-ink bg-white ${className}`}
+      className={`flex flex-col overflow-hidden border border-ink bg-white ${className}`}
     >
       <header
         className={`flex h-[30px] items-center justify-between border-b border-ink px-4 text-caption-02 font-bold text-white ${variantClasses[variant]}`}

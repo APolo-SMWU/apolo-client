@@ -100,10 +100,10 @@ export default function PromptPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="relative flex flex-1 grid-cols-[minmax(160px,1fr)_760px_minmax(160px,1fr)] items-start overflow-hidden p-10">
+      <main className="relative grid flex-1 grid-cols-[minmax(160px,1fr)_760px_minmax(160px,1fr)] items-start overflow-hidden p-10">
 
         {/* 왼쪽 필드 */}
-        <section className="flex flex-col items-start gap-75 px-9">
+        <section className="flex flex-col items-start gap-75 px-9 justify-self-end">
           <Button
             type="button"
             className="w-[140px] h-9"
@@ -288,7 +288,7 @@ export default function PromptPage() {
         </section>
 
         {/* 오른쪽 필드 */}
-        <section className="flex flex-col items-start gap-30 px-9">
+        <section className="flex flex-col items-start gap-30 px-9 justify-self-start">
           <WindowCard
             label="TIP"
             variant="black"
