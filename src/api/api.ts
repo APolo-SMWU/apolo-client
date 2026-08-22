@@ -25,6 +25,7 @@ export async function apiFetch<T>(
 
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(shouldUseAuth && token ? {Authorization: `Bearer ${token}` } : {}),
@@ -37,7 +38,7 @@ export async function apiFetch<T>(
   if (!response.ok) {
     throw {
       message: data?.message ?? "요청에 실패했습니다.",
-      code: data?.code ?? "UNKNOWN_ERROR",
+      code: data?.errorCode ?? data?.code ?? "UNKNOWN_ERROR",
       errors: data?.errors ?? [],
       status: response.status,
     } satisfies ApiErrorResponse;
