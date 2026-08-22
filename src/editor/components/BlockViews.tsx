@@ -61,14 +61,19 @@ function formatDateRange(range?: DateRange): string {
 }
 
 function ExternalLink({ item }: { item: LinkItem }) {
+  const label = item.label || item.url;
+  const href = /^[a-z][a-z\d+.-]*:/i.test(item.url) || item.url.startsWith("//")
+    ? item.url
+    : `https://${item.url}`;
+
   return (
     <a
-      href={item.url}
+      href={href}
       target={item.target ?? "_blank"}
       rel="noopener noreferrer"
       className="text-body-02 text-primary underline"
     >
-      {item.label}
+      {label}
     </a>
   );
 }
@@ -84,21 +89,22 @@ export function HeroBlockView({
   value: HeroBlockValue;
   props?: HeroBlockProps;
 }) {
-  const shouldShowImage = Boolean(value.heroImage);
+  const shouldShowImage = props?.showImage !== false && Boolean(value.heroImage);
 
   return (
-    <div className="grid overflow-hidden border border-ink bg-white sm:grid-cols-2">
+    <div className={`relative overflow-hidden border border-ink bg-white ${shouldShowImage ? "min-h-[360px]" : ""}`}>
       {shouldShowImage && (
-        <div>
-          <img className="h-full w-full object-cover" src={value.heroImage} alt="hero" />
-        </div>
+        <>
+          <img className="absolute inset-0 h-full w-full object-cover" src={value.heroImage} alt="" />
+          <div className="absolute inset-0 bg-ink/65" />
+        </>
       )}
-      <div className="flex flex-col justify-center gap-4 p-5">
+      <div className={`relative flex min-h-full max-w-3xl flex-col justify-center gap-4 p-8 ${shouldShowImage ? "text-white" : ""}`}>
         {value.headline && (
-          <h1 className="text-heading-02 font-bold text-ink">{value.headline}</h1>
+          <h1 className={`text-heading-02 font-bold ${shouldShowImage ? "text-white" : "text-ink"}`}>{value.headline}</h1>
         )}
         {value.subheadline && (
-          <p className="text-body-02 text-placeholder">{value.subheadline}</p>
+          <p className={`text-body-02 ${shouldShowImage ? "text-white/80" : "text-placeholder"}`}>{value.subheadline}</p>
         )}
         {props?.showCta && value.ctaLabel && value.ctaLink && (
           <a
@@ -168,10 +174,10 @@ export function ProjectBlockView({
   props?: ProjectBlockProps;
 }) {
   return (
-    <div className={`overflow-hidden border border-ink bg-white ${props?.display === "list" ? "flex gap-5" : ""}`}>
+    <div className="flex overflow-hidden border border-ink bg-white">
       {props?.showThumbnail !== false && value.thumbnail && (
-        <div className="shrink-0">
-          <img className="h-40 w-56 object-cover" src={value.thumbnail} alt={value.title || "프로젝트 썸네일"} />
+        <div className="w-64 shrink-0 self-stretch">
+          <img className="h-full min-h-56 w-full object-cover" src={value.thumbnail} alt={value.title || "프로젝트 썸네일"} />
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-5">
