@@ -7,6 +7,7 @@ import MyPage from "./pages/mypage/MyPage"
 import PromptPage from "./pages/portfolio/PromptPage"
 import GenerateLoadingPage from "./pages/portfolio/GenerateLoadingPage"
 import CreateCompletePage from "./pages/portfolio/CreateCompletePage"
+import BlockEditorPage from "./pages/portfolio/BlockEditorPage"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/prompt" element={<PromptPage />} />
         <Route path="/generate-loading" element={<GenerateLoadingPage />} />
         <Route path="/create-complete" element={<CreateCompletePage />} />
+        <Route path="/block-editor" element={<BlockEditorPage />} />
 
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
