@@ -23,8 +23,8 @@ export default function AuthInput({
       <div className="relative w-full">
         <input
           type={isPassword && showPassword ? "text" : type}
-          className={`flex px-4 h-11 border text-body-02 text-ink placeholder:text-placeholder leading-none outline-none ${
-            errorMessage ? 'border-danger' : 'border-ink'
+          className={`flex w-[450px] h-11 px-4 rounded-ml border  text-body-02 text-ink placeholder:text-placeholder leading-none outline-none ${
+            errorMessage ? 'border-danger' : 'border-placeholder'
           } ${className}`}
           {...props}
         />

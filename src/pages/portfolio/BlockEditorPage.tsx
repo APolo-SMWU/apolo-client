@@ -28,11 +28,14 @@ const editorFixture = normalizePortfolioTemplate({
 
 export default function BlockEditorPage() {
   const navigate = useNavigate();
+  const template = usePortfolioStore((state) => state.template);
   const initPortfolio = usePortfolioStore((state) => state.initPortfolio);
 
   useEffect(() => {
-    initPortfolio(editorFixture.template, editorFixture.content);
-  }, [initPortfolio]);
+    if (!template) {
+      initPortfolio(editorFixture.template, editorFixture.content);
+    }
+  }, [initPortfolio, template]);
 
   return (
     <div className="flex min-h-dvh flex-col">
