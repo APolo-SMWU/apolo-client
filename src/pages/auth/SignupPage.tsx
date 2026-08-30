@@ -166,6 +166,7 @@ export default function SignupPage() {
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
             <AuthInput
               label="이름"
+              required
               name="name"
               value={form.nickname}
               onChange={handleChange}
@@ -175,6 +176,7 @@ export default function SignupPage() {
             />
             <AuthInput
               label="이메일"
+              required
               type="email"
               name="email"
               value={form.email}
@@ -185,6 +187,7 @@ export default function SignupPage() {
             />
             <AuthInput
               label="비밀번호"
+              required
               type="password"
               name="password"
               value={form.password}
@@ -195,6 +198,7 @@ export default function SignupPage() {
             />
             <AuthInput
               label="비밀번호 확인"
+              required
               type="password"
               name="passwordCheck"
               value={form.passwordCheck}

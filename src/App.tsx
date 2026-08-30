@@ -9,6 +9,7 @@ import GenerateLoadingPage from "./pages/portfolio/GenerateLoadingPage"
 import CreateCompletePage from "./pages/portfolio/CreateCompletePage"
 import BlockEditorPage from "./pages/portfolio/BlockEditorPage"
 import PreviewPage from "./pages/portfolio/PreviewPage"
+import OnboardingPage from "./pages/auth/OnboardingPage"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         {/* auth */}
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
 
         <Route path="/dashboard" element={<DashboardPage />} />
 

@@ -150,6 +150,7 @@ export default function LoginPage() {
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
             <AuthInput
               label="이메일"
+              required
               type="email"
               name="email"
               value={form.email}
@@ -160,6 +161,7 @@ export default function LoginPage() {
             />
             <AuthInput
               label="비밀번호"
+              required
               type="password"
               name="password"
               value={form.password}
