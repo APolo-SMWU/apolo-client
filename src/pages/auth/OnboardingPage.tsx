@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header";
 import ProfileFormCard, {
   type ProfileFormField,
 } from "@/components/common/ProfileFormCard";
+import { formatPhoneNumber } from "@/components/common/profileForm";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 
 type OnboardingForm = {
@@ -11,15 +12,6 @@ type OnboardingForm = {
   github: string;
   notion: string;
 };
-
-function formatPhoneNumber(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
 
 const onboardingFields: ProfileFormField[] = [
   {

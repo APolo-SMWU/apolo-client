@@ -25,7 +25,8 @@ export type ProfileFormField = Omit<
 };
 
 type ProfileFormCardProps = {
-  title: ReactNode;
+  title?: ReactNode;
+  windowTitle?: string;
   description?: ReactNode;
   fields: ProfileFormField[];
   values: ProfileFormValues;
@@ -39,6 +40,7 @@ type ProfileFormCardProps = {
 
 export default function ProfileFormCard({
   title,
+  windowTitle,
   description,
   fields,
   values,
@@ -52,13 +54,17 @@ export default function ProfileFormCard({
   const requiredFieldsComplete = areRequiredProfileFieldsComplete(fields, values);
 
   return (
-    <AppWindow className={className}>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-heading-01 font-bold leading-[1.0] text-ink">{title}</h1>
-        {description ? (
-          <p className="text-body-02 text-placeholder">{description}</p>
-        ) : null}
-      </div>
+    <AppWindow className={className} title={windowTitle}>
+      {title || description ? (
+        <div className="flex flex-col gap-2">
+          {title ? (
+            <h1 className="text-heading-01 font-bold leading-[1.0] text-ink">{title}</h1>
+          ) : null}
+          {description ? (
+            <p className="text-body-02 text-placeholder">{description}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <form className="flex w-full flex-col gap-3" onSubmit={onSubmit}>
         {photoUploader}
