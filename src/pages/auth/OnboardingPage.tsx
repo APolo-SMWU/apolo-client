@@ -61,11 +61,11 @@ export default function  OnboardingPage() {
           className="relative z-10"
         >
           <div className="flex flex-col gap-2">
-            <h1 className="text-heading-01 font-bold text-ink leading-none">
+            <h1 className="text-heading-01 font-bold text-ink leading-[1.0]">
               Fill in your<br />
               information
             </h1>
-            <p className="text-body-02 text-placeholder leading-none">
+            <p className="text-body-02 text-placeholder">
               AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요
             </p>
           </div>

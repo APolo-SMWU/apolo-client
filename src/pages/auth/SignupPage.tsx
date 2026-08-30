@@ -154,11 +154,11 @@ export default function SignupPage() {
           className="relative z-10"
         >
           <div className="flex flex-col gap-2">
-            <h1 className="text-heading-01 font-bold text-ink leading-none">
+            <h1 className="text-heading-01 font-bold text-ink leading-[1.0]">
               Create your<br />
               account
             </h1>
-            <p className="text-body-02 text-placeholder leading-none">
+            <p className="text-body-02 text-placeholder">
               무슨 말을 해야할까
             </p>
           </div>
