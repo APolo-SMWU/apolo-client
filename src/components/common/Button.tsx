@@ -14,8 +14,8 @@ export default function Button({
     <button
       type="button"
       className={`
-        flex items-center justify-center border border-ink bg-white text-ink font-bold
-        hover:bg-primary hover:text-white
+        flex w-50 h-10 rounded-ml items-center justify-center border border-placeholder bg-white text-placeholder font-bold
+        hover:border-focus hover:bg-primary hover:text-white
         ${className}
       `}
       {...props}
