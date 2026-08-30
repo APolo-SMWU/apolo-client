@@ -1,10 +1,9 @@
-import AuthInput from "@/components/AuthInput";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import AppWindow from "@/components/AppWindow";
-import CTAButton from "@/components/common/CTAButton";
+import ProfileFormCard, {
+  type ProfileFormField,
+} from "@/components/common/ProfileFormCard";
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import PhotoUploader from "@/components/PhotoUploader";
 
 type OnboardingForm = {
   phone: string;
@@ -21,6 +20,35 @@ function formatPhoneNumber(value: string) {
 
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
+
+const onboardingFields: ProfileFormField[] = [
+  {
+    label: "Phone",
+    required: true,
+    type: "tel",
+    name: "phone",
+    inputMode: "numeric",
+    maxLength: 13,
+    pattern: "\\d{3}-\\d{4}-\\d{4}",
+    placeholder: "010-1234-5678",
+  },
+  {
+    label: "Address",
+    name: "address",
+    placeholder: "회사 주소를 입력해주세요",
+  },
+  {
+    label: "GitHub",
+    required: true,
+    name: "github",
+    placeholder: "GitHub 주소를 입력해주세요",
+  },
+  {
+    label: "Notion",
+    name: "notion",
+    placeholder: "노션 페이지 링크를 입력해주세요",
+  },
+];
 
 export default function  OnboardingPage() {
   const [form, setForm] = useState<OnboardingForm>({
@@ -41,8 +69,6 @@ export default function  OnboardingPage() {
   }
 
   const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
-  const isFormComplete = isPhoneValid && form.github.trim() !== "";
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
@@ -57,66 +83,16 @@ export default function  OnboardingPage() {
           <p className="ml-44 text-[70px]">PROFILE</p>
         </div>
 
-        <AppWindow
+        <ProfileFormCard
           className="relative z-10"
-        >
-          <div className="flex flex-col gap-2">
-            <h1 className="text-heading-01 font-bold text-ink leading-[1.0]">
-              Fill in your<br />
-              information
-            </h1>
-            <p className="text-body-02 text-placeholder">
-              AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요
-            </p>
-          </div>
-
-          <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
-            {/* 프로필 사진 */}
-            <PhotoUploader />
-            <AuthInput
-              label="Phone"
-              required
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              inputMode="numeric"
-              maxLength={13}
-              pattern="\d{3}-\d{4}-\d{4}"
-              placeholder="010-1234-5678"
-            />
-            <AuthInput
-              label="Address"
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="회사 주소를 입력해주세요"
-            />
-            <AuthInput
-              label="GitHub"
-              required
-              name="github"
-              value={form.github}
-              onChange={handleChange}
-              placeholder="GitHub 주소를 입력해주세요"
-            />
-            <AuthInput
-              label="Notion"
-              name="notion"
-              value={form.notion}
-              onChange={handleChange}
-              placeholder="노션 페이지 링크를 입력해주세요"
-            />
-            <div className="flex w-full mt-3 items-center justify-end">
-              <CTAButton
-                type="submit"
-                disabled={!isFormComplete}
-              >
-                저장하기
-              </CTAButton>
-            </div>
-          </form>
-        </AppWindow>
+          title={<>Fill in your<br />information</>}
+          description="AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요"
+          fields={onboardingFields}
+          values={form}
+          onFieldChange={handleChange}
+          onSubmit={handleSubmit}
+          submitDisabled={!isPhoneValid}
+        />
       </main>
       <Footer/>
     </div>
