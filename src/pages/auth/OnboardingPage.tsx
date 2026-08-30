@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import AppWindow from "@/components/AppWindow";
 import CTAButton from "@/components/common/CTAButton";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import PhotoUploader from "@/components/PhotoUploader";
 
 type OnboardingForm = {
   phone: string;
@@ -70,6 +71,8 @@ export default function  OnboardingPage() {
           </div>
 
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
+            {/* 프로필 사진 */}
+            <PhotoUploader />
             <AuthInput
               label="Phone"
               required
