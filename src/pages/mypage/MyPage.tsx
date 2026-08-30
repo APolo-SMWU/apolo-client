@@ -83,7 +83,13 @@ export default function MyPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
-      <main className="relative flex flex-1 flex-col items-center justify-center gap-10 overflow-hidden p-16">
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden">
+        {/* 배경글씨 */}
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
+          <p className="text-[80px]">MANAGE</p>
+          <p className="ml-44 text-[70px]">INFORMATION</p>
+        </div>
+
         {isEditing ? (
           <ProfileFormCard
             className="relative z-10"
