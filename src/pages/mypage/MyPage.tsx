@@ -5,8 +5,10 @@ import ProfileFormCard, {
 } from "@/components/common/ProfileFormCard";
 import { formatPhoneNumber } from "@/components/common/profileForm";
 import Button from "@/components/common/Button";
+import Modal from "@/components/common/Modal";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import { useNavigate } from "react-router-dom";
 
 type Profile = {
   name: string;
@@ -46,6 +48,7 @@ const profileFields: ProfileFormField[] = [
 ];
 
 export default function MyPage() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile>(initialProfile);
   const [form, setForm] = useState({
     name: initialProfile.name,
@@ -54,6 +57,7 @@ export default function MyPage() {
     github: initialProfile.github,
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
 
@@ -78,6 +82,11 @@ export default function MyPage() {
     event.preventDefault();
     setProfile((currentProfile) => ({ ...currentProfile, ...form }));
     setIsEditing(false);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("accessToken");
+    navigate("/login", { replace: true });
   }
 
   return (
@@ -126,11 +135,28 @@ export default function MyPage() {
 
             <div className="flex w-full items-center justify-between">
               <Button onClick={handleEditStart}>프로필 수정</Button>
-              <Button>로그아웃</Button>
+              <Button onClick={() => setIsLogoutModalOpen(true)}>로그아웃</Button>
             </div>
           </AppWindow>
         )}
       </main>
+      {isLogoutModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsLogoutModalOpen(false);
+            }
+          }}
+        >
+          <Modal
+            title="로그아웃하시겠습니까?"
+            description="로그아웃 후 다시 로그인이 가능합니다."
+            onCancel={() => setIsLogoutModalOpen(false)}
+            onConfirm={handleLogout}
+          />
+        </div>
+      ) : null}
       <Footer />
     </div>
   );
