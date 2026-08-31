@@ -1,98 +1,163 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import EmptyCard from "@/components/common/EmptyCard";
-import { WindowCard } from "@/components/WindowCard";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import AppWindow from "@/components/AppWindow";
+import ProfileFormCard, {
+  type ProfileFormField,
+} from "@/components/common/ProfileFormCard";
+import { formatPhoneNumber } from "@/components/common/profileForm";
 import Button from "@/components/common/Button";
-import { useEffect, useState } from "react";
-import { getPortfolios, type Portfolio } from "@/api/portfolios";
-import PortfoliosList from "./components/PortfoliosList";
+import Modal from "@/components/common/Modal";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import { useNavigate } from "react-router-dom";
+
+type Profile = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  github: string;
+};
+
+const initialProfile: Profile = {
+  name: "홍길동",
+  email: "test@gmail.com",
+  phone: "010-1234-5678",
+  address: "서울 용산구 청파로 47길 100",
+  github: "https://github.com/canofmato",
+};
+
+const profileFields: ProfileFormField[] = [
+  { label: "Name", name: "name", required: true, placeholder: "이름을 입력해주세요" },
+  {
+    label: "Phone",
+    name: "phone",
+    required: true,
+    type: "tel",
+    inputMode: "numeric",
+    maxLength: 13,
+    pattern: "\\d{3}-\\d{4}-\\d{4}",
+    placeholder: "010-1234-5678",
+  },
+  { label: "Address", name: "address", placeholder: "주소를 입력해주세요" },
+  {
+    label: "GitHub",
+    name: "github",
+    required: true,
+    placeholder: "GitHub 주소를 입력해주세요",
+  },
+];
 
 export default function MyPage() {
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<Profile>(initialProfile);
+  const [form, setForm] = useState({
+    name: initialProfile.name,
+    phone: initialProfile.phone,
+    address: initialProfile.address,
+    github: initialProfile.github,
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchPortfolios = async () => {
-      try {
-        const data = await getPortfolios();
-        setPortfolios(data.portfolios);
-      } catch {
-        setError("포트폴리오를 불러오지 못했어요");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
 
-    fetchPortfolios();
-  }, []);
+  function handleEditStart() {
+    setForm({
+      name: profile.name,
+      phone: profile.phone,
+      address: profile.address,
+      github: profile.github,
+    });
+    setIsEditing(true);
+  }
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+    const nextValue = name === "phone" ? formatPhoneNumber(value) : value;
+
+    setForm((currentForm) => ({ ...currentForm, [name]: nextValue }));
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setProfile((currentProfile) => ({ ...currentProfile, ...form }));
+    setIsEditing(false);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("accessToken");
+    navigate("/login", { replace: true });
+  }
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
-      <main className="relative flex flex-1 flex-col items-start overflow-hidden p-16 gap-10">
-        <WindowCard
-          label="PROFILE"
-          variant="blue"
-          className="relative z-10 w-full"
-          bodyClassName="flex w-full items-center justify-between px-5 py-8"
-        >
-          <div className="flex item-center justify-center gap-8">
-            {/* 프로필 사진 */}
-            <div className="rounded-full border border-ink w-25 h-25"/>
-            <div className="flex flex-col items-start justify-center gap-3 text-ink leading-none">
-              <h2 className="text-heading-03 font-bold">홍길동</h2>
-              <p className="text-body-02">test@gmail.com</p>
-            </div>
-          </div>
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden">
+        {/* 배경글씨 */}
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
+          <p className="text-[80px]">MANAGE</p>
+          <p className="ml-44 text-[70px]">INFORMATION</p>
+        </div>
 
-          <div className="flex flex-col gap-5 items-center justify-center">
-            <Button
-              className="w-[120px] h-8"
-            >
-              프로필 수정
-            </Button>
-            <Button
-              className="w-[120px] h-8"
-            >
-              로그아웃
-            </Button>
+        {isEditing ? (
+          <ProfileFormCard
+            className="relative z-10"
+            windowTitle="Edit Profile"
+            fields={profileFields}
+            values={form}
+            onFieldChange={handleChange}
+            onSubmit={handleSubmit}
+            submitLabel="수정하기"
+            submitDisabled={!isPhoneValid}
+          />
+        ) : (
+          <AppWindow className="relative z-10 w-[500px]" title="Profile">
+            <h1 className="text-heading-03 font-bold text-ink">{profile.name}</h1>
 
-          </div>
-        </WindowCard>
-
-        <WindowCard
-          label="PORTFOLIOS"
-          variant="black"
-          className="relative z-10 w-full"
-          bodyClassName="flex flex-col items-start justify-center px-5 py-8 gap-[30px]"
-        >
-          <h2 className="text-heading-03 font-bold text-ink leading-none">내 포트폴리오 목록</h2>
-          {isLoading ? (
-            <section className="flex w-full pt-[30px]">
-              <p>불러오는 중...</p>
-            </section>
-          ) : error ? (
-            <section className="flex w-full pt-[30px]">
-              <p>{error}</p>
-            </section>
-          ) : portfolios.length === 0 ? (
-              <EmptyCard />
-          ) : (
-            <div className="flex flex-col w-full gap-5">
-              {portfolios.map((portfolio) => (
-                <PortfoliosList
-                  key={portfolio.id}
-                  title={portfolio.title}
-                  updatedAt={portfolio.updatedAt}
-                  isPublic={portfolio.isPublic}
-                />
+            <div className="flex w-full flex-col items-start gap-3">
+              {[
+                ["Email", profile.email],
+                ["Phone", profile.phone],
+                ["Address", profile.address],
+                ["GitHub", profile.github],
+              ].map(([label, value]) => (
+                <div
+                  className="flex w-full items-center justify-start gap-4 text-start text-body-02 leading-none text-ink"
+                  key={label}
+                >
+                  <div className="flex w-16 gap-1 border-r border-primary">
+                    <p>{label}</p>
+                  </div>
+                  <p>{value}</p>
+                </div>
               ))}
             </div>
-          )}
-        </WindowCard>
+
+            <div className="flex w-full items-center justify-between">
+              <Button onClick={handleEditStart}>프로필 수정</Button>
+              <Button onClick={() => setIsLogoutModalOpen(true)}>로그아웃</Button>
+            </div>
+          </AppWindow>
+        )}
       </main>
+      {isLogoutModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsLogoutModalOpen(false);
+            }
+          }}
+        >
+          <Modal
+            title="로그아웃하시겠습니까?"
+            description="로그아웃 후 다시 로그인이 가능합니다."
+            onCancel={() => setIsLogoutModalOpen(false)}
+            onConfirm={handleLogout}
+          />
+        </div>
+      ) : null}
       <Footer />
     </div>
-  )
+  );
 }

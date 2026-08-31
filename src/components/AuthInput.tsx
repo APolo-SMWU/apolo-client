@@ -12,6 +12,7 @@ export default function AuthInput({
   errorMessage,
   className='',
   type,
+  required,
   ...props
 }: AuthInputProps) {
   const isPassword = type === "password";
@@ -19,12 +20,16 @@ export default function AuthInput({
 
   return (
     <label className="flex flex-col gap-1 items-start justify-center">
-      <span className="flex text-caption-01 text-ink leading-none gap-1">{label}<p className="text-caption-01 text-danger leading-none">*</p></span>
+      <span className="flex text-caption-01 text-ink leading-none gap-1">
+        {label}
+        {required && <span className="text-caption-01 text-danger leading-none">*</span>}
+      </span>
       <div className="relative w-full">
         <input
           type={isPassword && showPassword ? "text" : type}
-          className={`flex px-4 h-11 border text-body-02 text-ink placeholder:text-placeholder leading-none outline-none ${
-            errorMessage ? 'border-danger' : 'border-ink'
+          required={required}
+          className={`flex w-[450px] h-11 px-4 rounded-ml border  text-body-02 text-ink placeholder:text-placeholder leading-none outline-none ${
+            errorMessage ? 'border-danger' : 'border-placeholder'
           } ${className}`}
           {...props}
         />

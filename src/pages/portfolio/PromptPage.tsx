@@ -5,7 +5,6 @@ import Footer from "@/components/layout/Footer";
 import { WindowCard } from "@/components/WindowCard";
 import Button from "@/components/common/Button";
 import CTAButton from "@/components/common/CTAButton";
-import SingleSelectGroup from "@/components/common/SingleSelectGroup";
 import PlusIcon from "@/assets/Plus.svg?react";
 import DeleteIcon from "@/assets/Delete.svg?react";
 import {
@@ -145,23 +144,12 @@ export default function PromptPage() {
               <h2 className="text-title-02 font-bold text-ink leading-none">
                 1. 직무 선택
               </h2>
-              <SingleSelectGroup
-                value={jobRole}
-                onChange={setJobRole}
-                options={jobRoleOptions}
-                optionClassName="w-[154px] h-8"
-              />
             </div>
             <div className="flex flex-col gap-4 items-start">
               <h2 className="text-title-02 font-bold text-ink leading-none">
                 2. 경력 수준
               </h2>
-              <SingleSelectGroup
-                value={careerLevel}
-                onChange={setCareerLevel}
-                options={careerOptions}
-                optionClassName="w-[154px] h-8"
-              />
+
             </div>
             <div className="flex flex-col gap-4 items-start">
               <h2 className="text-title-02 font-bold text-ink leading-none">

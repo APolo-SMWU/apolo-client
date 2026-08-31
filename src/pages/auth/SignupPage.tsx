@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import AuthInput from "@/components/auth/AuthInput";
+import AuthInput from "@/components/AuthInput";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import { WindowCard } from "@/components/WindowCard";
+import AppWindow from "@/components/AppWindow";
 import CTAButton from "@/components/common/CTAButton";
 import {
   mapServerErrors,
@@ -141,44 +141,42 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-apolo">
       <Header/>
       <main className="relative flex flex-1 items-center justify-center overflow-hidden">
         {/* 배경글씨 */}
-        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-ink/6">
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
           <p className="text-[80px]">WELCOME</p>
           <p className="ml-44 text-[70px]">SIGN IN</p>
         </div>
 
-        <WindowCard
-          label="AUTH_SIGN_UP"
-          variant="black"
-          className="relative z-10 w-[530px]"
-          bodyClassName="flex flex-col items-start justify-center p-[30px] gap-6"
+        <AppWindow
+          className="relative z-10"
         >
           <div className="flex flex-col gap-2">
-            <h1 className="text-heading-01 font-bold text-ink leading-none">
+            <h1 className="text-heading-01 font-bold text-ink leading-[1.0]">
               Create your<br />
               account
             </h1>
-            <p className="text-body-02 text-placeholder leading-none">
-              저장, 공유, 커뮤니티 기능을 사용하려면 계정이 필요합니다.
+            <p className="text-body-02 text-placeholder">
+              흩어진 기록을 모아, 나를 보여주는 모든 페이지를 최신으로 관리해보세요.
             </p>
           </div>
 
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
             <AuthInput
-              label="닉네임"
-              name="nickname"
+              label="이름"
+              required
+              name="name"
               value={form.nickname}
               onChange={handleChange}
               onBlur={handleBlur}
               errorMessage={errors.nickname}
-              placeholder="닉네임을 입력해주세요"
-              className="w-full"
+              placeholder="이름을 입력해주세요"
             />
             <AuthInput
               label="이메일"
+              required
               type="email"
               name="email"
               value={form.email}
@@ -186,10 +184,10 @@ export default function SignupPage() {
               onBlur={handleBlur}
               errorMessage={errors.email}
               placeholder="email@example.com"
-              className="w-full"
             />
             <AuthInput
               label="비밀번호"
+              required
               type="password"
               name="password"
               value={form.password}
@@ -197,10 +195,10 @@ export default function SignupPage() {
               onBlur={handleBlur}
               errorMessage={errors.password}
               placeholder="8자 이상 입력해주세요"
-              className="w-full"
             />
             <AuthInput
               label="비밀번호 확인"
+              required
               type="password"
               name="passwordCheck"
               value={form.passwordCheck}
@@ -208,7 +206,6 @@ export default function SignupPage() {
               onBlur={handleBlur}
               errorMessage={errors.passwordCheck}
               placeholder="비밀번호를 다시 입력해주세요"
-              className="w-full"
             />
             <div className="flex w-full mt-3 items-center justify-between">
               <div className="flex items-center justify-center gap-[10px]">
@@ -226,13 +223,12 @@ export default function SignupPage() {
               <CTAButton
                 type="submit"
                 disabled={!isFormComplete || isSubmitting}
-                className="w-[210px] h-10"
               >
                 {isSubmitting ? "가입 중..." : "회원가입"}
               </CTAButton>
             </div>
           </form>
-        </WindowCard>
+        </AppWindow>
       </main>
       <Footer/>
     </div>
