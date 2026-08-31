@@ -143,7 +143,7 @@ export default function LoginPage() {
               account
             </h1>
             <p className="text-body-02 text-placeholder">
-              뭐라고 해야할까
+              연결해둔 기록과 포트폴리오를 이어서 관리해보세요.
             </p>
           </div>
 

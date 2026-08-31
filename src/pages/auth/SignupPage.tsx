@@ -159,7 +159,7 @@ export default function SignupPage() {
               account
             </h1>
             <p className="text-body-02 text-placeholder">
-              무슨 말을 해야할까
+              흩어진 기록을 모아, 나를 보여주는 모든 페이지를 최신으로 관리해보세요.
             </p>
           </div>
 
