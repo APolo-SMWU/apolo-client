@@ -4,7 +4,7 @@ export default function Header() {
   const isLoggedIn = !!localStorage.getItem("accessToken");
   
   return (
-    <header className="w-full flex md:px-16 px-6 py-4 items-center justify-between bg-surface border-b border-focus">
+    <header className="w-full flex md:px-8 px-6 py-4 items-center justify-between bg-surface border-b border-focus">
       <div className="flex flex-col items-start justify-center">
         <h3 className="md:text-heading-03 text-body-01 font-bold text-ink leading-none">
           APolo

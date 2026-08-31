@@ -14,9 +14,9 @@ export default function AppWindow({
     <section className={`flex flex-col overflow-hidden rounded-lg bg-white border border-focus ${className}`}>
       <div className='flex h-[30px] items-center gap-4 px-4 bg-surface border-b border-focus'>
         <div className='flex gap-[6px] items-center justify-center'>
-          <div className='w-[10px] h-[10px] rounded-full bg-danger'/>
-          <div className='w-[10px] h-[10px] rounded-full bg-warn'/>
-          <div className='w-[10px] h-[10px] rounded-full bg-success'/>
+          <div className='w-3 h-3 rounded-full bg-danger'/>
+          <div className='w-3 h-3 rounded-full bg-warn'/>
+          <div className='w-3 h-3 rounded-full bg-success'/>
         </div>
 
         {title && (
