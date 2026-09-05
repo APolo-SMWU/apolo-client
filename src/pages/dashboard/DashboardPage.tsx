@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button";
@@ -26,12 +25,11 @@ const mockProfile: PersonalCardProps = {
 };
 
 type ActiveModal = {
-  type: "delete" | "edit" | "share";
+  type: "delete" | "share";
   portfolioId: number;
 } | null;
 
 export default function DashboardPage() {
-  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [isCopied, setIsCopied] = useState(false);
   const shareLink = "https://canofmato.com";
@@ -61,8 +59,9 @@ export default function DashboardPage() {
           </div>
           <Button 
             type="button"
-            className="md:w-[140px] w-[100px]"
-            onClick={() => navigate(`/prompt`)}
+            className="md:w-[140px] w-[100px] disabled:pointer-events-none disabled:opacity-50"
+            disabled
+            title="명함 생성 기능 준비 중"
           >
             + 만들기
           </Button>
@@ -76,9 +75,7 @@ export default function DashboardPage() {
               <CardPreview
                 key={card.id}
                 title={card.title}
-                onOpen={() => navigate(`/portfolio/${card.id}`)}
                 onDelete={() => setActiveModal({ type: "delete", portfolioId: card.id })}
-                onEdit={() => setActiveModal({ type: "edit", portfolioId: card.id })}
                 onShare={() => setActiveModal({ type: "share", portfolioId: card.id })}
               >
                 <PersonalCard {...mockProfile} />
@@ -104,17 +101,6 @@ export default function DashboardPage() {
               onConfirm={() => {
                 // 나중에 삭제 API 호출
                 setActiveModal(null);
-              }}
-            />
-          ) : null}
-
-          {activeModal.type === "edit" ? (
-            <Modal
-              title="이 명함을 수정하시겠습니까?"
-              description="수정 후 이전 버전으로 되돌릴 수 없습니다."
-              onCancel={() => setActiveModal(null)}
-              onConfirm={() => {
-                navigate(`/portfolio/${activeModal.portfolioId}`);
               }}
             />
           ) : null}

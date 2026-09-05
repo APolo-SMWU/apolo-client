@@ -16,7 +16,7 @@ export default function CreateModal() {
         </p>
       </div>
       <div className="flex w-full items-center justify-end">
-        <Button>
+        <Button disabled title="명함 생성 기능 준비 중" className="disabled:pointer-events-none disabled:opacity-50">
           Create
         </Button>
       </div>
