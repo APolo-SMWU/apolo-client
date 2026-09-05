@@ -1,4 +1,5 @@
-import PhotoUploader from "@/components/PhotoUploader";
+import ProfileRoleSelector from "@/components/common/ProfileRoleSelector";
+import { roleFields, type Role } from "@/components/common/profileRoles";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ProfileFormCard, {
@@ -6,26 +7,6 @@ import ProfileFormCard, {
 } from "@/components/common/ProfileFormCard";
 import { formatPhoneNumber } from "@/components/common/profileForm";
 import { useState, type ChangeEvent, type FormEvent } from "react";
-
-const roles = ["Professional", "Professor", "Student"] as const;
-type Role = (typeof roles)[number];
-
-const roleFields: Record<Role, ProfileFormField[]> = {
-  Professional: [
-    { name: "company", label: "Company", placeholder: "회사명을 입력해주세요.", required: true, halfWidth: true },
-    { name: "jobTitle", label: "Job Title", placeholder: "직함을 입력해주세요.", required: true, halfWidth: true },
-    { name: "tel", label: "Tel", type: "tel", placeholder: "회사 전화번호를 입력해주세요.", required: true },
-  ],
-  Professor: [
-    { name: "university", label: "University", placeholder: "학교명을 입력해주세요.", required: true, halfWidth: true },
-    { name: "department", label: "Department", placeholder: "소속 학과를 입력해주세요.", required: true, halfWidth: true },
-    { name: "tel", label: "Tel", type: "tel", placeholder: "학교 또는 연구실 전화번호를 입력해주세요.", required: true },
-  ],
-  Student: [
-    { name: "university", label: "University", placeholder: "학교명을 입력해주세요.", required: true, halfWidth: true },
-    { name: "major", label: "Major", placeholder: "전공을 입력해주세요.", required: true, halfWidth: true },
-  ],
-};
 
 export default function OnboardingPage() {
   const [role, setRole] = useState<Role | null>(null);
@@ -94,31 +75,7 @@ export default function OnboardingPage() {
           onSubmit={handleSubmit}
           submitDisabled={!role || !isPhoneValid}
           photoUploader={
-            <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
-              <PhotoUploader className="size-20! shrink-0" />
-              <fieldset className="min-w-0 flex-1 basis-[310px] sm:w-[312px] sm:flex-none">
-                <legend className="mb-2 text-caption-01 text-ink">
-                  Role <span className="text-danger">*</span>
-                </legend>
-                <div className="flex gap-2">
-                  {roles.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      aria-pressed={role === option}
-                      onClick={() => setRole(option)}
-                      className={`h-10 min-w-0 flex-1 rounded-ml border px-2 text-body-02 transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                        role === option
-                          ? "border-focus bg-primary text-white"
-                          : "border-placeholder bg-white text-placeholder"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            </div>
+            <ProfileRoleSelector role={role} onRoleChange={setRole} />
           }
         />
       </main>
