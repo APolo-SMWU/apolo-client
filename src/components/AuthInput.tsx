@@ -19,7 +19,7 @@ export default function AuthInput({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <label className="flex flex-col gap-1 items-start justify-center">
+    <label className="flex flex-col gap-2 items-start justify-center">
       <span className="flex text-caption-01 text-ink leading-none gap-1">
         {label}
         {required && <span className="text-caption-01 text-danger leading-none">*</span>}
