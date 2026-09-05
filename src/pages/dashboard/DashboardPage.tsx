@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button";
 import CreateModal from "./components/CreateModal";
 import CardPreview from "./components/CardPreview";
-import PersonalCard from "./components/PersonalCard";
+import PersonalCard, { type PersonalCardProps } from "./components/PersonalCard";
 import Modal from "@/components/common/Modal";
 import LinkIcon from "@/assets/Link.svg?react";
 
@@ -15,9 +15,18 @@ const mockCards = [
   { id: 3, title: "이직용" },
 ];
 
+const mockProfile: PersonalCardProps = {
+  role: "Professional",
+  name: "PARK DA-IN",
+  job: "Developer",
+  tel: "02-123-4567",
+  phone: "010-1234-5678",
+  email: "gunmannduu@gmail.com",
+  address: "서울 용산구 청파로 47길 100",
+};
 
 type ActiveModal = {
-  type: "delete" | "edit" | "share";
+  type: "delete" | "share";
   portfolioId: number;
 } | null;
 
@@ -53,7 +62,7 @@ export default function DashboardPage() {
           <Button 
             type="button"
             className="md:w-[140px] w-[100px]"
-            onClick={() => navigate(`/prompt`)}
+            onClick={() => navigate("/create")}
           >
             + 만들기
           </Button>
@@ -67,19 +76,10 @@ export default function DashboardPage() {
               <CardPreview
                 key={card.id}
                 title={card.title}
-                onOpen={() => navigate(`/portfolio/${card.id}`)}
                 onDelete={() => setActiveModal({ type: "delete", portfolioId: card.id })}
-                onEdit={() => setActiveModal({ type: "edit", portfolioId: card.id })}
                 onShare={() => setActiveModal({ type: "share", portfolioId: card.id })}
               >
-                <PersonalCard 
-                  name="PARK DA-IN"
-                  job="Developer"
-                  email="gunmannduu@gmail.com"
-                  phone="010-1234-5678"
-                  web="https://canofmato.github.io"
-                  address="서울 용산구 청파로 47길 100"
-                />
+                <PersonalCard {...mockProfile} />
               </CardPreview>
             ))}
           </div>
@@ -102,17 +102,6 @@ export default function DashboardPage() {
               onConfirm={() => {
                 // 나중에 삭제 API 호출
                 setActiveModal(null);
-              }}
-            />
-          ) : null}
-
-          {activeModal.type === "edit" ? (
-            <Modal
-              title="이 명함을 수정하시겠습니까?"
-              description="수정 후 이전 버전으로 되돌릴 수 없습니다."
-              onCancel={() => setActiveModal(null)}
-              onConfirm={() => {
-                navigate(`/portfolio/${activeModal.portfolioId}`);
               }}
             />
           ) : null}

@@ -3,72 +3,89 @@ import AppWindow from "@/components/AppWindow";
 import ProfileFormCard, {
   type ProfileFormField,
 } from "@/components/common/ProfileFormCard";
-import { formatPhoneNumber } from "@/components/common/profileForm";
+import { areRequiredProfileFieldsComplete, formatPhoneNumber } from "@/components/common/profileForm";
+import ProfileRoleSelector from "@/components/common/ProfileRoleSelector";
+import { roleFields, type Role } from "@/components/common/profileRoles";
 import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
 
-type Profile = {
+const emptyRoleValues = {
+  company: "",
+  jobTitle: "",
+  tel: "",
+  university: "",
+  department: "",
+  major: "",
+};
+
+type Profile = typeof emptyRoleValues & {
+  role: Role;
   name: string;
   email: string;
   phone: string;
-  address: string;
   github: string;
 };
 
 const initialProfile: Profile = {
+  ...emptyRoleValues,
+  role: "Professional",
+  jobTitle: "대리",
   name: "홍길동",
   email: "test@gmail.com",
   phone: "010-1234-5678",
-  address: "서울 용산구 청파로 47길 100",
+  tel: "02-123-4567",
+  company: "집가자컴퍼니",
   github: "https://github.com/canofmato",
 };
-
-const profileFields: ProfileFormField[] = [
-  { label: "Name", name: "name", required: true, placeholder: "이름을 입력해주세요" },
-  {
-    label: "Phone",
-    name: "phone",
-    required: true,
-    type: "tel",
-    inputMode: "numeric",
-    maxLength: 13,
-    pattern: "\\d{3}-\\d{4}-\\d{4}",
-    placeholder: "010-1234-5678",
-  },
-  { label: "Address", name: "address", placeholder: "주소를 입력해주세요" },
-  {
-    label: "GitHub",
-    name: "github",
-    required: true,
-    placeholder: "GitHub 주소를 입력해주세요",
-  },
-];
 
 export default function MyPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile>(initialProfile);
-  const [form, setForm] = useState({
-    name: initialProfile.name,
-    phone: initialProfile.phone,
-    address: initialProfile.address,
-    github: initialProfile.github,
-  });
+  const [form, setForm] = useState<Profile>(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
 
+  const profileFields: ProfileFormField[] = [
+    { label: "Name", name: "name", required: true, placeholder: "이름을 입력해주세요." },
+    {
+      label: "Mobile",
+      name: "phone",
+      required: true,
+      type: "tel",
+      inputMode: "numeric" as const,
+      maxLength: 13,
+      pattern: "\\d{3}-\\d{4}-\\d{4}",
+      placeholder: "010-0000-0000",
+    },
+    ...roleFields[form.role],
+    { label: "GitHub", name: "github", placeholder: "GitHub 프로필 URL을 입력해주세요." },
+  ].map((field) => ({ ...field, className: "w-full!" }));
+  const canSave = isPhoneValid && areRequiredProfileFieldsComplete(profileFields, form);
+  const profileDetails = [
+    ["Email", profile.email],
+    ["Mobile", profile.phone],
+    ...(profile.role === "Professional"
+      ? [["Company", profile.company], ["Tel", profile.tel]]
+      : profile.role === "Professor"
+        ? [["University", profile.university], ["Tel", profile.tel]]
+        : [["University", profile.university], ["Major", profile.major]]),
+    ["GitHub", profile.github],
+  ];
+
   function handleEditStart() {
-    setForm({
-      name: profile.name,
-      phone: profile.phone,
-      address: profile.address,
-      github: profile.github,
-    });
+    setForm({ ...profile });
     setIsEditing(true);
+  }
+
+  function handleRoleChange(role: Role) {
+    setForm((currentForm) => currentForm.role === role
+      ? currentForm
+      : { ...currentForm, ...emptyRoleValues, role });
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -80,7 +97,8 @@ export default function MyPage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setProfile((currentProfile) => ({ ...currentProfile, ...form }));
+    if (!canSave) return;
+    setProfile({ ...form });
     setIsEditing(false);
   }
 
@@ -92,7 +110,7 @@ export default function MyPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden">
+      <main className={`relative flex flex-1 justify-center overflow-hidden py-10 ${isEditing ? "items-start" : "items-center"}`}>
         {/* 배경글씨 */}
         <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
           <p className="text-[80px]">MANAGE</p>
@@ -101,34 +119,31 @@ export default function MyPage() {
 
         {isEditing ? (
           <ProfileFormCard
-            className="relative z-10"
-            windowTitle="Edit Profile"
+            className="relative z-10 w-[510px] max-w-[calc(100%-2rem)] shrink-0"
+            title={<>Fill in your<br />information</>}
+            description="AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요."
+            animateFieldChanges
+            photoUploader={<ProfileRoleSelector role={form.role} onRoleChange={handleRoleChange} />}
             fields={profileFields}
             values={form}
             onFieldChange={handleChange}
             onSubmit={handleSubmit}
-            submitLabel="수정하기"
-            submitDisabled={!isPhoneValid}
+            submitDisabled={!canSave}
           />
         ) : (
-          <AppWindow className="relative z-10 w-[500px]" title="Profile">
+          <AppWindow className="relative z-10 w-[500px] max-w-[calc(100%-2rem)]" title="Profile">
             <h1 className="text-heading-03 font-bold text-ink">{profile.name}</h1>
 
             <div className="flex w-full flex-col items-start gap-3">
-              {[
-                ["Email", profile.email],
-                ["Phone", profile.phone],
-                ["Address", profile.address],
-                ["GitHub", profile.github],
-              ].map(([label, value]) => (
+              {profileDetails.map(([label, value]) => (
                 <div
                   className="flex w-full items-center justify-start gap-4 text-start text-body-02 leading-none text-ink"
                   key={label}
                 >
-                  <div className="flex w-16 gap-1 border-r border-primary">
+                  <div className="flex w-22 shrink-0 gap-1 border-r border-primary">
                     <p>{label}</p>
                   </div>
-                  <p>{value}</p>
+                  <p className="min-w-0 break-all">{value || "-"}</p>
                 </div>
               ))}
             </div>

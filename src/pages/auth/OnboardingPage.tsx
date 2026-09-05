@@ -1,3 +1,5 @@
+import ProfileRoleSelector from "@/components/common/ProfileRoleSelector";
+import { roleFields, type Role } from "@/components/common/profileRoles";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ProfileFormCard, {
@@ -6,49 +8,36 @@ import ProfileFormCard, {
 import { formatPhoneNumber } from "@/components/common/profileForm";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 
-type OnboardingForm = {
-  phone: string;
-  address: string;
-  github: string;
-  notion: string;
-};
-
-const onboardingFields: ProfileFormField[] = [
-  {
-    label: "Phone",
-    required: true,
-    type: "tel",
-    name: "phone",
-    inputMode: "numeric",
-    maxLength: 13,
-    pattern: "\\d{3}-\\d{4}-\\d{4}",
-    placeholder: "010-1234-5678",
-  },
-  {
-    label: "Address",
-    name: "address",
-    placeholder: "회사 주소를 입력해주세요",
-  },
-  {
-    label: "GitHub",
-    required: true,
-    name: "github",
-    placeholder: "GitHub 주소를 입력해주세요",
-  },
-  {
-    label: "Notion",
-    name: "notion",
-    placeholder: "노션 페이지 링크를 입력해주세요",
-  },
-];
-
-export default function  OnboardingPage() {
-  const [form, setForm] = useState<OnboardingForm>({
+export default function OnboardingPage() {
+  const [role, setRole] = useState<Role | null>(null);
+  const [form, setForm] = useState({
     phone: "",
-    address: "",
     github: "",
-    notion: "",
+    company: "",
+    jobTitle: "",
+    tel: "",
+    university: "",
+    department: "",
+    major: "",
   });
+  const onboardingFields: ProfileFormField[] = [
+    {
+      label: "Mobile",
+      required: true,
+      type: "tel",
+      name: "phone",
+      inputMode: "numeric" as const,
+      maxLength: 13,
+      pattern: "\\d{3}-\\d{4}-\\d{4}",
+      placeholder: "010-0000-0000",
+    },
+    ...(role ? roleFields[role] : []),
+    {
+      label: "GitHub",
+      name: "github",
+      placeholder: role ? "GitHub 프로필 URL을 입력해주세요." : "GitHub 주소를 입력해주세요.",
+    },
+  ].map((field) => ({ ...field, className: "w-full!" }));
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -68,7 +57,7 @@ export default function  OnboardingPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header/>
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden">
+      <main className="relative flex flex-1 items-start justify-center overflow-hidden py-10">
         {/* 배경글씨 */}
         <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
           <p className="text-[80px]">SET UP YOUR</p>
@@ -76,14 +65,18 @@ export default function  OnboardingPage() {
         </div>
 
         <ProfileFormCard
-          className="relative z-10"
+          className="relative z-10 w-[510px] max-w-[calc(100%-2rem)] shrink-0"
+          animateFieldChanges
           title={<>Fill in your<br />information</>}
-          description="AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요"
+          description="AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요."
           fields={onboardingFields}
           values={form}
           onFieldChange={handleChange}
           onSubmit={handleSubmit}
-          submitDisabled={!isPhoneValid}
+          submitDisabled={!role || !isPhoneValid}
+          photoUploader={
+            <ProfileRoleSelector role={role} onRoleChange={setRole} />
+          }
         />
       </main>
       <Footer/>

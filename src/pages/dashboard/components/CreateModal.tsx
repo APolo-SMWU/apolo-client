@@ -1,7 +1,9 @@
 import AppWindow from "@/components/AppWindow";
 import Button from "@/components/common/Button";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateModal() {
+  const navigate = useNavigate();
   return (
     <AppWindow
       className="relative z-10 w-[500px]"
@@ -16,7 +18,7 @@ export default function CreateModal() {
         </p>
       </div>
       <div className="flex w-full items-center justify-end">
-        <Button>
+        <Button onClick={() => navigate("/create")}>
           Create
         </Button>
       </div>

@@ -2,9 +2,9 @@ import type { ReactNode } from "react"
 
 type CardPreviewProps = {
   title?: string;
-  onOpen: () => void;
+  onOpen?: () => void;
   onDelete: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
   onShare: () => void;
   children: ReactNode;
 }
@@ -24,7 +24,7 @@ export default function CardPreview({
             <span className='block size-[15px] rounded-full bg-danger' />
           </button>
 
-          <button type="button" aria-label="명함 수정" onClick={onEdit}>
+          <button type="button" aria-label="명함 수정" onClick={onEdit} disabled={!onEdit} title={!onEdit ? "명함 수정 기능 준비 중" : undefined} className="disabled:opacity-40">
             <span className='block size-[15px] rounded-full bg-warn' />
           </button>
 
@@ -44,6 +44,8 @@ export default function CardPreview({
       <button
         type="button"
         onClick={onOpen}
+        disabled={!onOpen}
+        title={!onOpen ? "명함 열기 기능 준비 중" : undefined}
         className="flex w-full flex-col items-center justify-center p-4"
       >
         {children}

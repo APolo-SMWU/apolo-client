@@ -64,7 +64,7 @@ export default function PhotoUploader({
             onClick={handleRemove}
             aria-label="사진 삭제"
           >
-            <XIcon className="size-12" />
+            <XIcon className="size-8" />
           </button>
         </div>
       ) : (
