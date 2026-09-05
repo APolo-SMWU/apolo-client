@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import AuthInput from "@/components/AuthInput";
+import Input from "@/components/Input";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import AppWindow from "@/components/AppWindow";
@@ -164,7 +164,7 @@ export default function SignupPage() {
           </div>
 
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
-            <AuthInput
+            <Input
               label="이름"
               required
               name="name"
@@ -174,7 +174,7 @@ export default function SignupPage() {
               errorMessage={errors.nickname}
               placeholder="이름을 입력해주세요"
             />
-            <AuthInput
+            <Input
               label="이메일"
               required
               type="email"
@@ -185,7 +185,7 @@ export default function SignupPage() {
               errorMessage={errors.email}
               placeholder="email@example.com"
             />
-            <AuthInput
+            <Input
               label="비밀번호"
               required
               type="password"
@@ -196,7 +196,7 @@ export default function SignupPage() {
               errorMessage={errors.password}
               placeholder="8자 이상 입력해주세요"
             />
-            <AuthInput
+            <Input
               label="비밀번호 확인"
               required
               type="password"

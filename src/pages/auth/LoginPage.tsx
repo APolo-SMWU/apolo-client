@@ -1,4 +1,4 @@
-import AuthInput from "@/components/AuthInput";
+import Input from "@/components/Input";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import AppWindow from "@/components/AppWindow";
@@ -148,7 +148,7 @@ export default function LoginPage() {
           </div>
 
           <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit}>
-            <AuthInput
+            <Input
               label="이메일"
               required
               type="email"
@@ -159,7 +159,7 @@ export default function LoginPage() {
               errorMessage={errors.email}
               placeholder="email@example.com"
             />
-            <AuthInput
+            <Input
               label="비밀번호"
               required
               type="password"

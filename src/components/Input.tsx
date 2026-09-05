@@ -2,19 +2,19 @@ import { useState, type InputHTMLAttributes } from "react";
 import EyeIcon from '@/assets/Eye.svg?react';
 import EyeOffIcon from '@/assets/Eye-off.svg?react';
 
-interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   errorMessage?: string;
 }
 
-export default function AuthInput({
+export default function Input({
   label,
   errorMessage,
   className='',
   type,
   required,
   ...props
-}: AuthInputProps) {
+}: InputProps) {
   const isPassword = type === "password";
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,7 +28,7 @@ export default function AuthInput({
         <input
           type={isPassword && showPassword ? "text" : type}
           required={required}
-          className={`flex w-[450px] h-11 px-4 rounded-ml border  text-body-02 text-ink placeholder:text-placeholder leading-none outline-none ${
+          className={`flex w-[450px] h-11 px-4 rounded-ml border  text-body-02 text-ink placeholder:text-placeholder leading-none outline-none focus:border-primary ${
             errorMessage ? 'border-danger' : 'border-placeholder'
           } ${className}`}
           {...props}

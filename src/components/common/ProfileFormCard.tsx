@@ -6,7 +6,7 @@ import type {
 } from "react";
 import { useLayoutEffect, useRef } from "react";
 import AppWindow from "../AppWindow";
-import AuthInput from "../AuthInput";
+import Input from "../Input";
 import PhotoUploader from "../PhotoUploader";
 import CTAButton from "./CTAButton";
 import {
@@ -112,7 +112,7 @@ export default function ProfileFormCard({
         <div ref={fieldsRef} className="relative grid w-full grid-cols-2 content-start gap-x-2.5 gap-y-4">
         {fields.map(({ label, errorMessage, halfWidth, ...inputProps }) => (
           <div key={inputProps.name} data-field={inputProps.name} className={halfWidth ? "col-span-1 min-w-0" : "col-span-2 min-w-0"}>
-          <AuthInput
+          <Input
             {...inputProps}
             className={halfWidth ? `w-full! ${inputProps.className ?? ""}` : inputProps.className}
             label={label}

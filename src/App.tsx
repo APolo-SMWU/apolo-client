@@ -5,6 +5,7 @@ import LoginPage from "./pages/auth/LoginPage"
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import MyPage from "./pages/mypage/MyPage"
 import OnboardingPage from "./pages/auth/OnboardingPage"
+import CreatePage from "./pages/portfolio/CreatePage"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/onboarding" element={<OnboardingPage />} />
 
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/create" element={<CreatePage />} />
 
         <Route path="/mypage" element={<MyPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

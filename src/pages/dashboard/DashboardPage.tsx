@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button";
@@ -30,6 +31,7 @@ type ActiveModal = {
 } | null;
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [isCopied, setIsCopied] = useState(false);
   const shareLink = "https://canofmato.com";
@@ -59,9 +61,8 @@ export default function DashboardPage() {
           </div>
           <Button 
             type="button"
-            className="md:w-[140px] w-[100px] disabled:pointer-events-none disabled:opacity-50"
-            disabled
-            title="명함 생성 기능 준비 중"
+            className="md:w-[140px] w-[100px]"
+            onClick={() => navigate("/create")}
           >
             + 만들기
           </Button>
