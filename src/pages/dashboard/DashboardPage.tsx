@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button";
 import CreateModal from "./components/CreateModal";
 import CardPreview from "./components/CardPreview";
-import PersonalCard from "./components/PersonalCard";
+import PersonalCard, { type PersonalCardProps } from "./components/PersonalCard";
 import Modal from "@/components/common/Modal";
 import LinkIcon from "@/assets/Link.svg?react";
 
@@ -15,6 +15,15 @@ const mockCards = [
   { id: 3, title: "이직용" },
 ];
 
+const mockProfile: PersonalCardProps = {
+  role: "Professional",
+  name: "PARK DA-IN",
+  job: "Developer",
+  tel: "02-123-4567",
+  phone: "010-1234-5678",
+  email: "gunmannduu@gmail.com",
+  address: "서울 용산구 청파로 47길 100",
+};
 
 type ActiveModal = {
   type: "delete" | "edit" | "share";
@@ -72,14 +81,7 @@ export default function DashboardPage() {
                 onEdit={() => setActiveModal({ type: "edit", portfolioId: card.id })}
                 onShare={() => setActiveModal({ type: "share", portfolioId: card.id })}
               >
-                <PersonalCard 
-                  name="PARK DA-IN"
-                  job="Developer"
-                  email="gunmannduu@gmail.com"
-                  phone="010-1234-5678"
-                  web="https://canofmato.github.io"
-                  address="서울 용산구 청파로 47길 100"
-                />
+                <PersonalCard {...mockProfile} />
               </CardPreview>
             ))}
           </div>
