@@ -22,7 +22,7 @@ export default function PersonalCard({
   address = '',
 }: PersonalCardProps) {
   return (
-    <div className="flex min-h-[200px] w-[390px] max-w-[calc(100vw-2rem)] flex-col gap-6 rounded-xl border border-ink bg-white p-4 md:min-h-[230px] md:gap-6 md:p-5">
+    <div className="flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col gap-6 rounded-xl border border-ink bg-white p-5">
       <div className="flex flex-col w-full items-end justify-center">
         <GoIcon className="size-4 md:size-5"/>
         <p className="text-caption-01 text-ink leading-[1.2] md:text-body-02">{job}</p>
