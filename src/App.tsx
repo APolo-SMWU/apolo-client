@@ -26,7 +26,7 @@ function App() {
         <Route path="/create" element={<CreatePage />} />
 
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
   )

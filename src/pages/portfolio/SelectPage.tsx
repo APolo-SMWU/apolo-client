@@ -23,7 +23,7 @@ const designs = [
 
 export default function SelectPage() {
   const navigate = useNavigate();
-  const [selectedDesign, setSelectedDesign] = useState<string | null>(designs[0].id);
+  const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
 
   function handleNext() {
     if (!selectedDesign) return;

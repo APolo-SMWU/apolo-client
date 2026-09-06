@@ -5,6 +5,7 @@ import AppWindow from "@/components/AppWindow";
 import CTAButton from "@/components/common/CTAButton";
 import PlusIcon from "@/assets/Plus.svg?react";
 import XIcon from "@/assets/X.svg?react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const themes = [
   { id: "blue", label: "블루", colors: ["#F2F4F7", "#DCEBFF", "#245BFF", "#667085", "#111111"] },
@@ -41,6 +42,8 @@ function normalizeLink(value: string) {
 }
 
 export default function CreatePage({ onCreate }: CreatePageProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [theme, setTheme] = useState<Theme | null>(null);
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
@@ -99,6 +102,10 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     setSubmitMessage("");
     try {
       await onCreate?.(request);
+      navigate("/loading", {
+        state: location.state,
+        replace: true,
+      });
     } catch {
       setSubmitMessage("생성 요청을 보내지 못했어요. 잠시 후 다시 시도해주세요.");
     } finally {
