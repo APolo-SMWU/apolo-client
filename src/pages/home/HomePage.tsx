@@ -30,7 +30,7 @@ type ActiveModal = {
   portfolioId: number;
 } | null;
 
-export default function DashboardPage() {
+export default function HomePage() {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [isCopied, setIsCopied] = useState(false);

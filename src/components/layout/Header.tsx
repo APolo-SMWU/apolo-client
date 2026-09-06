@@ -15,7 +15,7 @@ export default function Header() {
       </div>
 
       <div className="flex items-center justify-center md:gap-16 gap-8 md:text-body-02 text-caption-01 font-medium text-ink leading-none whitespace-nowrap">
-        <NavLink to="/dashboard">Dashboard</NavLink>
+        <NavLink to="/home">Home</NavLink>
         <NavLink to={isLoggedIn ? "/mypage" : "/login"}>
           {isLoggedIn ? "My Page" : "Login"}
         </NavLink>

@@ -9,7 +9,8 @@ import {
   mapServerErrors,
   type ApiErrorResponse,
 } from '@/api/api';
-import { type LoginRequest, login } from "@/api/auth";
+import { getMe, type LoginRequest, login } from "@/api/auth";
+import { hasCompletedOnboarding } from "@/utils/onboarding";
 
 type LoginErrors = Partial<
   Record<"email" | "password",string>
@@ -100,7 +101,9 @@ export default function LoginPage() {
 
       const response = await login(form);
       localStorage.setItem("accessToken", response.accessToken);
-      navigate("/dashboard");
+
+      const me = await getMe();
+      navigate(hasCompletedOnboarding(me.email) ? "/home" : "/onboarding");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
 

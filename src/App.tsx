@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import LandingPage from "./pages/LandingPage"
 import SignupPage from "./pages/auth/SignupPage"
 import LoginPage from "./pages/auth/LoginPage"
-import DashboardPage from "./pages/dashboard/DashboardPage"
+import HomePage from "./pages/home/HomePage"
 import MyPage from "./pages/mypage/MyPage"
 import OnboardingPage from "./pages/auth/OnboardingPage"
 import CreatePage from "./pages/portfolio/CreatePage"
@@ -18,7 +18,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
 
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/create" element={<CreatePage />} />
 
         <Route path="/mypage" element={<MyPage />} />

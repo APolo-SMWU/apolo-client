@@ -6,9 +6,13 @@ import ProfileFormCard, {
   type ProfileFormField,
 } from "@/components/common/ProfileFormCard";
 import { formatPhoneNumber } from "@/components/common/profileForm";
+import { getMe } from "@/api/auth";
+import { markOnboardingCompleted } from "@/utils/onboarding";
+import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 
 export default function OnboardingPage() {
+  const navigate = useNavigate();
   const [role, setRole] = useState<Role | null>(null);
   const [form, setForm] = useState({
     phone: "",
@@ -52,6 +56,10 @@ export default function OnboardingPage() {
   const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    getMe().then((me) => {
+      markOnboardingCompleted(me.email);
+      navigate("/home", { replace: true });
+    });
   }
 
   return (
