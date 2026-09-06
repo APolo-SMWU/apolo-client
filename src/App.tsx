@@ -7,6 +7,7 @@ import MyPage from "./pages/mypage/MyPage"
 import OnboardingPage from "./pages/auth/OnboardingPage"
 import CreatePage from "./pages/portfolio/CreatePage"
 import SelectPage from "./pages/portfolio/SelectPage"
+import LoadingPage from "./pages/portfolio/LoadingPage"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
 
         <Route path="/home" element={<HomePage />} />
         <Route path="/select" element={<SelectPage />} />
+        <Route path="/loading" element={<LoadingPage />} />
         <Route path="/create" element={<CreatePage />} />
 
         <Route path="/mypage" element={<MyPage />} />
