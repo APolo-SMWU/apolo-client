@@ -6,6 +6,7 @@ import HomePage from "./pages/home/HomePage"
 import MyPage from "./pages/mypage/MyPage"
 import OnboardingPage from "./pages/auth/OnboardingPage"
 import CreatePage from "./pages/portfolio/CreatePage"
+import SelectPage from "./pages/portfolio/SelectPage"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/onboarding" element={<OnboardingPage />} />
 
         <Route path="/home" element={<HomePage />} />
+        <Route path="/select" element={<SelectPage />} />
         <Route path="/create" element={<CreatePage />} />
 
         <Route path="/mypage" element={<MyPage />} />
