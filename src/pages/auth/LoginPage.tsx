@@ -10,7 +10,6 @@ import {
   type ApiErrorResponse,
 } from '@/api/api';
 import { getMe, type LoginRequest, login } from "@/api/auth";
-import { hasCompletedOnboarding } from "@/utils/onboarding";
 
 type LoginErrors = Partial<
   Record<"email" | "password",string>
@@ -103,7 +102,7 @@ export default function LoginPage() {
       localStorage.setItem("accessToken", response.accessToken);
 
       const me = await getMe();
-      navigate(hasCompletedOnboarding(me.email) ? "/home" : "/onboarding");
+      navigate(me.onboardingCompleted ? "/home" : "/onboarding");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
 
