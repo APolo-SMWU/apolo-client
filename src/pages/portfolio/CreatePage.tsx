@@ -5,6 +5,7 @@ import AppWindow from "@/components/AppWindow";
 import CTAButton from "@/components/common/CTAButton";
 import PlusIcon from "@/assets/Plus.svg?react";
 import XIcon from "@/assets/X.svg?react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const themes = [
   { id: "blue", label: "블루", colors: ["#F2F4F7", "#DCEBFF", "#245BFF", "#667085", "#111111"] },
@@ -31,8 +32,9 @@ function normalizeLink(value: string) {
   if (!text || /\s/.test(text)) return null;
   try {
     const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(text) ? text : `https://${text}`);
+    const normalizedUrl = url.href;
     return ["http:", "https:"].includes(url.protocol) && url.hostname.includes(".")
-      ? url.href
+      ? normalizedUrl.endsWith("/") ? normalizedUrl.slice(0, -1) : normalizedUrl
       : null;
   } catch {
     return null;
@@ -40,6 +42,8 @@ function normalizeLink(value: string) {
 }
 
 export default function CreatePage({ onCreate }: CreatePageProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [theme, setTheme] = useState<Theme | null>(null);
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
@@ -94,14 +98,14 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     const externalLinks = commitLink();
     if (!externalLinks?.length) return;
     const request: CreateCardRequest = { theme, externalLinks, requirements: requirements.trim(), attachments };
-    if (!onCreate) {
-      setSubmitMessage("명함 생성 기능은 준비 중이에요. 입력한 내용은 이 화면에 유지됩니다.");
-      return;
-    }
     setIsSubmitting(true);
     setSubmitMessage("");
     try {
-      await onCreate(request);
+      await onCreate?.(request);
+      navigate("/loading", {
+        state: location.state,
+        replace: true,
+      });
     } catch {
       setSubmitMessage("생성 요청을 보내지 못했어요. 잠시 후 다시 시도해주세요.");
     } finally {
@@ -145,9 +149,9 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
 
             <div className="flex flex-col gap-2">
               <label htmlFor="external-links" className="text-body-02">외부 페이지 링크 <span className="text-danger">*</span></label>
-              <div className={`flex min-h-11 sm:min-h-14 flex-wrap items-center gap-2 rounded-ml border px-4 py-2 focus-within:border-primary ${linkError ? "border-danger" : "border-placeholder"}`}>
+              <div className={`flex min-h-11 flex-wrap items-center gap-2 rounded-ml border px-4 py-2 focus-within:border-primary ${linkError ? "border-danger" : "border-placeholder"}`}>
                 {links.map((link) => (
-                  <span key={link} className="group relative flex max-w-full items-center rounded-lg bg-focus px-2 py-1 text-body-02 text-primary transition-colors hover:bg-danger/70 hover:text-white focus-within:bg-danger focus-within:text-white motion-reduce:transition-none">
+                  <span key={link} className="group relative flex max-w-full items-center rounded-ml bg-focus px-2 py-0.5 text-body-02 text-primary transition-colors hover:bg-danger/70 hover:text-white focus-within:bg-danger focus-within:text-white motion-reduce:transition-none">
                     <span className="min-w-0 break-all">{link}</span>
                     <button type="button" disabled={isSubmitting} className="pointer-events-none absolute -right-1.5 -top-1.5 z-10 flex size-4 items-center justify-center rounded-full bg-danger text-white opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 focus-visible:outline-2 motion-reduce:transition-none" aria-label={`${link} 삭제`} onClick={() => setLinks((current) => current.filter((item) => item !== link))}>
                       <XIcon className="size-3" />
@@ -171,6 +175,14 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
                   onBlur={() => commitLink()}
                   onKeyDown={(event) => {
                     if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+                    if (event.key === "Backspace" && !linkInput && links.length > 0) {
+                      event.preventDefault();
+                      const lastLink = links[links.length - 1];
+                      setLinks((current) => current.slice(0, -1));
+                      setLinkInput(lastLink);
+                      setLinkError("");
+                      return;
+                    }
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
                       commitLink();
@@ -185,7 +197,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
 
             <div className="flex flex-col gap-2">
               <label htmlFor="requirements" className="text-body-02">요구사항</label>
-              <div className="flex min-h-[120px] flex-col gap-3 rounded-ml border border-placeholder px-4 py-3 focus-within:border-primary">
+              <div className="flex min-h-30 flex-col gap-3 rounded-ml border border-placeholder px-4 py-4 focus-within:border-primary">
                 <textarea
                   id="requirements"
                   name="requirements"
@@ -200,7 +212,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
                   {attachments.map((file, index) => (
                     <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex max-w-full items-center gap-1 rounded-md bg-surface px-2 py-1 text-caption-01 text-placeholder">
                       <span className="min-w-0 break-all">{file.name}</span>
-                      <button type="button" disabled={isSubmitting} aria-label={`${file.name} 첨부 삭제`} onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="shrink-0 p-0.5"><XIcon className="size-3" /></button>
+                      <button type="button" disabled={isSubmitting} aria-label={`${file.name} 첨부 삭제`} onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="shrink-0 p-0.5 rounded-full bg-placeholder"><XIcon className="size-3" /></button>
                     </li>
                   ))}
                 </ul>}

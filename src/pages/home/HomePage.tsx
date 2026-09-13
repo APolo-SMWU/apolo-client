@@ -62,7 +62,7 @@ export default function HomePage() {
           <Button 
             type="button"
             className="md:w-[140px] w-[100px]"
-            onClick={() => navigate("/create")}
+            onClick={() => navigate("/select")}
           >
             + 만들기
           </Button>

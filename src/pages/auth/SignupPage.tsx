@@ -12,14 +12,14 @@ import { useState, type ChangeEvent, type FocusEvent, type FormEvent } from "rea
 import { type SignupRequest, signup } from "@/api/auth";
 
 type SignupErrors = Partial<
-  Record<"nickname" | "email" | "password" | "passwordCheck", string>
+  Record<"name" | "email" | "password" | "passwordCheck", string>
 >;
 
 export default function SignupPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<SignupRequest>({
-    nickname: "",
+    name: "",
     email: "",
     password: "",
     passwordCheck: "",
@@ -45,12 +45,12 @@ export default function SignupPage() {
   function validate(values: SignupRequest): SignupErrors {
     const nextErrors: SignupErrors = {};
 
-    const nicknameError = validateField("nickname", values.nickname);
+    const nameError = validateField("name", values.name);
     const emailError = validateField("email", values.email);
     const passwordError = validateField("password", values.password);
     const passwordCheckError = validateField("passwordCheck", values.passwordCheck);
 
-    if (nicknameError) nextErrors.nickname = nicknameError;
+    if (nameError) nextErrors.name = nameError;
     if (emailError) nextErrors.email = emailError;
     if (passwordError) nextErrors.password = passwordError;
     if (passwordCheckError) nextErrors.passwordCheck = passwordCheckError;
@@ -60,8 +60,8 @@ export default function SignupPage() {
 
   function validateField(name: keyof SignupRequest, value: string) {
     switch (name) {
-      case "nickname":
-        if (!value.trim()) return "닉네임을 입력해주세요.";
+      case "name":
+        if (!value.trim()) return "이름을 입력해주세요.";
         return "";
 
       case "email":
@@ -96,7 +96,7 @@ export default function SignupPage() {
   }
 
   const isFormComplete =
-    form.nickname.trim() !== "" &&
+    form.name.trim() !== "" &&
     form.email.trim() !== "" &&
     form.password.trim() !== "" &&
     form.passwordCheck.trim() !== "";
@@ -168,10 +168,10 @@ export default function SignupPage() {
               label="이름"
               required
               name="name"
-              value={form.nickname}
+              value={form.name}
               onChange={handleChange}
               onBlur={handleBlur}
-              errorMessage={errors.nickname}
+              errorMessage={errors.name}
               placeholder="이름을 입력해주세요"
             />
             <Input

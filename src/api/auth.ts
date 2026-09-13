@@ -2,7 +2,7 @@ import { apiFetch } from "./api";
 
 export type SignupRequest = {
   email: string,
-  nickname: string,
+  name: string,
   password: string,
   passwordCheck: string;
 };
@@ -17,8 +17,10 @@ export type LoginResponse = {
 };
 
 export type MeResponse = {
-  email: string,
-  nickname: string;
+  id: number;
+  email: string;
+  name: string;
+  onboardingCompleted: boolean;
 };
 
 // 회원가입
@@ -37,7 +39,12 @@ export const login = (body: LoginRequest) =>
 
 // 내 정보 조회
 export const getMe = () =>
-  apiFetch<MeResponse>("/auth/me", {
+  apiFetch<{ user: MeResponse }>("/users/me", {
     method: "GET",
     auth: true,
+  }).then((response) => response.user);
+
+export const logout = () =>
+  apiFetch<{ message: string }>("/auth/logout", {
+    method: "POST",
   });

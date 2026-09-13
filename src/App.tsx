@@ -6,6 +6,10 @@ import HomePage from "./pages/home/HomePage"
 import MyPage from "./pages/mypage/MyPage"
 import OnboardingPage from "./pages/auth/OnboardingPage"
 import CreatePage from "./pages/portfolio/CreatePage"
+import SelectPage from "./pages/portfolio/SelectPage"
+import LoadingPage from "./pages/portfolio/LoadingPage"
+import EditorPage from "./pages/portfolio/EditorPage"
+import PreviewPage from "./pages/portfolio/PreviewPage"
 
 function App() {
   return (
@@ -19,10 +23,14 @@ function App() {
         <Route path="/onboarding" element={<OnboardingPage />} />
 
         <Route path="/home" element={<HomePage />} />
+        <Route path="/select" element={<SelectPage />} />
         <Route path="/create" element={<CreatePage />} />
+        <Route path="/loading" element={<LoadingPage />} />
+        <Route path="/preview" element={<PreviewPage />} />
+        <Route path="/editor" element={<EditorPage />} />
 
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
   )

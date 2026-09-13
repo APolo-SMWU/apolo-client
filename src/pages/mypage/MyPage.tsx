@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import AppWindow from "@/components/AppWindow";
 import ProfileFormCard, {
   type ProfileFormField,
@@ -11,6 +11,8 @@ import Modal from "@/components/common/Modal";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
+import { logout } from "@/api/auth";
+import { getUserProfile, updateProfile, type UserProfile } from "@/api/user";
 
 const emptyRoleValues = {
   company: "",
@@ -21,32 +23,55 @@ const emptyRoleValues = {
   major: "",
 };
 
-type Profile = typeof emptyRoleValues & {
-  role: Role;
-  name: string;
+type Profile = {
+  id: number;
   email: string;
+  name: string;
+  onboardingCompleted: boolean;
+  role: Role;
   phone: string;
   github: string;
+  company: string;
+  jobTitle: string;
+  tel: string;
+  university: string;
+  department: string;
+  major: string;
 };
 
-const initialProfile: Profile = {
-  ...emptyRoleValues,
-  role: "Professional",
-  jobTitle: "대리",
-  name: "홍길동",
-  email: "test@gmail.com",
-  phone: "010-1234-5678",
-  tel: "02-123-4567",
-  company: "집가자컴퍼니",
-  github: "https://github.com/canofmato",
-};
+function toProfile(user: UserProfile): Profile {
+  return {
+    ...user,
+    role: user.role ?? "Professional",
+    phone: user.phone ?? "",
+    github: user.github ?? "",
+    company: user.company ?? "",
+    jobTitle: user.jobTitle ?? "",
+    tel: user.tel ?? "",
+    university: user.university ?? "",
+    department: user.department ?? "",
+    major: user.major ?? "",
+  };
+}
 
 export default function MyPage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile>(initialProfile);
-  const [form, setForm] = useState<Profile>(initialProfile);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [form, setForm] = useState<Profile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  useEffect(() => {
+    getUserProfile().then((response) => {
+      const nextProfile = toProfile(response.user);
+      setProfile(nextProfile);
+      setForm(nextProfile);
+    });
+  }, []);
+
+  if (!profile || !form) {
+    return <div className="flex min-h-dvh items-center justify-center bg-apolo">불러오는 중...</div>;
+  }
 
   const isPhoneValid = /^\d{3}-\d{4}-\d{4}$/.test(form.phone);
 
@@ -65,7 +90,18 @@ export default function MyPage() {
     ...roleFields[form.role],
     { label: "GitHub", name: "github", placeholder: "GitHub 프로필 URL을 입력해주세요." },
   ].map((field) => ({ ...field, className: "w-full!" }));
-  const canSave = isPhoneValid && areRequiredProfileFieldsComplete(profileFields, form);
+  const formValues = {
+    name: form.name,
+    phone: form.phone,
+    github: form.github,
+    company: form.company,
+    jobTitle: form.jobTitle,
+    tel: form.tel,
+    university: form.university,
+    department: form.department,
+    major: form.major,
+  };
+  const canSave = isPhoneValid && areRequiredProfileFieldsComplete(profileFields, formValues);
   const profileDetails = [
     ["Email", profile.email],
     ["Mobile", profile.phone],
@@ -78,31 +114,39 @@ export default function MyPage() {
   ];
 
   function handleEditStart() {
-    setForm({ ...profile });
+    setForm(profile);
     setIsEditing(true);
   }
 
   function handleRoleChange(role: Role) {
-    setForm((currentForm) => currentForm.role === role
-      ? currentForm
-      : { ...currentForm, ...emptyRoleValues, role });
+    setForm((currentForm) => {
+      if (!currentForm || currentForm.role === role) return currentForm;
+      return { ...currentForm, ...emptyRoleValues, role };
+    });
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
     const nextValue = name === "phone" ? formatPhoneNumber(value) : value;
 
-    setForm((currentForm) => ({ ...currentForm, [name]: nextValue }));
+    setForm((currentForm) => currentForm
+      ? { ...currentForm, [name]: nextValue }
+      : currentForm);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!canSave) return;
-    setProfile({ ...form });
+    if (!form || !canSave) return;
+
+    const response = await updateProfile(form);
+    const nextProfile = toProfile(response.user);
+    setProfile(nextProfile);
+    setForm(nextProfile);
     setIsEditing(false);
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await logout();
     localStorage.removeItem("accessToken");
     navigate("/login", { replace: true });
   }
@@ -125,7 +169,7 @@ export default function MyPage() {
             animateFieldChanges
             photoUploader={<ProfileRoleSelector role={form.role} onRoleChange={handleRoleChange} />}
             fields={profileFields}
-            values={form}
+            values={formValues}
             onFieldChange={handleChange}
             onSubmit={handleSubmit}
             submitDisabled={!canSave}
