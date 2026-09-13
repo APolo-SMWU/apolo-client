@@ -1,6 +1,6 @@
 import Header from "@/components/layout/Header";
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PersonalCard from "@/pages/home/components/PersonalCard";
 import ProfileBlock from "@/pages/portfolio/components/ProfileBlock";
 import BlockRenderer from "@/pages/portfolio/components/BlockRenderer";
@@ -10,27 +10,65 @@ import ModeButton from "@/pages/portfolio/components/ModeButton";
 import ShareButton from "@/pages/portfolio/components/ShareButton";
 import UpdateButton from "@/pages/portfolio/components/UpdateButton";
 import type { PortfolioDocument } from "@/types/portfolio";
+import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
 
 export default function PreviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { shareId } = useParams();
   const [side, setSide] = useState<"front" | "back">("front");
-  const document = (location.state as { document?: PortfolioDocument } | null)?.document ?? mockPortfolio;
+  const locationState = (location.state as { document?: PortfolioDocument; portfolioId?: number | string } | null) ?? null;
+  const [document, setDocument] = useState<PortfolioDocument>(locationState?.document ?? mockPortfolio);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
+
+  useEffect(() => {
+    if (locationState?.document) return;
+    if (shareId) {
+      void getSharedPortfolio(shareId).then(setDocument);
+      return;
+    }
+    if (locationState?.portfolioId !== undefined) {
+      void getPortfolio(locationState.portfolioId).then(setDocument);
+    }
+  }, [locationState?.document, locationState?.portfolioId, shareId]);
+
+  async function handleUpdateContent() {
+    if (typeof document.id !== "number") return;
+    setIsUpdating(true);
+    try {
+      setDocument(await updatePortfolioContent(document.id));
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
+  async function handleShare() {
+    if (typeof document.id !== "number") return;
+    try {
+      const { shareUrl } = await sharePortfolio(document.id);
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage("공유 링크를 복사했어요.");
+      window.setTimeout(() => setShareMessage(""), 2000);
+    } catch {
+      setShareMessage("공유 링크를 만들지 못했어요.");
+    }
+  }
   const profileValue = (kind: string) => document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
       <main className={`relative flex min-h-0 flex-1 flex-col overflow-hidden text-focus ${side === "front" ? "bg-apolo px-6 py-8" : "bg-white p-0"}`}>
-        <div className="fixed inset-x-0 top-24 z-20 flex justify-center">
-          <UpdateButton />
-        </div>
-        <div className="fixed right-6 top-24 z-20">
+        {!shareId && <div className="fixed inset-x-0 top-24 z-20 flex justify-center">
+          <UpdateButton onClick={() => void handleUpdateContent()} disabled={isUpdating || typeof document.id !== "number"} />
+        </div>}
+        {!shareId && <div className="fixed right-6 top-24 z-20">
           <ModeButton
             mode="preview"
             onClick={() => navigate("/editor", { state: { document, side } })}
           />
-        </div>
+        </div>}
         {side === "front" ? 
           <div className="flex flex-1 items-center justify-center">
             <PersonalCard 
@@ -40,7 +78,7 @@ export default function PreviewPage() {
               tel={profileValue("company")}
               phone={profileValue("phone")}
               email={profileValue("email")}
-              address={profileValue("university")} 
+              address={document.card.organizationAddress ?? ""}
             />
           </div> 
         : 
@@ -72,9 +110,10 @@ export default function PreviewPage() {
         <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
           <CardSideNavigation side={side} onSideChange={setSide} />
         </div>
-        <div className="fixed bottom-8 right-6 z-20">
-          <ShareButton />
-        </div>
+        {!shareId && <div className="fixed bottom-8 right-6 z-20">
+          <ShareButton onClick={() => void handleShare()} />
+        </div>}
+        {shareMessage && <p role="status" className="fixed bottom-8 right-20 z-20 rounded-full bg-focus px-3 py-2 text-caption-01 text-primary">{shareMessage}</p>}
       </main>
     </div>
   )

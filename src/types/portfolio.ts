@@ -18,7 +18,7 @@ export type ProfileField = {
 export type ProfileData = {
   name: string;
   title: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   fields: ProfileField[];
 };
 
@@ -30,7 +30,6 @@ type BaseBlock = {
 export type AboutBlock = BaseBlock & {
   type: "about";
   body: string;
-  interests: string[];
 };
 
 export type TimelineItem = {
@@ -66,14 +65,30 @@ export type WorksBlock = BaseBlock & {
 
 export type SkillsBlock = BaseBlock & {
   type: "skills";
-  categories: { category: string; items: string[] }[];
+  categories: { id?: string; category: string; items: string[] }[];
 };
 
 export type ContentBlock = AboutBlock | TimelineBlock | WorksBlock | SkillsBlock;
 
 export type PortfolioDocument = {
-  id: string;
-  designId: string;
+  id: number | string;
+  title: string;
+  userType: "student" | "professor" | "professional";
+  cardDesignId: string;
+  siteDesignId: string;
+  card: {
+    name: string;
+    headline: string;
+    phone: string;
+    email: string;
+    organizationAddress: string | null;
+  };
   profile: ProfileData;
   blocks: ContentBlock[];
+  sourceLinks: string[];
+  sourceSnapshots: { url: string; contentHash: string; lastFetchedAt: string }[];
+  schemaVersion: number;
+  status: "generating" | "draft" | "published" | "failed";
+  createdAt: string;
+  updatedAt: string;
 };

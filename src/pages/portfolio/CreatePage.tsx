@@ -6,6 +6,8 @@ import CTAButton from "@/components/common/CTAButton";
 import PlusIcon from "@/assets/Plus.svg?react";
 import XIcon from "@/assets/X.svg?react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createPortfolio } from "@/api/portfolio";
+import type { PortfolioDocument } from "@/types/portfolio";
 
 const themes = [
   { id: "blue", label: "블루", colors: ["#F2F4F7", "#DCEBFF", "#245BFF", "#667085", "#111111"] },
@@ -101,9 +103,21 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     setIsSubmitting(true);
     setSubmitMessage("");
     try {
-      await onCreate?.(request);
+      let document: PortfolioDocument | undefined;
+      if (onCreate) {
+        await onCreate(request);
+      } else {
+        const { designId } = (location.state as { designId?: string } | null) ?? {};
+        document = await createPortfolio({
+          title: "내 온라인 명함",
+          cardDesignId: theme,
+          siteDesignId: designId ?? "classic",
+          externalLinks,
+          ...(request.requirements ? { requirements: request.requirements } : {}),
+        });
+      }
       navigate("/loading", {
-        state: location.state,
+        state: { ...(location.state as object | null), document },
         replace: true,
       });
     } catch {

@@ -3,20 +3,23 @@ import Footer from "@/components/layout/Footer";
 import { Lottie, type LottieHandle } from "lottie-react";
 import loadingAnimation from "@/assets/loading-animation.json";
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { PortfolioDocument } from "@/types/portfolio";
 
 export default function LoadingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const lottieRef = useRef<LottieHandle>(null);
   const directionRef = useRef<"forward" | "reverse">("forward");
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      navigate("/preview", { replace: true });
+      const state = (location.state as { document?: PortfolioDocument } | null) ?? null;
+      navigate("/preview", { state: { document: state?.document }, replace: true });
     }, 5000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [navigate]);
+  }, [location.state, navigate]);
 
   function handleAnimationFrame({ currentFrame }: { currentFrame: number }) {
     const isMovingForward = directionRef.current === "forward";
