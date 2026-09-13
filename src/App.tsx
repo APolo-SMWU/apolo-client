@@ -27,6 +27,7 @@ function App() {
         <Route path="/create" element={<CreatePage />} />
         <Route path="/loading" element={<LoadingPage />} />
         <Route path="/preview" element={<PreviewPage />} />
+        <Route path="/share/:shareId" element={<PreviewPage />} />
         <Route path="/editor" element={<EditorPage />} />
 
         <Route path="/mypage" element={<MyPage />} />

@@ -4,7 +4,17 @@ import projectImage from "@/assets/portfolio/project-hwansung.png";
 
 export const mockPortfolio: PortfolioDocument = {
   id: "mock-portfolio",
-  designId: "classic",
+  title: "Mock portfolio",
+  userType: "professional",
+  cardDesignId: "blue",
+  siteDesignId: "classic",
+  card: {
+    name: "DA-IN PARK",
+    headline: "Frontend Developer",
+    phone: "010-1234-5678",
+    email: "test@gmail.com",
+    organizationAddress: "00 Company",
+  },
   profile: {
     name: "DA-IN PARK",
     title: "Frontend Developer",
@@ -23,7 +33,6 @@ export const mockPortfolio: PortfolioDocument = {
       type: "about",
       visible: true,
       body: "프론트엔드 개발과 사용자 경험에 관심이 많은 개발자입니다.",
-      interests: ["React", "TypeScript", "AI"],
     },
     {
       id: "experience",
@@ -71,4 +80,10 @@ export const mockPortfolio: PortfolioDocument = {
       ],
     },
   ],
+  sourceLinks: [],
+  sourceSnapshots: [],
+  schemaVersion: 1,
+  status: "draft",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
 };

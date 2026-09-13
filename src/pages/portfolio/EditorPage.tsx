@@ -22,6 +22,7 @@ import GithubIcon from "@/assets/portfolio/GitHub.svg?react";
 import MobileIcon from "@/assets/portfolio/Mobile.svg?react";
 import ScholarIcon from "@/assets/portfolio/Scholar.svg?react";
 import type { ComponentType, InputHTMLAttributes, SVGProps } from "react";
+import { updatePortfolio } from "@/api/portfolio";
 
 const inputClass = "w-full rounded-ml border border-placeholder bg-white px-4 py-2 text-body-02 text-ink outline-none focus:border-placeholder";
 const panelClass = "rounded-xl border p-3";
@@ -713,6 +714,7 @@ export default function EditorPage() {
   const [side, setSide] = useState<"front" | "back">(editorState?.side ?? "back");
   const [document, setDocument] = useState<PortfolioDocument>(editorState?.document ?? mockPortfolio);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   function updateProfileValue(key: "name" | "title", value: string) {
     setDocument((current) => ({ ...current, profile: { ...current.profile, [key]: value } }));
@@ -761,6 +763,37 @@ export default function EditorPage() {
     setDocument((current) => ({ ...current, profile: { ...current.profile, fields: current.profile.fields.filter((field) => field.kind !== kind) } }));
   }
 
+  async function saveDocument() {
+    if (typeof document.id !== "number") {
+      navigate("/preview", { state: { document, side }, replace: true });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const saved = await updatePortfolio(document.id, {
+        profile: document.profile,
+        blocks: document.blocks,
+      });
+      navigate("/preview", { state: { document: saved, side }, replace: true });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function moveBlock(sourceId: string, targetId: string) {
+    if (sourceId === targetId) return;
+    setDocument((current) => {
+      const sourceIndex = current.blocks.findIndex((block) => block.id === sourceId);
+      const targetIndex = current.blocks.findIndex((block) => block.id === targetId);
+      if (sourceIndex < 0 || targetIndex < 0) return current;
+      const blocks = [...current.blocks];
+      const [moved] = blocks.splice(sourceIndex, 1);
+      blocks.splice(targetIndex, 0, moved);
+      return { ...current, blocks };
+    });
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
@@ -768,7 +801,7 @@ export default function EditorPage() {
         <div className="fixed right-6 top-24 z-20">
           <ModeButton
             mode="edit"
-            onClick={() => navigate("/preview", { state: { document, side }, replace: true })}
+            onClick={() => void saveDocument()}
           />
         </div>
         <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pb-24">
@@ -787,24 +820,35 @@ export default function EditorPage() {
                 onFieldAdd={addField}
                 onFieldRemove={removeField}
               />
-              <div className="flex min-w-0 flex-1 flex-col gap-6">
+              <div className={`flex min-w-0 flex-1 flex-col gap-6 ${isSaving ? "pointer-events-none opacity-60" : ""}`}>
                 {document.blocks.map((block) => (
-                  <BlockEditor
+                  <div
                     key={block.id}
-                    block={block}
-                    isSelected={selectedBlockId === block.id}
-                    onSelect={() => setSelectedBlockId(block.id)}
-                    onChange={(nextBlock) =>
-                      setDocument((current) => ({
-                        ...current,
-                        blocks: current.blocks.map((currentBlock) =>
-                          currentBlock.id === nextBlock.id
-                            ? nextBlock
-                            : currentBlock,
-                        ),
-                      }))
-                    }
-                  />
+                    draggable
+                    onDragStart={(event) => event.dataTransfer.setData("text/plain", block.id)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      moveBlock(event.dataTransfer.getData("text/plain"), block.id);
+                    }}
+                    className="cursor-grab active:cursor-grabbing"
+                  >
+                    <BlockEditor
+                      block={block}
+                      isSelected={selectedBlockId === block.id}
+                      onSelect={() => setSelectedBlockId(block.id)}
+                      onChange={(nextBlock) =>
+                        setDocument((current) => ({
+                          ...current,
+                          blocks: current.blocks.map((currentBlock) =>
+                            currentBlock.id === nextBlock.id
+                              ? nextBlock
+                              : currentBlock,
+                          ),
+                        }))
+                      }
+                    />
+                  </div>
                 ))}
               </div>
             </div>
