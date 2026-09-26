@@ -16,6 +16,17 @@ export type ApiFetchOptions = RequestInit & {
   auth?: boolean;
 };
 
+async function reissueAccessToken() {
+  const response = await fetch(`${BASE_URL}/auth/reissue`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || typeof data?.accessToken !== "string") return null;
+  localStorage.setItem("accessToken", data.accessToken);
+  return data.accessToken;
+}
+
 export async function apiFetch<T>(
   path: string,
   options?:ApiFetchOptions,
@@ -23,15 +34,21 @@ export async function apiFetch<T>(
   const token = localStorage.getItem("accessToken");
   const shouldUseAuth = options?.auth ?? false;
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const request = (accessToken: string | null) => fetch(`${BASE_URL}${path}`, {
     ...options,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      ...(shouldUseAuth && token ? {Authorization: `Bearer ${token}` } : {}),
+      ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(shouldUseAuth && accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...options?.headers,
     },
   });
+
+  let response = await request(token);
+  if (response.status === 401 && shouldUseAuth && path !== "/auth/reissue") {
+    const refreshedToken = await reissueAccessToken().catch(() => null);
+    if (refreshedToken) response = await request(refreshedToken);
+  }
 
   const data = await response.json().catch(() => null);
 

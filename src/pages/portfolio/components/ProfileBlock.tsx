@@ -24,11 +24,14 @@ const iconByKind: Record<ProfileFieldKind, ProfileIcon> = {
   blog: FileText,
   linkedin: Link2,
   phone: MobileIcon,
+  tel: MobileIcon,
+  department: ScholarIcon,
+  major: ScholarIcon,
 };
 
 function getHref(field: ProfileField) {
   if (field.kind === "email") return `mailto:${field.value}`;
-  if (field.kind === "phone") return `tel:${field.value.replace(/[^\d+]/g, "")}`;
+  if (field.kind === "phone" || field.kind === "tel") return `tel:${field.value.replace(/[^\d+]/g, "")}`;
   if (["github", "scholar", "notion", "blog", "linkedin"].includes(field.kind)) {
     return /^[a-z][a-z\d+.-]*:/i.test(field.value) ? field.value : `https://${field.value}`;
   }
@@ -68,8 +71,8 @@ export default function ProfileBlock({ profile }: { profile: ProfileData }) {
                 <a
                   className="flex items-center gap-3 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
                   href={href}
-                  target={field.kind === "email" || field.kind === "phone" ? undefined : "_blank"}
-                  rel={field.kind === "email" || field.kind === "phone" ? undefined : "noreferrer"}
+                  target={field.kind === "email" || field.kind === "phone" || field.kind === "tel" ? undefined : "_blank"}
+                  rel={field.kind === "email" || field.kind === "phone" || field.kind === "tel" ? undefined : "noreferrer"}
                 >
                   {content}
                 </a>

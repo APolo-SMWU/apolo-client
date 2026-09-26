@@ -26,27 +26,27 @@ describe("portfolio API", () => {
       jsonResponse({ portfolio: { id: "portfolio-1" } }, 201),
     );
 
+    const attachment = new File(["pdf"], "resume.pdf", { type: "application/pdf" });
     await createPortfolio({
       title: "개발자 포트폴리오",
       cardDesignId: "blue",
       siteDesignId: "classic",
       externalLinks: ["https://github.com/example"],
       requirements: "React 프로젝트 중심으로 구성해주세요.",
+      attachments: [attachment],
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/portfolios/generate"),
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({
-          title: "개발자 포트폴리오",
-          cardDesignId: "blue",
-          siteDesignId: "classic",
-          externalLinks: ["https://github.com/example"],
-          requirements: "React 프로젝트 중심으로 구성해주세요.",
-        }),
+        body: expect.any(FormData),
       }),
     );
+    const requestBody = fetchMock.mock.calls[0][1]?.body as FormData;
+    expect(requestBody.get("title")).toBe("개발자 포트폴리오");
+    expect(requestBody.get("externalLinks")).toBe(JSON.stringify(["https://github.com/example"]));
+    expect(requestBody.get("attachments")).toBe(attachment);
   });
 
   it("uses the portfolio API for list, detail, update, refresh, share, and delete", async () => {

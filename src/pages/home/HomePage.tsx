@@ -43,13 +43,14 @@ export default function HomePage() {
 
   function toPersonalCard(document: PortfolioDocument): PersonalCardProps {
     const role = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
+    const profileValue = (kind: string) => document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
     return {
       role,
-      name: document.card.name,
-      job: document.card.headline,
-      tel: document.card.phone,
-      phone: document.card.phone,
-      email: document.card.email,
+      name: document.profile.name,
+      job: document.profile.title,
+      tel: profileValue("tel"),
+      phone: profileValue("phone"),
+      email: profileValue("email"),
       address: document.card.organizationAddress ?? "",
     } as PersonalCardProps;
   }

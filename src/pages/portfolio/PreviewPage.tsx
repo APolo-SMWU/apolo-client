@@ -55,6 +55,7 @@ export default function PreviewPage() {
     }
   }
   const profileValue = (kind: string) => document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
+  const cardRole = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
@@ -72,14 +73,14 @@ export default function PreviewPage() {
         {side === "front" ? 
           <div className="flex flex-1 items-center justify-center">
             <PersonalCard 
-              role="Professional"
+              role={cardRole}
               name={document.profile.name}
               job={document.profile.title}
-              tel={profileValue("company")}
+              tel={profileValue("tel")}
               phone={profileValue("phone")}
               email={profileValue("email")}
               address={document.card.organizationAddress ?? ""}
-            />
+            /> 
           </div> 
         : 
           <div className="flex min-h-0 w-full flex-1 flex-col overflow-auto bg-white text-ink">

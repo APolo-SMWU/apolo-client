@@ -7,7 +7,10 @@ export type ProfileFieldKind =
   | "notion"
   | "blog"
   | "linkedin"
-  | "phone";
+  | "phone"
+  | "tel"
+  | "department"
+  | "major";
 
 export type ProfileField = {
   kind: ProfileFieldKind;
