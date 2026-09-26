@@ -156,32 +156,48 @@ function EditableProfile({
         <span className="sr-only">이름</span>
         <input className={`${inputClass} w-fit max-w-full font-bold`} value={document.profile.name} onChange={(event) => onProfileChange("name", event.target.value)} />
       </label>
-      <label className="flex flex-col gap-1">
+      <label className="relative flex items-center gap-2">
         <span className="sr-only">직함</span>
-        <input className={`${inputClass} w-fit max-w-full`} value={document.profile.title} onChange={(event) => onProfileChange("title", event.target.value)} />
+        <input className={`${inputClass} min-w-0 flex-1`} value={document.profile.title} onChange={(event) => onProfileChange("title", event.target.value)} />
+        <button
+          type="button"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full text-primary"
+          onClick={() => setIsFieldMenuOpen((open) => !open)}
+          aria-label="프로필 필드 추가"
+        >
+          <AddIcon className="size-6" aria-hidden="true" />
+        </button>
+        {isFieldMenuOpen && availableFields.length > 0 && (
+          <select
+            autoFocus
+            className="absolute right-8 top-1/2 z-10 w-30 -translate-y-1/2 rounded-md border border-placeholder bg-white px-3 py-2 text-body-02 shadow-md"
+            value=""
+            onChange={(event) => {
+              if (event.target.value) onFieldAdd(event.target.value as ProfileFieldKind);
+              setIsFieldMenuOpen(false);
+            }}
+            aria-label="추가할 프로필 필드 선택"
+          >
+            <option value="">선택</option>
+            {availableFields.map((field) => (
+              <option key={field.kind} value={field.kind}>
+                {field.label}
+              </option>
+            ))}
+          </select>
+        )}
       </label>
 
       <div className="relative flex flex-col gap-3">
-        <div className="flex min-h-6 justify-end">
-          <button
-            type="button"
-            className="flex size-6 shrink-0 items-center justify-center rounded-full text-primary"
-            onClick={() => setIsFieldMenuOpen((open) => !open)}
-            aria-label="프로필 필드 추가"
-          >
-            <AddIcon className="size-6" aria-hidden="true" />
-          </button>
-        </div>
-
         {visibleFields.map((field) => (
           <div key={field.kind} className="flex items-center gap-2">
             {(() => {
               const Icon = profileIcons[field.kind] ?? Link2;
               return <Icon className="size-5 shrink-0" aria-hidden="true" />;
             })()}
-            <span className="w-14 shrink-0 text-body-02">{field.label}</span>
+            <span className="w-16 shrink-0 text-body-02">{field.label}</span>
             <span className="text-placeholder">|</span>
-            <input className={`${inputClass} min-w-0 flex-1`} value={field.value} onChange={(event) => onFieldChange(field.kind, event.target.value)} />
+            <input className={`${inputClass} min-w-0 flex-1 text-body-02`} value={field.value} onChange={(event) => onFieldChange(field.kind, event.target.value)} />
             <button type="button" className="flex size-6 shrink-0 items-center justify-center text-danger" disabled={requiredProfileKinds.includes(field.kind)} onClick={() => onFieldRemove(field.kind)} aria-label={`${field.label} 삭제`}>
               <DeleteIcon className="size-6" aria-hidden="true" />
             </button>
@@ -189,25 +205,6 @@ function EditableProfile({
         ))}
       </div>
 
-      {isFieldMenuOpen && availableFields.length > 0 && (
-        <select
-          autoFocus
-          className="absolute right-0 top-9 z-10 rounded-md border border-placeholder bg-white px-3 py-2 text-body-02 shadow-md"
-          value=""
-          onChange={(event) => {
-            if (event.target.value) onFieldAdd(event.target.value as ProfileFieldKind);
-            setIsFieldMenuOpen(false);
-          }}
-          aria-label="추가할 프로필 필드 선택"
-        >
-          <option value="">선택</option>
-          {availableFields.map((field) => (
-            <option key={field.kind} value={field.kind}>
-              {field.label}
-            </option>
-          ))}
-        </select>
-      )}
     </aside>
   );
 }
