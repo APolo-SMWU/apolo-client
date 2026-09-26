@@ -14,6 +14,7 @@ export type CreatePortfolioRequest = {
   siteDesignId: string;
   externalLinks: string[];
   requirements?: string;
+  attachments?: File[];
 };
 
 export type UpdatePortfolioRequest = {
@@ -27,12 +28,22 @@ export type UpdatePortfolioRequest = {
 
 type PortfolioResponse = { portfolio: PortfolioDocument };
 
-export const createPortfolio = (body: CreatePortfolioRequest) =>
-  apiFetch<PortfolioResponse>("/portfolios/generate", {
+export const createPortfolio = (body: CreatePortfolioRequest) => {
+  const { attachments = [], ...fields } = body;
+  const formData = new FormData();
+  formData.append("title", fields.title);
+  formData.append("cardDesignId", fields.cardDesignId);
+  formData.append("siteDesignId", fields.siteDesignId);
+  formData.append("externalLinks", JSON.stringify(fields.externalLinks));
+  if (fields.requirements !== undefined) formData.append("requirements", fields.requirements);
+  attachments.forEach((file) => formData.append("attachments", file));
+
+  return apiFetch<PortfolioResponse>("/portfolios/generate", {
     method: "POST",
     auth: true,
-    body: JSON.stringify(body),
+    body: formData,
   }).then(({ portfolio }) => portfolio);
+};
 
 export const getPortfolios = () =>
   apiFetch<{ portfolios: PortfolioSummary[] }>("/portfolios", {
@@ -74,6 +85,17 @@ export const updatePortfolioContent = (
     method: "POST",
     auth: true,
   }).then(({ portfolio }) => portfolio);
+
+export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}/profile/avatar`, {
+    method: "POST",
+    auth: true,
+    body: formData,
+  }).then(({ portfolio }) => portfolio);
+};
 
 export type SharePortfolioResponse = {
   shareId: string;

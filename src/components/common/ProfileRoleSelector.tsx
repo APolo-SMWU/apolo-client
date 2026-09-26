@@ -4,13 +4,14 @@ import { roles, type Role } from "./profileRoles";
 type ProfileRoleSelectorProps = {
   role: Role | null;
   onRoleChange: (role: Role) => void;
+  showPhoto?: boolean;
 };
 
-export default function ProfileRoleSelector({ role, onRoleChange }: ProfileRoleSelectorProps) {
+export default function ProfileRoleSelector({ role, onRoleChange, showPhoto = true }: ProfileRoleSelectorProps) {
   return (
     <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
-      <PhotoUploader className="size-20! shrink-0" />
-      <fieldset className="min-w-0 flex-1 basis-[310px] sm:w-[312px] sm:flex-none">
+      {showPhoto && <PhotoUploader className="size-20! shrink-0" />}
+      <fieldset className={`min-w-0 flex-1 ${showPhoto ? "basis-[310px] sm:w-[312px] sm:flex-none" : "w-full"}`}>
         <legend className="mb-2 text-caption-01 text-ink">
           Role <span className="text-danger">*</span>
         </legend>

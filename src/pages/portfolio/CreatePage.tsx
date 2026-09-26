@@ -25,6 +25,9 @@ export type CreateCardRequest = {
   attachments: File[];
 };
 
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
 type CreatePageProps = {
   onCreate?: (request: CreateCardRequest) => void | Promise<void>;
 };
@@ -80,11 +83,23 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
 
   function handleAttachments(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
-    const validFiles = files.filter((file) => /\.(pdf|jpe?g|png)$/i.test(file.name));
-    setAttachmentError(files.length === validFiles.length ? "" : "PDF, JPG, PNG 파일을 첨부해주세요.");
+    const validFiles = files.filter((file) => /\.(pdf|jpe?g|png)$/i.test(file.name) && file.size <= MAX_ATTACHMENT_BYTES);
+    const hasInvalidType = files.some((file) => !/\.(pdf|jpe?g|png)$/i.test(file.name));
+    const hasOversizedFile = files.some((file) => file.size > MAX_ATTACHMENT_BYTES);
+    const availableSlots = Math.max(0, MAX_ATTACHMENTS - attachments.length);
+    const acceptedFiles = validFiles.slice(0, availableSlots);
+    setAttachmentError(
+      hasInvalidType
+        ? "PDF, JPG, PNG 파일만 첨부할 수 있어요."
+        : hasOversizedFile
+          ? "첨부파일은 파일당 10MB 이하만 업로드할 수 있어요."
+          : validFiles.length > availableSlots
+            ? "첨부파일은 최대 5개까지 업로드할 수 있어요."
+            : "",
+    );
     setAttachments((current) => {
       const next = [...current];
-      for (const file of validFiles) {
+      for (const file of acceptedFiles) {
         if (!next.some((existing) => existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified)) {
           next.push(file);
         }
@@ -113,6 +128,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
           cardDesignId: theme,
           siteDesignId: designId ?? "classic",
           externalLinks,
+          attachments,
           ...(request.requirements ? { requirements: request.requirements } : {}),
         });
       }

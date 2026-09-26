@@ -93,7 +93,7 @@ export default function OnboardingPage() {
           onSubmit={handleSubmit}
           submitDisabled={!role || !isPhoneValid}
           photoUploader={
-            <ProfileRoleSelector role={role} onRoleChange={setRole} />
+            <ProfileRoleSelector role={role} onRoleChange={setRole} showPhoto={false} />
           }
         />
       </main>

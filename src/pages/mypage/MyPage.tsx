@@ -167,7 +167,7 @@ export default function MyPage() {
             title={<>Fill in your<br />information</>}
             description="AI가 웹사이트를 만들기 위해서는 아래의 정보가 필요해요."
             animateFieldChanges
-            photoUploader={<ProfileRoleSelector role={form.role} onRoleChange={handleRoleChange} />}
+            photoUploader={<ProfileRoleSelector role={form.role} onRoleChange={handleRoleChange} showPhoto={false} />}
             fields={profileFields}
             values={formValues}
             onFieldChange={handleChange}

@@ -11,6 +11,7 @@ import ShareButton from "@/pages/portfolio/components/ShareButton";
 import UpdateButton from "@/pages/portfolio/components/UpdateButton";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
+import { getCardField, getCardJob, getCardName } from "./cardData";
 
 export default function PreviewPage() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function PreviewPage() {
       setShareMessage("공유 링크를 만들지 못했어요.");
     }
   }
-  const profileValue = (kind: string) => document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
+  const cardRole = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
@@ -72,14 +73,15 @@ export default function PreviewPage() {
         {side === "front" ? 
           <div className="flex flex-1 items-center justify-center">
             <PersonalCard 
-              role="Professional"
-              name={document.profile.name}
-              job={document.profile.title}
-              tel={profileValue("company")}
-              phone={profileValue("phone")}
-              email={profileValue("email")}
+              role={cardRole}
+              name={getCardName(document)}
+              job={getCardJob(document)}
+              logoUrl={document.card.logoUrl}
+              tel={getCardField(document, "tel")}
+              phone={getCardField(document, "phone")}
+              email={getCardField(document, "email")}
               address={document.card.organizationAddress ?? ""}
-            />
+            /> 
           </div> 
         : 
           <div className="flex min-h-0 w-full flex-1 flex-col overflow-auto bg-white text-ink">

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import LandingPage from "./pages/LandingPage"
 import SignupPage from "./pages/auth/SignupPage"
 import LoginPage from "./pages/auth/LoginPage"
@@ -11,30 +11,63 @@ import LoadingPage from "./pages/portfolio/LoadingPage"
 import EditorPage from "./pages/portfolio/EditorPage"
 import PreviewPage from "./pages/portfolio/PreviewPage"
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
+  {
+    path: "/signup",
+    element: <SignupPage />,
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/onboarding",
+    element: <OnboardingPage />,
+  },
+  {
+    path: "/home",
+    element: <HomePage />,
+  },
+  {
+    path: "/select",
+    element: <SelectPage />,
+  },
+  {
+    path: "/create",
+    element: <CreatePage />,
+  },
+  {
+    path: "/loading",
+    element: <LoadingPage />,
+  },
+  {
+    path: "/preview",
+    element: <PreviewPage />,
+  },
+  {
+    path: "/share/:shareId",
+    element: <PreviewPage />,
+  },
+  {
+    path: "/editor",
+    element: <EditorPage />,
+  },
+  {
+    path: "/mypage",
+    element: <MyPage />,
+  },
+  {
+    path: "*",
+    element: <Navigate to="/home" replace />,
+  },
+]);
+
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-
-        {/* auth */}
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
-
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/select" element={<SelectPage />} />
-        <Route path="/create" element={<CreatePage />} />
-        <Route path="/loading" element={<LoadingPage />} />
-        <Route path="/preview" element={<PreviewPage />} />
-        <Route path="/share/:shareId" element={<PreviewPage />} />
-        <Route path="/editor" element={<EditorPage />} />
-
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return <RouterProvider router={router} />;
 }
 
 export default App

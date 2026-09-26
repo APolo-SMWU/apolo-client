@@ -7,7 +7,10 @@ export type ProfileFieldKind =
   | "notion"
   | "blog"
   | "linkedin"
-  | "phone";
+  | "phone"
+  | "tel"
+  | "department"
+  | "major";
 
 export type ProfileField = {
   kind: ProfileFieldKind;
@@ -77,11 +80,19 @@ export type PortfolioDocument = {
   cardDesignId: string;
   siteDesignId: string;
   card: {
-    name: string;
-    headline: string;
-    phone: string;
-    email: string;
-    organizationAddress: string | null;
+    name?: string;
+    company?: string;
+    university?: string;
+    department?: string;
+    major?: string;
+    headline?: string;
+    tel?: string;
+    mobile?: string;
+    /** Legacy response field; prefer mobile when both are present. */
+    phone?: string;
+    email?: string;
+    organizationAddress?: string | null;
+    logoUrl?: string | null;
   };
   profile: ProfileData;
   blocks: ContentBlock[];
