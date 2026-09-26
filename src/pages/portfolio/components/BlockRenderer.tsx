@@ -31,14 +31,14 @@ function TimelineContent({ block }: { block: Extract<ContentBlock, { type: "educ
       {block.items.map((item) => (
         <article
           key={item.id}
-          className="grid gap-2 px-4 sm:grid-cols-[150px_1fr]"
+          className="grid gap-2 px-4 sm:grid-cols-[220px_1fr]"
         >
-          <p className="text-body-01">
+          <p className="whitespace-nowrap text-body-01">
             {item.startDate}
             {item.endDate ? ` - ${item.endDate}` : ""}
           </p>
           <div>
-            <h3 className="font-bold">{item.organization}</h3>
+            <h3 className="text-title-02 font-bold">{item.organization}</h3>
             {item.role && (
               <p className={block.type === "education" ? "text-body-02" : "text-body-01"}>
                 {item.role}
@@ -70,7 +70,7 @@ function WorksContent({
           )}
           <div className="min-w-0">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              {item.title && <h3 className="font-bold">{item.title}</h3>}
+              {item.title && <h3 className="text-title-02 font-bold">{item.title}</h3>}
             </div>
             {item.role && <p className="text-body-01">{item.role}</p>}
             {item.skills && item.skills.length > 0 && (

@@ -11,6 +11,7 @@ import CompanyIcon from "@/assets/portfolio/Company.svg?react";
 import EmailIcon from "@/assets/portfolio/Email.svg?react";
 import MobileIcon from "@/assets/portfolio/Mobile.svg?react";
 import type { ProfileData, ProfileField, ProfileFieldKind } from "@/types/portfolio";
+import { isProfileFieldVisible, type ProfileUserType } from "./profileFieldOptions";
 
 type ProfileIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -38,7 +39,7 @@ function getHref(field: ProfileField) {
   return null;
 }
 
-export default function ProfileBlock({ profile }: { profile: ProfileData }) {
+export default function ProfileBlock({ profile, userType }: { profile: ProfileData; userType: ProfileUserType }) {
   return (
     <section className="flex w-[150px] max-w-[150px] shrink-0 flex-col items-start gap-5 px-0 py-8" aria-label="Profile">
       <div className="flex size-[150px] items-center justify-center overflow-hidden rounded-full bg-focus text-display-02 font-bold text-primary">
@@ -55,13 +56,15 @@ export default function ProfileBlock({ profile }: { profile: ProfileData }) {
       </div>
 
       <ul className="flex w-full flex-col gap-3">
-        {profile.fields.map((field) => {
+        {profile.fields.filter((field) => isProfileFieldVisible(field.kind, userType)).map((field) => {
           const Icon = iconByKind[field.kind];
           const href = getHref(field);
+          const isOrganizationField = field.kind === "company" || field.kind === "university";
+          const displayLabel = isOrganizationField && field.value ? field.value : field.label;
           const content = (
             <>
               <Icon className="size-5 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 truncate text-body-02">{field.label}</span>
+              <span className="min-w-0 truncate text-body-02">{displayLabel}</span>
             </>
           );
 
