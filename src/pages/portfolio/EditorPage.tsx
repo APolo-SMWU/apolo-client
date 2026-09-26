@@ -721,31 +721,39 @@ function EditableFrontCard({ document, onProfileChange, onChange }: { document: 
   const role = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
 
   return (
-    <div className="flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] shrink-0 flex-col gap-6 rounded-xl border border-ink bg-white p-5 text-ink">
-      <div className="flex w-full flex-col items-end justify-center gap-1">
-        <GoIcon className="size-4 md:size-5" aria-hidden="true" />
+    <div className="relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] shrink-0 flex-col rounded-xl border border-ink bg-white p-5 text-ink">
+      <div className="flex h-[100px] w-full items-start justify-between">
+        <div className="flex size-[70px] shrink-0 items-center justify-center overflow-hidden">
+          {document.card.logoUrl ? (
+            <img src={document.card.logoUrl} alt="" width={70} height={70} className="size-[70px] object-contain" />
+          ) : null}
+        </div>
+        <div className="flex flex-col items-end justify-start gap-2">
+          <GoIcon className="size-4 md:size-5" aria-hidden="true" />
         <HugInput
-          className={`${inputClass} h-fit min-w-25 !rounded-sm !px-0 !py-0 text-caption-01 leading-[1.2] text-right md:text-body-02`}
+          className={`${inputClass} !box-border !h-[1.2em] min-w-25 !rounded-sm !px-0 !py-0 !leading-[1.2] text-caption-01 text-right md:text-body-02`}
           value={document.profile.title}
           onChange={(event) => onProfileChange("title", event.target.value)}
           aria-label="직함"
         />
         <HugInput
-          className={`${inputClass} h-fit min-w-25 !rounded-sm !px-0 !py-0 text-heading-03 font-semibold leading-none text-right md:text-display-02`}
+          className={`${inputClass} !box-border !h-[1em] min-w-25 !rounded-sm !px-0 !py-0 !leading-none text-heading-03 font-semibold text-right md:text-display-02`}
           value={document.profile.name}
           onChange={(event) => onProfileChange("name", event.target.value)}
           aria-label="이름"
+          autoFocus
         />
+        </div>
       </div>
       <div className="flex w-full border-b border-ink" />
-      <div className="flex w-full flex-col items-start justify-start gap-1">
+      <div className="flex w-full flex-1 flex-col items-start justify-start gap-2 pt-3">
         {[
           ...(role === "Student" ? [] : [["Tel.", "tel"]]),
           ["Mobile.", "phone"],
           ["E-mail.", "email"],
         ].map(([label, kind]) => (
           <label key={kind} className="flex w-full items-center gap-1 text-caption-02 font-bold leading-[1.2]">
-            <span className="w-9 shrink-0">{label}</span>
+            <span className="w-16 shrink-0">{label}</span>
             <HugInput
               className={`${inputClass} h-fit min-w-25 !rounded-sm !px-0 !py-0 text-caption-02 font-normal leading-[1.2]`}
               value={getField(document, kind as ProfileFieldKind)}
@@ -753,6 +761,9 @@ function EditableFrontCard({ document, onProfileChange, onChange }: { document: 
             />
           </label>
         ))}
+        {document.card.organizationAddress && (
+          <p className="text-caption-02 leading-[1.2]">{document.card.organizationAddress}</p>
+        )}
       </div>
     </div>
   );
