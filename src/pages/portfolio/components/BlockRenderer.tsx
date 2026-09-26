@@ -21,7 +21,7 @@ function Section({
 
 function AboutContent({ block }: { block: Extract<ContentBlock, { type: "about" }> }) {
   return (
-    <p className="text-body-01 leading-normal">{block.body}</p>
+    <p className="whitespace-pre-line text-body-01 leading-normal">{block.body}</p>
   );
 }
 

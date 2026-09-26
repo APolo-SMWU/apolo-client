@@ -25,16 +25,19 @@ import GithubIcon from "@/assets/portfolio/GitHub.svg?react";
 import MobileIcon from "@/assets/portfolio/Mobile.svg?react";
 import ScholarIcon from "@/assets/portfolio/Scholar.svg?react";
 import GoIcon from "@/assets/Goto.svg?react";
+import Modal from "@/components/common/Modal";
 import type { ComponentType, InputHTMLAttributes, SVGProps } from "react";
 import { updatePortfolio, uploadPortfolioAvatar } from "@/api/portfolio";
 import { buildPortfolioUpdateRequest, hasDocumentChanged } from "./editorDocument";
+import { getCardField, getCardJob, getCardName } from "./cardData";
 
 const inputClass = "w-full border-0 bg-transparent px-0 py-0 font-[inherit] text-inherit leading-[inherit] tracking-[inherit] caret-primary outline-none";
 const panelClass = "rounded-xl border border-transparent p-3";
 const projectLinkLabels = ["Link", "GitHub"];
 
 function getField(document: PortfolioDocument, kind: ProfileFieldKind) {
-  return document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
+  const profileValue = document.profile.fields.find((field) => field.kind === kind)?.value;
+  return profileValue || getCardField(document, kind);
 }
 
 function HugInput({
@@ -761,45 +764,14 @@ function ProfilePreviewCard({ document }: { document: PortfolioDocument }) {
   return (
     <PersonalCard
       role={role}
-      name={document.profile.name}
-      job={document.profile.title}
+      name={document.profile.name || getCardName(document)}
+      job={document.profile.title || getCardJob(document)}
+      logoUrl={document.card.logoUrl}
       tel={getField(document, "tel")}
       phone={getField(document, "phone")}
       email={getField(document, "email")}
       address={document.card.organizationAddress ?? ""}
     />
-  );
-}
-
-function UnsavedChangesModal({
-  onContinueEditing,
-  onDiscard,
-  onSave,
-  isSaving,
-}: {
-  onContinueEditing: () => void;
-  onDiscard: () => void;
-  onSave: () => void;
-  isSaving: boolean;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-6" role="dialog" aria-modal="true" aria-labelledby="unsaved-title">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 text-ink shadow-xl">
-        <h2 id="unsaved-title" className="text-title-01 font-bold">저장하지 않은 변경 내용이 있어요</h2>
-        <p className="mt-2 text-body-02">페이지를 나가면 수정한 내용이 사라질 수 있습니다.</p>
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button type="button" className="rounded-full border border-placeholder px-4 py-2 text-body-02" onClick={onContinueEditing}>
-            계속 편집하기
-          </button>
-          <button type="button" className="rounded-full border border-danger px-4 py-2 text-body-02 text-danger" onClick={onDiscard} disabled={isSaving}>
-            저장하지 않고 나가기
-          </button>
-          <button type="button" className="rounded-full bg-primary px-4 py-2 text-body-02 text-white" onClick={onSave} disabled={isSaving}>
-            {isSaving ? "저장 중..." : "저장하고 나가기"}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -1074,19 +1046,17 @@ export default function EditorPage() {
         </div>
       </main>
       {blocker.state === "blocked" && (
-        <UnsavedChangesModal
-          isSaving={isSaving}
-          onContinueEditing={() => blocker.reset()}
-          onDiscard={() => {
-            allowNavigationRef.current = true;
-            blocker.proceed();
-          }}
-          onSave={() => void saveDocument(false).then((saved) => {
-            if (!saved) return;
-            allowNavigationRef.current = true;
-            blocker.proceed();
-          })}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4">
+          <Modal
+            title="저장하지 않고 나가시겠습니까?"
+            description="저장하지 않은 수정 내용은 사라집니다."
+            onCancel={() => blocker.reset()}
+            onConfirm={() => {
+              allowNavigationRef.current = true;
+              blocker.proceed();
+            }}
+          />
+        </div>
       )}
     </div>
   );

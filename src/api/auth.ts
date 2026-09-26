@@ -47,4 +47,5 @@ export const getMe = () =>
 export const logout = () =>
   apiFetch<{ message: string }>("/auth/logout", {
     method: "POST",
+    auth: true,
   });

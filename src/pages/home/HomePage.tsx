@@ -10,10 +10,14 @@ import Modal from "@/components/common/Modal";
 import LinkIcon from "@/assets/Link.svg?react";
 import { deletePortfolio, getPortfolio, getPortfolios, sharePortfolio } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
+import { getCardField, getCardJob, getCardName } from "@/pages/portfolio/cardData";
 
 type ActiveModal = {
   type: "delete" | "share";
   portfolioId: number | string;
+} | {
+  type: "edit";
+  document: PortfolioDocument;
 } | null;
 
 export default function HomePage() {
@@ -43,14 +47,14 @@ export default function HomePage() {
 
   function toPersonalCard(document: PortfolioDocument): PersonalCardProps {
     const role = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
-    const profileValue = (kind: string) => document.profile.fields.find((field) => field.kind === kind)?.value ?? "";
     return {
       role,
-      name: document.profile.name,
-      job: document.profile.title,
-      tel: profileValue("tel"),
-      phone: profileValue("phone"),
-      email: profileValue("email"),
+      name: getCardName(document),
+      job: getCardJob(document),
+      logoUrl: document.card.logoUrl,
+      tel: getCardField(document, "tel"),
+      phone: getCardField(document, "phone"),
+      email: getCardField(document, "email"),
       address: document.card.organizationAddress ?? "",
     } as PersonalCardProps;
   }
@@ -108,7 +112,7 @@ export default function HomePage() {
                 key={document.id}
                 title={document.title}
                 onOpen={() => navigate("/preview", { state: { document } })}
-                onEdit={() => navigate("/editor", { state: { document } })}
+                onEdit={() => setActiveModal({ type: "edit", document })}
                 onDelete={() => setActiveModal({ type: "delete", portfolioId: document.id })}
                 onShare={() => void handleShare(document.id)}
               >
@@ -127,7 +131,17 @@ export default function HomePage() {
             }
           }}
         >
-          {activeModal.type === "delete" ? (
+          {activeModal.type === "edit" ? (
+            <Modal
+              title="명함을 수정하시겠습니까?"
+              description="에디터 페이지로 이동합니다."
+              onCancel={() => setActiveModal(null)}
+              onConfirm={() => {
+                navigate("/editor", { state: { document: activeModal.document } });
+                setActiveModal(null);
+              }}
+            />
+          ) : activeModal.type === "delete" ? (
             <Modal
               title="이 명함을 삭제하시겠습니까?"
               description="삭제 후 복구는 불가능합니다."
