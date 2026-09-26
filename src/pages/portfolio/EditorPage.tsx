@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useBlocker, useLocation, useNavigate } from "react-router-dom";
-import { FileText, Link2, StickyNote, UserRound } from "lucide-react";
+import { FileText, GripVertical, Link2, StickyNote, UserRound } from "lucide-react";
 import Header from "@/components/layout/Header";
 import CardSideNavigation from "@/pages/portfolio/components/CardSideNavigation";
 import ModeButton from "@/pages/portfolio/components/ModeButton";
@@ -8,7 +8,7 @@ import ProfileBlock from "@/pages/portfolio/components/ProfileBlock";
 import BlockRenderer from "@/pages/portfolio/components/BlockRenderer";
 import PersonalCard from "@/pages/home/components/PersonalCard";
 import { mockPortfolio } from "@/data/mockPortfolio";
-import { profileFieldOptions, requiredProfileKinds } from "@/pages/portfolio/components/profileFieldOptions";
+import { isProfileFieldVisible, profileFieldOptions, requiredProfileKinds } from "@/pages/portfolio/components/profileFieldOptions";
 import type {
   ContentBlock,
   ProfileFieldKind,
@@ -96,6 +96,7 @@ function EditableProfile({
   onFieldChange,
   onFieldAdd,
   onFieldRemove,
+  onFieldReorder,
   onAvatarChange,
   isUploadingAvatar,
 }: {
@@ -106,16 +107,19 @@ function EditableProfile({
   onFieldChange: (kind: ProfileFieldKind, value: string) => void;
   onFieldAdd: (kind: ProfileFieldKind) => void;
   onFieldRemove: (kind: ProfileFieldKind) => void;
+  onFieldReorder: (sourceKind: ProfileFieldKind, targetKind: ProfileFieldKind) => void;
   onAvatarChange: (file: File) => void;
   isUploadingAvatar: boolean;
 }) {
   const [isFieldMenuOpen, setIsFieldMenuOpen] = useState(false);
+  const [draggedFieldKind, setDraggedFieldKind] = useState<ProfileFieldKind | null>(null);
+  const [dragOverFieldKind, setDragOverFieldKind] = useState<ProfileFieldKind | null>(null);
   const usedKinds = new Set(document.profile.fields.map((field) => field.kind));
-  const visibleFields = document.userType === "student"
-    ? document.profile.fields.filter((field) => field.kind !== "tel")
-    : document.profile.fields;
+  const visibleFields = document.profile.fields.filter((field) =>
+    isProfileFieldVisible(field.kind, document.userType) && (document.userType !== "student" || field.kind !== "tel"),
+  );
   const availableFields = profileFieldOptions.filter((field) =>
-    !usedKinds.has(field.kind) && (document.userType !== "student" || field.kind !== "tel"),
+    !usedKinds.has(field.kind) && isProfileFieldVisible(field.kind, document.userType) && (document.userType !== "student" || field.kind !== "tel"),
   );
 
   return (
@@ -190,7 +194,39 @@ function EditableProfile({
 
       <div className="relative flex flex-col gap-3">
         {visibleFields.map((field) => (
-          <div key={field.kind} className="flex items-center gap-2">
+          <div
+            key={field.kind}
+            className={`flex items-center gap-2 rounded-md ${dragOverFieldKind === field.kind ? "bg-focus" : ""}`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragOverFieldKind(field.kind);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const sourceKind = event.dataTransfer.getData("text/plain") as ProfileFieldKind;
+              if (sourceKind) onFieldReorder(sourceKind, field.kind);
+              setDraggedFieldKind(null);
+              setDragOverFieldKind(null);
+            }}
+            onDragLeave={() => setDragOverFieldKind(null)}
+          >
+            <span
+              draggable
+              className={`flex size-5 shrink-0 cursor-grab items-center justify-center text-placeholder active:cursor-grabbing ${draggedFieldKind === field.kind ? "opacity-50" : ""}`}
+              onDragStart={(event) => {
+                setDraggedFieldKind(field.kind);
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", field.kind);
+              }}
+              onDragEnd={() => {
+                setDraggedFieldKind(null);
+                setDragOverFieldKind(null);
+              }}
+              aria-label={`${field.label} 순서 변경`}
+            >
+              <GripVertical className="size-4" aria-hidden="true" />
+            </span>
             {(() => {
               const Icon = profileIcons[field.kind] ?? Link2;
               return <Icon className="size-5 shrink-0" aria-hidden="true" />;
@@ -290,39 +326,74 @@ function EditableTimeline({
   onBlockSelect,
   onChange,
   onRemove,
+  onReorder,
 }: {
   block: Extract<ContentBlock, { type: "education" | "experience" | "activities" | "awards" | "certification" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
   onChange: (index: number, key: "startDate" | "endDate" | "organization" | "role" | "description", value: string) => void;
   onRemove: (index: number) => void;
+  onReorder: (sourceId: string, targetId: string) => void;
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
       {block.items.map((item, index) => (
         <div
           key={item.id}
-          className={`relative grid gap-4 rounded-xl border p-4 sm:grid-cols-[224px_1fr] ${
+          className={`relative grid gap-4 rounded-xl border p-4 pl-10 sm:grid-cols-[240px_1fr] ${
             isBlockSelected && selectedItemId === item.id
               ? "border-primary"
               : "border-transparent"
-          }`}
+          } ${dragOverItemId === item.id ? "bg-focus" : ""}`}
           onClick={() => {
             onBlockSelect();
             setSelectedItemId(item.id);
           }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragOverItemId(item.id);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const sourceId = event.dataTransfer.getData("text/plain");
+            if (sourceId) onReorder(sourceId, item.id);
+            setDraggedItemId(null);
+            setDragOverItemId(null);
+          }}
+          onDragLeave={() => setDragOverItemId(null)}
         >
+          <span
+            draggable
+            className={`absolute left-3 top-4 z-10 flex cursor-grab items-center justify-center text-placeholder active:cursor-grabbing ${draggedItemId === item.id ? "opacity-50" : ""}`}
+            onDragStart={(event) => {
+              event.stopPropagation();
+              setDraggedItemId(item.id);
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", item.id);
+            }}
+            onDragEnd={() => {
+              setDraggedItemId(null);
+              setDragOverItemId(null);
+            }}
+            aria-label="타임라인 항목 순서 변경"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <GripVertical className="size-5" aria-hidden="true" />
+          </span>
           <input
-            className={`${inputClass} h-fit w-[200px] self-start`}
+            className={`${inputClass} h-fit w-[220px] self-start`}
             placeholder="기간을 입력해주세요."
             value={`${item.startDate}${item.endDate ? ` - ${item.endDate}` : ""}`}
             onChange={(event) => onChange(index, "startDate", event.target.value)}
           />
           <div className="flex max-w-[448px] flex-col gap-2">
             <input
-              className={`${inputClass} font-bold`}
+              className={`${inputClass} text-title-02 !font-bold`}
               placeholder="기관 또는 회사"
               value={item.organization}
               onChange={(event) => onChange(index, "organization", event.target.value)}
@@ -366,36 +437,71 @@ function EditableWorks({
   onBlockSelect,
   onChange,
   onRemove,
+  onReorder,
 }: {
   block: Extract<ContentBlock, { type: "works" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
   onChange: (index: number, key: "title" | "role" | "skills" | "description" | "link", value: string, linkIndex?: number) => void;
   onRemove: (index: number) => void;
+  onReorder: (sourceId: string, targetId: string) => void;
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
       {block.items.map((item, index) => (
         <div
           key={item.id}
-          className={`relative flex gap-4 rounded-xl border p-4 ${
+          className={`relative flex gap-4 rounded-xl border p-4 pl-10 ${
             isBlockSelected && selectedItemId === item.id
               ? "border-primary"
               : "border-transparent"
-          }`}
+          } ${dragOverItemId === item.id ? "bg-focus" : ""}`}
           onClick={() => {
             onBlockSelect();
             setSelectedItemId(item.id);
           }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragOverItemId(item.id);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const sourceId = event.dataTransfer.getData("text/plain");
+            if (sourceId) onReorder(sourceId, item.id);
+            setDraggedItemId(null);
+            setDragOverItemId(null);
+          }}
+          onDragLeave={() => setDragOverItemId(null)}
         >
+          <span
+            draggable
+            className={`absolute left-3 top-4 z-10 flex cursor-grab items-center justify-center text-placeholder active:cursor-grabbing ${draggedItemId === item.id ? "opacity-50" : ""}`}
+              onDragStart={(event) => {
+                event.stopPropagation();
+                setDraggedItemId(item.id);
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", item.id);
+              }}
+              onDragEnd={() => {
+                setDraggedItemId(null);
+                setDragOverItemId(null);
+              }}
+            aria-label="프로젝트 순서 변경"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <GripVertical className="size-5" aria-hidden="true" />
+          </span>
           <div className="size-[145px] shrink-0 overflow-hidden rounded-md border border-placeholder bg-focus">
             {item.imageUrl && <img className="size-full object-cover" src={item.imageUrl} alt="" />}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <input
-              className={`${inputClass} font-bold`}
+              className={`${inputClass} text-title-02 !font-bold`}
               placeholder="프로젝트 제목"
               value={item.title}
               onChange={(event) => onChange(index, "title", event.target.value)}
@@ -459,34 +565,69 @@ function EditableSkills({
   onBlockSelect,
   onChange,
   onRemove,
+  onReorder,
 }: {
   block: Extract<ContentBlock, { type: "skills" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
   onChange: (categoryIndex: number, value: string) => void;
   onRemove: (categoryIndex: number) => void;
+  onReorder: (sourceIndex: number, targetIndex: number) => void;
 }) {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number | null>(null);
   const [draftValues, setDraftValues] = useState<Record<number, string>>({});
+  const [draggedCategoryIndex, setDraggedCategoryIndex] = useState<number | null>(null);
+  const [dragOverCategoryIndex, setDragOverCategoryIndex] = useState<number | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
       {block.categories.map((category, index) => (
         <div
           key={category.category}
-          className={`relative grid gap-2 rounded-xl border p-2 sm:grid-cols-[130px_1fr] ${
+          className={`relative grid items-center gap-2 rounded-xl border p-2 pl-10 sm:grid-cols-[130px_1fr] ${
             isBlockSelected && selectedCategoryIndex === index
               ? "border-primary"
               : "border-transparent"
-          }`}
+          } ${dragOverCategoryIndex === index ? "bg-focus" : ""}`}
           onClick={() => {
             onBlockSelect();
             setSelectedCategoryIndex(index);
           }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragOverCategoryIndex(index);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const sourceIndex = Number(event.dataTransfer.getData("text/skill-category-index"));
+            if (Number.isInteger(sourceIndex)) onReorder(sourceIndex, index);
+            setDraggedCategoryIndex(null);
+            setDragOverCategoryIndex(null);
+          }}
+          onDragLeave={() => setDragOverCategoryIndex(null)}
         >
-          <span className="py-2 text-body-02">{category.category}</span>
+          <span
+            draggable
+            className={`absolute left-3 top-1/2 z-10 flex -translate-y-1/2 cursor-grab items-center justify-center text-placeholder active:cursor-grabbing ${draggedCategoryIndex === index ? "opacity-50" : ""}`}
+            onDragStart={(event) => {
+              event.stopPropagation();
+              setDraggedCategoryIndex(index);
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/skill-category-index", String(index));
+            }}
+            onDragEnd={() => {
+              setDraggedCategoryIndex(null);
+              setDragOverCategoryIndex(null);
+            }}
+            aria-label="스킬 카테고리 순서 변경"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <GripVertical className="size-5" aria-hidden="true" />
+          </span>
+          <span className="text-body-02">{category.category}</span>
           <input
-            className={inputClass}
+            className={`${inputClass} self-center`}
             value={draftValues[index] ?? category.items.join(", ")}
             onChange={(event) => {
               const value = event.target.value;
@@ -627,6 +768,15 @@ function BlockEditor({
               items[index] = { ...items[index], [key]: value };
               onChange({ ...block, items } as ContentBlock);
             }}
+            onReorder={(sourceId, targetId) => {
+              const items = [...(block as TimelineBlock).items];
+              const sourceIndex = items.findIndex((item) => item.id === sourceId);
+              const targetIndex = items.findIndex((item) => item.id === targetId);
+              if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+              const [movedItem] = items.splice(sourceIndex, 1);
+              items.splice(targetIndex, 0, movedItem);
+              onChange({ ...block, items } as ContentBlock);
+            }}
             onRemove={(index) =>
               onChange({
                 ...block,
@@ -670,6 +820,15 @@ function BlockEditor({
                 }),
               })
             }
+            onReorder={(sourceId, targetId) => {
+              const sourceIndex = block.items.findIndex((item) => item.id === sourceId);
+              const targetIndex = block.items.findIndex((item) => item.id === targetId);
+              if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+              const items = [...block.items];
+              const [movedItem] = items.splice(sourceIndex, 1);
+              items.splice(targetIndex, 0, movedItem);
+              onChange({ ...block, items });
+            }}
             onRemove={(index) =>
               onChange({
                 ...block,
@@ -707,6 +866,14 @@ function BlockEditor({
                 ),
               })
             }
+            onReorder={(sourceIndex, targetIndex) => {
+              if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+
+              const categories = [...block.categories];
+              const [movedCategory] = categories.splice(sourceIndex, 1);
+              categories.splice(targetIndex, 0, movedCategory);
+              onChange({ ...block, categories });
+            }}
           />
         )}
       </div>
@@ -790,9 +957,11 @@ export default function EditorPage() {
     document?: PortfolioDocument;
     side?: "front" | "back";
   } | null) ?? null;
+  const forceMockDocument = import.meta.env.DEV && new URLSearchParams(location.search).get("mock") === "1";
+  const initialDocument = forceMockDocument ? mockPortfolio : editorState?.document ?? mockPortfolio;
   const [side, setSide] = useState<"front" | "back">(editorState?.side ?? "back");
-  const [originalDocument, setOriginalDocument] = useState<PortfolioDocument>(editorState?.document ?? mockPortfolio);
-  const [draftDocument, setDraftDocument] = useState<PortfolioDocument>(editorState?.document ?? mockPortfolio);
+  const [originalDocument, setOriginalDocument] = useState<PortfolioDocument>(initialDocument);
+  const [draftDocument, setDraftDocument] = useState<PortfolioDocument>(initialDocument);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -888,6 +1057,31 @@ export default function EditorPage() {
   function removeField(kind: ProfileFieldKind) {
     if (requiredProfileKinds.includes(kind)) return;
     updateDraft((current) => ({ ...current, profile: { ...current.profile, fields: current.profile.fields.filter((field) => field.kind !== kind) } }));
+  }
+
+  function reorderField(sourceKind: ProfileFieldKind, targetKind: ProfileFieldKind) {
+    if (sourceKind === targetKind) return;
+    updateDraft((current) => {
+      const isVisibleField = (kind: ProfileFieldKind) =>
+        isProfileFieldVisible(kind, current.userType) && (current.userType !== "student" || kind !== "tel");
+      const visibleKinds = current.profile.fields
+        .filter((field) => isVisibleField(field.kind))
+        .map((field) => field.kind);
+      const sourceIndex = visibleKinds.indexOf(sourceKind);
+      const targetIndex = visibleKinds.indexOf(targetKind);
+      if (sourceIndex < 0 || targetIndex < 0) return current;
+
+      const reorderedKinds = [...visibleKinds];
+      const [movedKind] = reorderedKinds.splice(sourceIndex, 1);
+      reorderedKinds.splice(targetIndex, 0, movedKind);
+      let visibleIndex = 0;
+      const fields = current.profile.fields.map((field) => {
+        if (!isVisibleField(field.kind)) return field;
+        const nextKind = reorderedKinds[visibleIndex++];
+        return current.profile.fields.find((candidate) => candidate.kind === nextKind) ?? field;
+      });
+      return { ...current, profile: { ...current.profile, fields } };
+    });
   }
 
   async function saveDocument(shouldNavigate = true) {
@@ -1005,11 +1199,12 @@ export default function EditorPage() {
                     onFieldChange={updateField}
                     onFieldAdd={addField}
                     onFieldRemove={removeField}
+                    onFieldReorder={reorderField}
                     onAvatarChange={(file) => void handleAvatarChange(file)}
                     isUploadingAvatar={isUploadingAvatar}
                   />
                 ) : (
-                  <ProfileBlock profile={draftDocument.profile} />
+                  <ProfileBlock profile={draftDocument.profile} userType={draftDocument.userType} />
                 )}
               </div>
               <div className={`flex min-w-0 flex-1 flex-col gap-6 ${isSaving ? "pointer-events-none opacity-60" : ""}`}>

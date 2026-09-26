@@ -96,7 +96,7 @@ export default function PreviewPage() {
               </nav>
             </header>
             <div className="flex w-full min-w-0 flex-1 items-start justify-between gap-8 p-4">
-              <ProfileBlock profile={document.profile} />
+              <ProfileBlock profile={document.profile} userType={document.userType} />
               <div className="flex min-w-0 flex-1 flex-col">
                 {document.blocks.map((block) => 
                   <div 
