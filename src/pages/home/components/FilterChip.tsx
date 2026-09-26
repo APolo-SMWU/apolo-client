@@ -13,7 +13,7 @@ export default function FilterChip({
       type="button"
       onClick={onClick}
       className={`
-        flex w-[120px] h-9 border border-ink items-center justify-center
+        flex w-[120px] h-9 border border-ink items-center justify-center outline-none
         ${selected ? "bg-primary text-white": "bg-white text-ink"}
       `}
     >
