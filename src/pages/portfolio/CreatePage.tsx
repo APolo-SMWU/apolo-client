@@ -8,6 +8,7 @@ import XIcon from "@/assets/X.svg?react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortfolio } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
+import { buildCreateCardRequest, type CreateCardRequest, type CreateTheme } from "./createForm";
 
 const themes = [
   { id: "blue", label: "블루", colors: ["#F2F4F7", "#DCEBFF", "#245BFF", "#667085", "#111111"] },
@@ -17,13 +18,7 @@ const themes = [
   { id: "green", label: "그린", colors: ["#F4F7EF", "#F0FFDD", "#80DB37", "#768063", "#111111"] },
 ] as const;
 
-type Theme = (typeof themes)[number]["id"];
-export type CreateCardRequest = {
-  theme: Theme;
-  externalLinks: string[];
-  requirements: string;
-  attachments: File[];
-};
+type Theme = CreateTheme;
 
 const MAX_ATTACHMENTS = 5;
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
@@ -49,6 +44,7 @@ function normalizeLink(value: string) {
 export default function CreatePage({ onCreate }: CreatePageProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [title, setTitle] = useState("");
   const [theme, setTheme] = useState<Theme | null>(null);
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
@@ -60,7 +56,8 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
   const [submitMessage, setSubmitMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingLink = normalizeLink(linkInput);
-  const isFormComplete = theme !== null
+  const isFormComplete = title.trim() !== ""
+    && theme !== null
     && (links.length > 0 || pendingLink !== null)
     && (!linkInput.trim() || pendingLink !== null);
 
@@ -111,10 +108,10 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isSubmitting || !theme) return;
+    if (isSubmitting || !theme || !title.trim()) return;
     const externalLinks = commitLink();
     if (!externalLinks?.length) return;
-    const request: CreateCardRequest = { theme, externalLinks, requirements: requirements.trim(), attachments };
+    const request = buildCreateCardRequest(theme, title, externalLinks, requirements.trim(), attachments);
     setIsSubmitting(true);
     setSubmitMessage("");
     try {
@@ -124,7 +121,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
       } else {
         const { designId } = (location.state as { designId?: string } | null) ?? {};
         document = await createPortfolio({
-          title: "내 온라인 명함",
+          title: request.title,
           cardDesignId: theme,
           siteDesignId: designId ?? "classic",
           externalLinks,
@@ -154,6 +151,19 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
 
         <AppWindow className="relative z-10 w-[734px] max-w-[calc(100%-2rem)] sm:[&>div:last-child]:p-10" title="Create">
           <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="title" className="text-body-02">제목 <span className="text-danger">*</span></label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                required
+                className="min-h-11 rounded-ml border border-placeholder bg-transparent px-4 text-body-02 outline-none focus:border-primary placeholder:text-placeholder"
+                placeholder="제목을 입력해주세요."
+              />
+            </div>
             <fieldset disabled={isSubmitting}>
               <legend className="mb-2 text-body-02">색상 테마 <span className="text-danger">*</span></legend>
               <div className="grid grid-cols-5 gap-2 sm:gap-3">
