@@ -39,6 +39,35 @@ export type UpdateProfileRequest = OnboardingRequest & {
   name: string;
 };
 
+function addField(payload: Record<string, string>, key: string, value?: string) {
+  payload[key] = value ?? "";
+}
+
+export function toUpdateProfilePayload(body: UpdateProfileRequest): UpdateProfileRequest {
+  const payload: Record<string, string> = {
+    name: body.name,
+    role: body.role,
+    phone: body.phone,
+  };
+
+  addField(payload, "github", body.github);
+
+  if (body.role === "Student") {
+    addField(payload, "university", body.university);
+    addField(payload, "major", body.major);
+  } else if (body.role === "Professor") {
+    addField(payload, "university", body.university);
+    addField(payload, "department", body.department);
+    addField(payload, "tel", body.tel);
+  } else {
+    addField(payload, "company", body.company);
+    addField(payload, "jobTitle", body.jobTitle);
+    addField(payload, "tel", body.tel);
+  }
+
+  return payload as UpdateProfileRequest;
+}
+
 export const getUserProfile = () =>
   apiFetch<UserResponse>("/users/me", {
     method: "GET",
@@ -56,5 +85,5 @@ export const updateProfile = (body: UpdateProfileRequest) =>
   apiFetch<UserResponse>("/users/me/profile", {
     method: "PATCH",
     auth: true,
-    body: JSON.stringify(body),
+    body: JSON.stringify(toUpdateProfilePayload(body)),
   });
