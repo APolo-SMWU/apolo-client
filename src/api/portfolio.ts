@@ -28,6 +28,24 @@ export type UpdatePortfolioRequest = {
 
 type PortfolioResponse = { portfolio: PortfolioDocument };
 
+const PORTFOLIO_CREATION_TIMEOUT_MS = 30_000;
+const portfolioCreationRequests = new Map<string, Promise<PortfolioDocument>>();
+
+function createRequestId() {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<T>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error("생성 요청 시간이 초과되었어요.")), timeoutMs);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+  });
+}
+
 export const createPortfolio = (body: CreatePortfolioRequest) => {
   const { attachments = [], ...fields } = body;
   const formData = new FormData();
@@ -43,6 +61,31 @@ export const createPortfolio = (body: CreatePortfolioRequest) => {
     auth: true,
     body: formData,
   }).then(({ portfolio }) => portfolio);
+};
+
+export const startPortfolioCreation = (body: CreatePortfolioRequest) => {
+  return savePortfolioCreation(withTimeout(createPortfolio(body), PORTFOLIO_CREATION_TIMEOUT_MS));
+};
+
+export const startPortfolioCreationTask = (task: () => Promise<PortfolioDocument | undefined>) => {
+  return savePortfolioCreation(withTimeout(Promise.resolve().then(task), PORTFOLIO_CREATION_TIMEOUT_MS));
+};
+
+function savePortfolioCreation(promise: Promise<PortfolioDocument | undefined>) {
+  const requestId = createRequestId();
+  // Keep the original rejected promise available for LoadingPage without causing
+  // an unhandled rejection while the route transition is in progress.
+  void promise.catch(() => undefined);
+  portfolioCreationRequests.set(requestId, promise as Promise<PortfolioDocument>);
+  return requestId;
+}
+
+export const getPortfolioCreation = (requestId: string) => {
+  const request = portfolioCreationRequests.get(requestId);
+  if (!request) return Promise.reject(new Error("생성 요청을 찾을 수 없어요."));
+
+  void request.finally(() => portfolioCreationRequests.delete(requestId)).catch(() => undefined);
+  return request;
 };
 
 export const getPortfolios = () =>

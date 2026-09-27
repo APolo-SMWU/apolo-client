@@ -6,7 +6,7 @@ import CTAButton from "@/components/common/CTAButton";
 import PlusIcon from "@/assets/Plus.svg?react";
 import XIcon from "@/assets/X.svg?react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createPortfolio } from "@/api/portfolio";
+import { startPortfolioCreation, startPortfolioCreationTask } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { buildCreateCardRequest, type CreateCardRequest, type CreateTheme } from "./createForm";
 
@@ -24,7 +24,7 @@ const MAX_ATTACHMENTS = 5;
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
 type CreatePageProps = {
-  onCreate?: (request: CreateCardRequest) => void | Promise<void>;
+  onCreate?: (request: CreateCardRequest) => void | Promise<PortfolioDocument | undefined>;
 };
 
 function normalizeLink(value: string) {
@@ -115,12 +115,14 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     setIsSubmitting(true);
     setSubmitMessage("");
     try {
-      let document: PortfolioDocument | undefined;
+      let requestId: string;
       if (onCreate) {
-        await onCreate(request);
+        requestId = startPortfolioCreationTask(async () => (
+          await onCreate(request)
+        ) as PortfolioDocument | undefined);
       } else {
         const { designId } = (location.state as { designId?: string } | null) ?? {};
-        document = await createPortfolio({
+        requestId = startPortfolioCreation({
           title: request.title,
           cardDesignId: theme,
           siteDesignId: designId ?? "classic",
@@ -130,7 +132,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
         });
       }
       navigate("/loading", {
-        state: { ...(location.state as object | null), document },
+        state: { ...(location.state as object | null), requestId },
         replace: true,
       });
     } catch {
