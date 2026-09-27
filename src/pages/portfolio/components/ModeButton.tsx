@@ -1,3 +1,5 @@
+import Button from "@/components/common/Button";
+
 type ModeButtonProps = {
   mode: "preview" | "edit";
   onClick?: () => void;
@@ -6,13 +8,12 @@ type ModeButtonProps = {
 
 export default function ModeButton({ mode, onClick, disabled }: ModeButtonProps) {
   return (
-    <button
-      type="button"
+    <Button
       onClick={onClick}
       disabled={disabled}
-      className="flex h-10 w-20 items-center justify-center rounded-full border-2 border-primary bg-focus text-title-02 font-bold text-primary disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-20"
     >
       {mode === "edit" ? "SAVE" : "EDIT"}
-    </button>
+    </Button>
   )
 }

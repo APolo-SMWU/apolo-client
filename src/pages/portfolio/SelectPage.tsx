@@ -1,5 +1,4 @@
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import PersonalCard,  { type PersonalCardProps } from "../home/components/PersonalCard";
 import UncheckedIcon from '@/assets/Unchecked.svg?react';
 import CheckedIcon from '@/assets/Checked.svg?react';
@@ -66,7 +65,6 @@ export default function SelectPage() {
           선택 완료
         </CTAButton>
       </main>
-      <Footer />
     </div>
   )
 }

@@ -60,16 +60,7 @@ export default function PreviewPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
-      <main className={`relative flex min-h-0 flex-1 flex-col overflow-hidden text-focus ${side === "front" ? "bg-apolo px-6 py-8" : "bg-white p-0"}`}>
-        {!shareId && <div className="fixed inset-x-0 top-24 z-20 flex justify-center">
-          <UpdateButton onClick={() => void handleUpdateContent()} disabled={isUpdating || typeof document.id !== "number"} />
-        </div>}
-        {!shareId && <div className="fixed right-6 top-24 z-20">
-          <ModeButton
-            mode="preview"
-            onClick={() => navigate("/editor", { state: { document, side } })}
-          />
-        </div>}
+      <main className={`relative flex min-h-0 flex-1 flex-col overflow-auto text-focus ${side === "front" ? "bg-apolo px-6 pt-8 pb-0" : "bg-white p-0"}`}>
         {side === "front" ? 
           <div className="flex flex-1 items-center justify-center">
             <PersonalCard 
@@ -84,7 +75,7 @@ export default function PreviewPage() {
             /> 
           </div> 
         : 
-          <div className="flex min-h-0 w-full flex-1 flex-col overflow-auto bg-white text-ink">
+          <div className="flex w-full flex-1 flex-col bg-white text-ink">
             <header className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01">
               <strong>{document.profile.name}</strong>
               <nav className="flex gap-8" aria-label="Website navigation">
@@ -103,19 +94,28 @@ export default function PreviewPage() {
                     id={block.type}
                     key={block.id}
                   >
-                    <BlockRenderer block={block} />
+                    <BlockRenderer block={block} themeId={document.cardDesignId} />
                   </div>
                 )}
               </div>
             </div>
           </div>}
-        <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
-          <CardSideNavigation side={side} onSideChange={setSide} />
+        <div className="relative sticky bottom-0 z-10 mx-auto flex w-full max-w-[1200px] items-center justify-center bg-transparent px-4 py-2">
+          {shareMessage && <p role="status" className="absolute bottom-full left-1/2 z-10 mb-3 -translate-x-1/2 rounded-full bg-focus px-3 py-2 text-center text-caption-01 text-primary">{shareMessage}</p>}
+          <div className="flex items-center justify-center gap-4">
+            <CardSideNavigation side={side} onSideChange={setSide} />
+            {!shareId && (
+              <>
+                <UpdateButton onClick={() => void handleUpdateContent()} disabled={isUpdating || typeof document.id !== "number"} />
+                <ModeButton
+                  mode="preview"
+                  onClick={() => navigate("/editor", { state: { document, side } })}
+                />
+                <ShareButton onClick={() => void handleShare()} />
+              </>
+            )}
+          </div>
         </div>
-        {!shareId && <div className="fixed bottom-8 right-6 z-20">
-          <ShareButton onClick={() => void handleShare()} />
-        </div>}
-        {shareMessage && <p role="status" className="fixed bottom-8 right-20 z-20 rounded-full bg-focus px-3 py-2 text-caption-01 text-primary">{shareMessage}</p>}
       </main>
     </div>
   )
