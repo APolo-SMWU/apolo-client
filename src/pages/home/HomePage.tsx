@@ -32,6 +32,7 @@ export default function HomePage() {
   const [titleDraft, setTitleDraft] = useState("");
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [titleError, setTitleError] = useState("");
+  const canCopyShareLink = shareLink.startsWith("http");
 
   useEffect(() => {
     let cancelled = false;
@@ -224,18 +225,22 @@ export default function HomePage() {
                   <button
                     type="button"
                     aria-label={isCopied ? "링크 복사됨" : "링크 복사"}
+                    disabled={!canCopyShareLink}
                     onClick={async () => {
-                      if (!shareLink) return;
+                      if (!canCopyShareLink) return;
                       await navigator.clipboard.writeText(shareLink);
                       setIsCopied(true);
                       setTimeout(() => setIsCopied(false), 1500);
                     }}
-                    className="flex h-8 shrink-0 items-center justify-center rounded-md bg-transparent px-2 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+                    className="flex h-8 shrink-0 items-center justify-center rounded-md bg-transparent px-2 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default disabled:opacity-40 disabled:hover:text-ink"
                   >
                     <LinkIcon className="size-5" />
                   </button>
                 </div>
-                <ShareQrCode value={shareLink.startsWith("http") ? shareLink : ""} />
+                <ShareQrCode
+                  value={shareLink.startsWith("http") ? shareLink : ""}
+                  title={portfolios.find(({ id }) => id === activeModal.portfolioId)?.title ?? "online-card"}
+                />
               </div>
             </Modal>
           ) : null}

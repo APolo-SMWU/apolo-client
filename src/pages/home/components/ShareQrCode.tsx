@@ -4,9 +4,10 @@ import Button from "@/components/common/Button";
 
 type ShareQrCodeProps = {
   value: string;
+  title: string;
 };
 
-export default function ShareQrCode({ value }: ShareQrCodeProps) {
+export default function ShareQrCode({ value, title }: ShareQrCodeProps) {
   const [qrCode, setQrCode] = useState<{ value: string; dataUrl: string } | null>(null);
 
   useEffect(() => {
@@ -40,7 +41,14 @@ export default function ShareQrCode({ value }: ShareQrCodeProps) {
 
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = "online-card-qr.png";
+    const safeTitle = [...title.trim()]
+      .filter((character) => {
+        const code = character.charCodeAt(0);
+        return code >= 0x20 && code !== 0x7f;
+      })
+      .join("")
+      .replace(/[<>:"/\\|?*]/g, "-") || "online-card";
+    link.download = `${safeTitle}-QR.PNG`;
     link.click();
   }
 
