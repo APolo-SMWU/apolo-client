@@ -64,7 +64,10 @@ export const createPortfolio = (body: CreatePortfolioRequest) => {
 };
 
 export const startPortfolioCreation = (body: CreatePortfolioRequest) => {
-  return savePortfolioCreation(withTimeout(createPortfolio(body), PORTFOLIO_CREATION_TIMEOUT_MS));
+  return savePortfolioCreation(withTimeout(
+    Promise.resolve().then(() => createPortfolio(body)),
+    PORTFOLIO_CREATION_TIMEOUT_MS,
+  ));
 };
 
 export const startPortfolioCreationTask = (task: () => Promise<PortfolioDocument | undefined>) => {
