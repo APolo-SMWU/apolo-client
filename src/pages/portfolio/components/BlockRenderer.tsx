@@ -1,19 +1,24 @@
 import type { ReactNode } from "react";
 import type { ContentBlock } from "@/types/portfolio";
+import { getPortfolioThemeColors } from "./portfolioTheme";
 
 function Section({
   title,
   children,
+  themeId,
   titleClassName = "text-title-01",
 }: {
   title: string;
   children: ReactNode;
+  themeId: string;
   titleClassName?: string;
 }) {
+  const themeColors = getPortfolioThemeColors(themeId);
+
   return (
     <section className="flex w-full flex-col gap-2 px-4 py-4 text-ink">
       <h2 className={`font-bold ${titleClassName}`}>{title}</h2>
-      <div className="border-b border-placeholder" />
+      <div className="border-b" style={{ borderColor: themeColors.text }} />
       <div>{children}</div>
     </section>
   );
@@ -56,15 +61,22 @@ function TimelineContent({ block }: { block: Extract<ContentBlock, { type: "educ
 
 function WorksContent({
   block,
+  themeId,
 }: {
   block: Extract<ContentBlock, { type: "works" }>;
+  themeId: string;
 }) {
+  const themeColors = getPortfolioThemeColors(themeId);
+
   return (
     <div className="flex flex-col gap-3">
       {block.items.map((item) => (
         <article key={item.id} className="flex gap-4 px-4">
           {item.imageUrl && (
-            <div className="size-[145px] shrink-0 overflow-hidden rounded-md border border-placeholder bg-focus">
+            <div
+              className="size-[145px] shrink-0 overflow-hidden rounded-md border bg-focus"
+              style={{ borderColor: themeColors.text }}
+            >
               <img className="size-full object-cover" src={item.imageUrl} alt="" />
             </div>
           )}
@@ -78,7 +90,8 @@ function WorksContent({
                 {item.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="rounded-sm bg-focus px-2 py-1 text-caption-01 text-primary"
+                    className="rounded-sm px-2 py-1 text-caption-01"
+                    style={{ backgroundColor: themeColors.background, color: themeColors.text }}
                   >
                     {skill}
                   </span>
@@ -91,7 +104,8 @@ function WorksContent({
                 {item.links.filter((link) => link.href).map((link) => (
                 <a
                   key={link.href}
-                  className="text-body-02 font-semibold text-primary"
+                  className="inline-flex rounded-sm px-2 py-1 text-caption-01 font-semibold"
+                  style={{ backgroundColor: themeColors.background, color: themeColors.text }}
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
@@ -108,7 +122,9 @@ function WorksContent({
   );
 }
 
-function SkillsContent({ block }: { block: Extract<ContentBlock, { type: "skills" }> }) {
+function SkillsContent({ block, themeId }: { block: Extract<ContentBlock, { type: "skills" }>; themeId: string }) {
+  const themeColors = getPortfolioThemeColors(themeId);
+
   return (
     <div className="flex flex-col gap-3">
       {block.categories.map((category) => (
@@ -121,7 +137,8 @@ function SkillsContent({ block }: { block: Extract<ContentBlock, { type: "skills
             {category.items.map((item) => (
               <span
                 key={item}
-                className="rounded-sm bg-focus px-2 py-1 text-caption-01 text-primary"
+                className="rounded-sm px-2 py-1 text-caption-01"
+                style={{ backgroundColor: themeColors.background, color: themeColors.text }}
               >
                 {item}
               </span>
@@ -135,15 +152,17 @@ function SkillsContent({ block }: { block: Extract<ContentBlock, { type: "skills
 
 export default function BlockRenderer({
   block,
+  themeId,
 }: {
   block: ContentBlock;
+  themeId: string;
 }) {
   if (!block.visible) return null;
 
   switch (block.type) {
     case "about":
       return (
-        <Section title="About">
+        <Section title="About" themeId={themeId}>
           <AboutContent block={block} />
         </Section>
       );
@@ -153,20 +172,20 @@ export default function BlockRenderer({
     case "awards":
     case "certification":
       return (
-        <Section title={block.type[0].toUpperCase() + block.type.slice(1)}>
+        <Section title={block.type[0].toUpperCase() + block.type.slice(1)} themeId={themeId}>
           <TimelineContent block={block} />
         </Section>
       );
     case "works":
       return (
-        <Section title="Projects">
-          <WorksContent block={block} />
+        <Section title="Projects" themeId={themeId}>
+          <WorksContent block={block} themeId={themeId} />
         </Section>
       );
     case "skills":
       return (
-        <Section title="Skills">
-          <SkillsContent block={block} />
+        <Section title="Skills" themeId={themeId}>
+          <SkillsContent block={block} themeId={themeId} />
         </Section>
       );
   }

@@ -6,7 +6,7 @@ export const mockPortfolio: PortfolioDocument = {
   id: "mock-portfolio",
   title: "Mock portfolio",
   userType: "professional",
-  cardDesignId: "blue",
+  cardDesignId: "mono",
   siteDesignId: "classic",
   card: {
     name: "DA-IN PARK",
