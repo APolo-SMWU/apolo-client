@@ -30,6 +30,7 @@ import type { ComponentType, InputHTMLAttributes, SVGProps } from "react";
 import { updatePortfolio, uploadPortfolioAvatar } from "@/api/portfolio";
 import { buildPortfolioUpdateRequest, hasDocumentChanged } from "./editorDocument";
 import { getCardField, getCardJob, getCardName } from "./cardData";
+import { getPortfolioThemeColors } from "./components/portfolioTheme";
 
 const inputClass = "w-full border-0 bg-transparent px-0 py-0 font-[inherit] text-inherit leading-[inherit] tracking-[inherit] caret-primary outline-none";
 const panelClass = "rounded-xl border border-transparent p-3";
@@ -99,6 +100,7 @@ function EditableProfile({
   onFieldReorder,
   onAvatarChange,
   isUploadingAvatar,
+  themeId,
 }: {
   document: PortfolioDocument;
   isSelected: boolean;
@@ -110,10 +112,12 @@ function EditableProfile({
   onFieldReorder: (sourceKind: ProfileFieldKind, targetKind: ProfileFieldKind) => void;
   onAvatarChange: (file: File) => void;
   isUploadingAvatar: boolean;
+  themeId: string;
 }) {
   const [isFieldMenuOpen, setIsFieldMenuOpen] = useState(false);
   const [draggedFieldKind, setDraggedFieldKind] = useState<ProfileFieldKind | null>(null);
   const [dragOverFieldKind, setDragOverFieldKind] = useState<ProfileFieldKind | null>(null);
+  const themeColors = getPortfolioThemeColors(themeId);
   const usedKinds = new Set(document.profile.fields.map((field) => field.kind));
   const visibleFields = document.profile.fields.filter((field) =>
     isProfileFieldVisible(field.kind, document.userType) && (document.userType !== "student" || field.kind !== "tel"),
@@ -124,7 +128,8 @@ function EditableProfile({
 
   return (
     <aside
-      className={`relative flex w-full shrink-0 flex-col gap-4 rounded-xl border p-3 md:w-[30%] md:min-w-[286px] md:max-w-[320px] ${isSelected ? "border-primary bg-focus" : "border-transparent bg-white"}`}
+      className={`relative flex w-full shrink-0 flex-col gap-4 rounded-xl border p-3 md:w-[30%] md:min-w-[286px] md:max-w-[320px] ${isSelected ? "" : "border-transparent bg-white"}`}
+      style={isSelected ? { borderColor: themeColors.text, backgroundColor: themeColors.background } : undefined}
       onClick={(event) => {
         event.stopPropagation();
         onSelect();
@@ -268,11 +273,14 @@ function EditableAbout({ block, onChange }: { block: Extract<ContentBlock, { typ
 function EditableSkillTags({
   skills,
   onChange,
+  themeId,
 }: {
   skills: string[];
   onChange: (skills: string[]) => void;
+  themeId: string;
 }) {
   const [inputValue, setInputValue] = useState("");
+  const themeColors = getPortfolioThemeColors(themeId);
 
   function addSkill() {
     const skill = inputValue.trim();
@@ -294,7 +302,8 @@ function EditableSkillTags({
         <button
           key={skill}
           type="button"
-          className="rounded-sm bg-focus px-2 py-1 text-caption-01 text-primary"
+          className="rounded-sm px-2 py-1 text-caption-01"
+          style={{ backgroundColor: themeColors.background, color: themeColors.text }}
           onClick={() => onChange(skills.filter((item) => item !== skill))}
         >
           {skill}
@@ -438,6 +447,7 @@ function EditableWorks({
   onChange,
   onRemove,
   onReorder,
+  themeId,
 }: {
   block: Extract<ContentBlock, { type: "works" }>;
   isBlockSelected: boolean;
@@ -445,10 +455,12 @@ function EditableWorks({
   onChange: (index: number, key: "title" | "role" | "skills" | "description" | "link", value: string, linkIndex?: number) => void;
   onRemove: (index: number) => void;
   onReorder: (sourceId: string, targetId: string) => void;
+  themeId: string;
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+  const themeColors = getPortfolioThemeColors(themeId);
 
   return (
     <div className="flex flex-col gap-3">
@@ -496,7 +508,10 @@ function EditableWorks({
           >
             <GripVertical className="size-5" aria-hidden="true" />
           </span>
-          <div className="size-[145px] shrink-0 overflow-hidden rounded-md border border-placeholder bg-focus">
+          <div
+            className="size-[145px] shrink-0 overflow-hidden rounded-md border bg-focus"
+            style={{ borderColor: themeColors.text }}
+          >
             {item.imageUrl && <img className="size-full object-cover" src={item.imageUrl} alt="" />}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -515,6 +530,7 @@ function EditableWorks({
             <EditableSkillTags
               skills={item.skills ?? []}
               onChange={(skills) => onChange(index, "skills", JSON.stringify(skills))}
+              themeId={themeId}
             />
             <input
               className={inputClass}
@@ -526,8 +542,13 @@ function EditableWorks({
               const link = item.links[linkIndex];
 
               return (
-              <label key={label} className="flex items-center gap-3 text-body-02 font-semibold text-primary">
-                <span className="w-14 shrink-0">[{label}]</span>
+              <label key={label} className="flex items-center gap-3 text-body-02 font-semibold">
+                <span
+                  className="inline-flex w-14 shrink-0 justify-center rounded-sm px-2 py-1 text-caption-01"
+                  style={{ backgroundColor: themeColors.background, color: themeColors.text }}
+                >
+                  [{label}]
+                </span>
                 <input
                   className={`${inputClass} font-normal text-ink`}
                   value={link?.href ?? ""}
@@ -671,11 +692,13 @@ function BlockEditor({
   isSelected,
   onSelect,
   onChange,
+  themeId,
 }: {
   block: ContentBlock;
   isSelected: boolean;
   onSelect: () => void;
   onChange: (block: ContentBlock) => void;
+  themeId: string;
 }) {
   const titleMap: Record<ContentBlock["type"], string> = {
     about: "About",
@@ -688,6 +711,7 @@ function BlockEditor({
     skills: "Skills",
   };
   const title = titleMap[block.type];
+  const themeColors = getPortfolioThemeColors(themeId);
 
   function addTimelineItem() {
     if (!("items" in block)) return;
@@ -727,7 +751,8 @@ function BlockEditor({
 
   return (
     <section
-      className={`${panelClass} ${isSelected ? "border-primary bg-focus" : "bg-white"}`}
+      className={`${panelClass} ${isSelected ? "" : "bg-white"}`}
+      style={isSelected ? { borderColor: themeColors.text, backgroundColor: themeColors.background } : undefined}
       onClick={(event) => {
         event.stopPropagation();
         onSelect();
@@ -737,7 +762,7 @@ function BlockEditor({
         onSelect();
       }}
     >
-      <div className="flex items-center justify-between border-b border-placeholder pb-3">
+      <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: themeColors.text }}>
         <h2 className="text-title-01 font-bold">{title}</h2>
         {block.type !== "about" && (
           <button
@@ -792,6 +817,7 @@ function BlockEditor({
             block={block}
             isBlockSelected={isSelected}
             onBlockSelect={onSelect}
+            themeId={themeId}
             onChange={(index, key, value, linkIndex) =>
               onChange({
                 ...block,
@@ -1146,18 +1172,10 @@ export default function EditorPage() {
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
       <main
-        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden text-ink ${side === "front" ? "bg-apolo px-6 py-8" : "bg-white"}`}
+        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden text-ink ${side === "front" ? "bg-apolo px-6 pt-8 pb-0" : "bg-white"}`}
         onClick={() => setSelectedBlockId(null)}
       >
-        <div className="fixed right-6 top-24 z-20">
-          <ModeButton
-            mode="edit"
-            onClick={() => void saveDocument()}
-            disabled={isSaving}
-          />
-        </div>
-        {saveError && <p role="alert" className="fixed right-6 top-36 z-20 rounded-full bg-danger/10 px-4 py-2 text-caption-01 text-danger">{saveError}</p>}
-        <div className={`flex min-h-0 flex-1 flex-col overflow-auto ${side === "back" ? "p-4 pb-24" : ""}`}>
+        <div className={`flex min-h-0 flex-1 flex-col overflow-auto ${side === "back" ? "p-4" : ""}`}>
           {side === "front" ? (
             <div className="flex flex-1 items-center justify-center">
               <div
@@ -1202,6 +1220,7 @@ export default function EditorPage() {
                     onFieldReorder={reorderField}
                     onAvatarChange={(file) => void handleAvatarChange(file)}
                     isUploadingAvatar={isUploadingAvatar}
+                    themeId={draftDocument.cardDesignId}
                   />
                 ) : (
                   <ProfileBlock profile={draftDocument.profile} userType={draftDocument.userType} />
@@ -1234,18 +1253,27 @@ export default function EditorPage() {
                         isSelected
                         onSelect={() => setSelectedBlockId(block.id)}
                         onChange={updateBlock}
+                        themeId={draftDocument.cardDesignId}
                       />
                     ) : (
-                      <BlockRenderer block={block} />
+                      <BlockRenderer block={block} themeId={draftDocument.cardDesignId} />
                     )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-        </div>
-        <div className="fixed bottom-8 left-1/2 z-20 -translate-x-1/2">
-          <CardSideNavigation side={side} onSideChange={setSide} />
+          <div className="relative sticky bottom-0 z-10 flex items-center justify-center bg-transparent py-2">
+            {saveError && <p role="alert" className="absolute bottom-full z-10 mb-3 rounded-full bg-danger/10 px-4 py-2 text-center text-caption-01 text-danger">{saveError}</p>}
+            <div className="flex items-center justify-center gap-4">
+              <CardSideNavigation side={side} onSideChange={setSide} />
+              <ModeButton
+                mode="edit"
+                onClick={() => void saveDocument()}
+                disabled={isSaving}
+              />
+            </div>
+          </div>
         </div>
       </main>
       {blocker.state === "blocked" && (

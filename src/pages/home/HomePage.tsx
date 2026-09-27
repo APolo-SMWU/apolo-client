@@ -211,23 +211,25 @@ export default function HomePage() {
               title="이 명함을 공유하시겠습니까?"
               description="링크나 QR 코드로 명함을 공유할 수 있습니다."
             >
-              {/* 링크 복사 입력창, QR 코드 */}
-              <div className="flex flex-col w-full gap-4 items-center justify-center">
-                <div 
-                  className={`flex w-full h-10 items-center justify-between px-4 rounded-ml border border-primary ${
-                    isCopied ? "bg-focus" : "bg-white"
-                  }`}
-                >
-                  <p className="break-all text-body-02 font-semibold text-ink">{shareLink || "공유 링크를 생성하는 중…"}</p>
+              <div className="flex w-full flex-col items-center justify-center gap-4">
+                <div className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-ml border border-primary px-3 ${isCopied ? "bg-focus" : "bg-white"}`}>
+                  <p
+                    className="min-w-0 flex-1 truncate text-caption-01 text-ink"
+                    title={shareLink || undefined}
+                    aria-live="polite"
+                  >
+                    {shareLink || "공유 링크를 생성하는 중…"}
+                  </p>
                   <button
                     type="button"
-                    aria-label="링크 복사"
+                    aria-label={isCopied ? "링크 복사됨" : "링크 복사"}
                     onClick={async () => {
                       if (!shareLink) return;
                       await navigator.clipboard.writeText(shareLink);
                       setIsCopied(true);
                       setTimeout(() => setIsCopied(false), 1500);
                     }}
+                    className="flex h-8 shrink-0 items-center justify-center rounded-md bg-transparent px-2 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
                   >
                     <LinkIcon className="size-5" />
                   </button>

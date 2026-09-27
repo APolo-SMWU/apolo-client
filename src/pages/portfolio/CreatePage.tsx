@@ -15,7 +15,7 @@ const themes = [
   { id: "mono", label: "모노", colors: ["#FFFFFF", "#ECEEEF", "#222222", "#888888", "#111111"] },
   { id: "orange", label: "오렌지", colors: ["#F8F4EF", "#FFF0CC", "#FFAD20", "#827563", "#111111"] },
   { id: "purple", label: "퍼플", colors: ["#F5F1FA", "#F1DCFF", "#A020F0", "#796484", "#111111"] },
-  { id: "green", label: "그린", colors: ["#F4F7EF", "#F0FFDD", "#80DB37", "#768063", "#111111"] },
+  { id: "green", label: "그린", colors: ["#F4F7EF", "#F0FFDD", "#65B82B", "#768063", "#111111"] },
 ] as const;
 
 type Theme = CreateTheme;
