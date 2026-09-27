@@ -12,6 +12,7 @@ import { deletePortfolio, getPortfolio, getPortfolios, sharePortfolio, updatePor
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getCardField, getCardJob, getCardName } from "@/pages/portfolio/cardData";
 import { normalizePortfolioTitle } from "./homeTitle";
+import ShareQrCode from "./components/ShareQrCode";
 
 type ActiveModal = {
   type: "delete" | "share";
@@ -234,6 +235,7 @@ export default function HomePage() {
                     <LinkIcon className="size-5" />
                   </button>
                 </div>
+                <ShareQrCode value={shareLink.startsWith("http") ? shareLink : ""} />
               </div>
             </Modal>
           ) : null}
