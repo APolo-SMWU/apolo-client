@@ -8,9 +8,10 @@ import CardPreview from "./components/CardPreview";
 import PersonalCard, { type PersonalCardProps } from "./components/PersonalCard";
 import Modal from "@/components/common/Modal";
 import LinkIcon from "@/assets/Link.svg?react";
-import { deletePortfolio, getPortfolio, getPortfolios, sharePortfolio } from "@/api/portfolio";
+import { deletePortfolio, getPortfolio, getPortfolios, sharePortfolio, updatePortfolio } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getCardField, getCardJob, getCardName } from "@/pages/portfolio/cardData";
+import { normalizePortfolioTitle } from "./homeTitle";
 
 type ActiveModal = {
   type: "delete" | "share";
@@ -27,6 +28,9 @@ export default function HomePage() {
   const [portfolios, setPortfolios] = useState<PortfolioDocument[]>([]);
   const [shareLink, setShareLink] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [titleDraft, setTitleDraft] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +75,29 @@ export default function HomePage() {
     }
   }
 
+  async function handleTitleUpdate() {
+    if (isSavingTitle || activeModal?.type !== "edit") return;
+    const title = normalizePortfolioTitle(titleDraft);
+    if (!title) {
+      setTitleError("제목을 입력해주세요.");
+      return;
+    }
+
+    setIsSavingTitle(true);
+    setTitleError("");
+    try {
+      const savedDocument = await updatePortfolio(activeModal.document.id, { title });
+      setPortfolios((current) => current.map((document) => (
+        document.id === savedDocument.id ? savedDocument : document
+      )));
+      setActiveModal(null);
+    } catch {
+      setTitleError("제목을 수정하지 못했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsSavingTitle(false);
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
@@ -112,7 +139,11 @@ export default function HomePage() {
                 key={document.id}
                 title={document.title}
                 onOpen={() => navigate("/preview", { state: { document } })}
-                onEdit={() => setActiveModal({ type: "edit", document })}
+                onEdit={() => {
+                  setTitleDraft(document.title);
+                  setTitleError("");
+                  setActiveModal({ type: "edit", document });
+                }}
                 onDelete={() => setActiveModal({ type: "delete", portfolioId: document.id })}
                 onShare={() => void handleShare(document.id)}
               >
@@ -133,14 +164,34 @@ export default function HomePage() {
         >
           {activeModal.type === "edit" ? (
             <Modal
-              title="명함을 수정하시겠습니까?"
-              description="에디터 페이지로 이동합니다."
+              title="명함 제목 수정"
+              description="명함에 표시할 제목을 입력해주세요."
               onCancel={() => setActiveModal(null)}
-              onConfirm={() => {
-                navigate("/editor", { state: { document: activeModal.document } });
-                setActiveModal(null);
-              }}
-            />
+              onConfirm={() => void handleTitleUpdate()}
+            >
+              <div className="flex w-full flex-col gap-2">
+                <label htmlFor="portfolio-title" className="text-body-02 text-ink">title</label>
+                <input
+                  id="portfolio-title"
+                  type="text"
+                  value={titleDraft}
+                  onChange={(event) => {
+                    setTitleDraft(event.target.value);
+                    setTitleError("");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleTitleUpdate();
+                    }
+                  }}
+                  disabled={isSavingTitle}
+                  className="min-h-11 w-full rounded-ml border border-placeholder bg-transparent px-4 text-body-02 outline-none focus:border-primary"
+                />
+                {titleError ? <p role="alert" className="text-caption-01 text-danger">{titleError}</p> : null}
+                {isSavingTitle ? <p role="status" className="text-caption-01 text-placeholder">저장 중…</p> : null}
+              </div>
+            </Modal>
           ) : activeModal.type === "delete" ? (
             <Modal
               title="이 명함을 삭제하시겠습니까?"

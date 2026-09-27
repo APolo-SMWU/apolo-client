@@ -37,6 +37,7 @@ export type AboutBlock = BaseBlock & {
 
 export type TimelineItem = {
   id: string;
+  entityId?: string;
   startDate: string;
   endDate?: string;
   organization: string;
@@ -52,6 +53,7 @@ export type TimelineBlock = BaseBlock & {
 
 export type WorkItem = {
   id: string;
+  entityId?: string;
   kind: "project" | "publication" | "opensource";
   title: string;
   role?: string;
