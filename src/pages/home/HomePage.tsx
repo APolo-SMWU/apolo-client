@@ -237,7 +237,10 @@ export default function HomePage() {
                     <LinkIcon className="size-5" />
                   </button>
                 </div>
-                <ShareQrCode value={shareLink.startsWith("http") ? shareLink : ""} />
+                <ShareQrCode
+                  value={shareLink.startsWith("http") ? shareLink : ""}
+                  title={portfolios.find(({ id }) => id === activeModal.portfolioId)?.title ?? "online-card"}
+                />
               </div>
             </Modal>
           ) : null}
