@@ -9,6 +9,7 @@ export type PersonalCardProps = {
   email: string;
   /** 회사명 또는 학교명으로 조회해 저장된 주소 */
   address: string;
+  onGoto?: () => void;
 } & (
   | { role: "Student"; tel?: string }
   | { role: Exclude<Role, "Student">; tel: string }
@@ -22,6 +23,7 @@ export default function PersonalCard({
   phone = '',
   email = '',
   address = '',
+  onGoto,
 }: PersonalCardProps) {
   return (
     <div className="relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col rounded-xl border border-ink bg-white p-5">
@@ -32,7 +34,18 @@ export default function PersonalCard({
           ) : null}
         </div>
         <div className="flex flex-col items-end justify-start gap-2">
-          <GoIcon className="size-4 md:size-5"/>
+          {onGoto ? (
+            <button
+              type="button"
+              className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-ink md:size-5"
+              onClick={onGoto}
+              aria-label="웹사이트 보기"
+            >
+              <GoIcon className="size-full" />
+            </button>
+          ) : (
+            <GoIcon className="size-4 md:size-5" />
+          )}
           <p className="text-caption-01 text-ink leading-[1.2] md:text-body-02">{job}</p>
           <h1 className="text-heading-03 font-semibold leading-none text-ink md:text-display-02">{name}</h1>
         </div>
