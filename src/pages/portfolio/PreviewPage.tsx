@@ -82,6 +82,7 @@ export default function PreviewPage() {
                 phone={getCardField(document, "phone")}
                 email={getCardField(document, "email")}
                 address={document.card.organizationAddress ?? ""}
+                design={document.cardDesignId === "bold" ? "bold" : "default"}
                 onGoto={() => setIsCardFlipping(true)}
               />
             </div>

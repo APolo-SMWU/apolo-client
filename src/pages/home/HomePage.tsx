@@ -62,6 +62,7 @@ export default function HomePage() {
       phone: getCardField(document, "phone"),
       email: getCardField(document, "email"),
       address: document.card.organizationAddress ?? "",
+      design: document.cardDesignId === "bold" ? "bold" : "default",
     } as PersonalCardProps;
   }
 

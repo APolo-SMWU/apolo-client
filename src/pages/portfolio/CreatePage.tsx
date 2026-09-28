@@ -56,6 +56,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
   const [submitMessage, setSubmitMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingLink = normalizeLink(linkInput);
+  const locationState = (location.state as { cardDesignId?: string; siteDesignId?: string } | null) ?? null;
   const isFormComplete = title.trim() !== ""
     && theme !== null
     && (links.length > 0 || pendingLink !== null)
@@ -111,7 +112,14 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     if (isSubmitting || !theme || !title.trim()) return;
     const externalLinks = commitLink();
     if (!externalLinks?.length) return;
-    const request = buildCreateCardRequest(theme, title, externalLinks, requirements.trim(), attachments);
+    const request = buildCreateCardRequest(
+      locationState?.cardDesignId ?? theme,
+      theme,
+      title,
+      externalLinks,
+      requirements.trim(),
+      attachments,
+    );
     setIsSubmitting(true);
     setSubmitMessage("");
     try {
@@ -121,11 +129,10 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
           await onCreate(request)
         ) as PortfolioDocument | undefined);
       } else {
-        const { designId } = (location.state as { designId?: string } | null) ?? {};
         requestId = startPortfolioCreation({
           title: request.title,
-          cardDesignId: theme,
-          siteDesignId: designId ?? "classic",
+          cardDesignId: request.cardDesignId,
+          siteDesignId: locationState?.siteDesignId ?? "classic",
           externalLinks,
           attachments,
           ...(request.requirements ? { requirements: request.requirements } : {}),

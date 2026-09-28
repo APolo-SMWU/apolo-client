@@ -989,6 +989,7 @@ function ProfilePreviewCard({ document }: { document: PortfolioDocument }) {
       phone={getField(document, "phone")}
       email={getField(document, "email")}
       address={document.card.organizationAddress ?? ""}
+      design={document.cardDesignId === "bold" ? "bold" : "default"}
     />
   );
 }
