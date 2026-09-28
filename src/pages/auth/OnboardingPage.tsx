@@ -77,7 +77,7 @@ export default function OnboardingPage() {
       <Header/>
       <main className="relative flex flex-1 items-start justify-center overflow-hidden py-10">
         {/* 배경글씨 */}
-        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-placeholder/65">
           <p className="text-[80px]">SET UP YOUR</p>
           <p className="ml-44 text-[70px]">PROFILE</p>
         </div>
