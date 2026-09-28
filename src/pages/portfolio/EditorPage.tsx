@@ -38,6 +38,9 @@ const projectLinkLabels = ["Link", "GitHub"];
 
 function getField(document: PortfolioDocument, kind: ProfileFieldKind) {
   const profileValue = document.profile.fields.find((field) => field.kind === kind)?.value;
+  if (kind === "tel") {
+    return document.card.tel ?? "";
+  }
   return profileValue || getCardField(document, kind);
 }
 
@@ -1044,6 +1047,13 @@ export default function EditorPage() {
 
   function updateField(kind: ProfileFieldKind, value: string) {
     updateDraft((current) => {
+      if (kind === "tel") {
+        return {
+          ...current,
+          card: { ...current.card, tel: value || null },
+        };
+      }
+
       const existingField = current.profile.fields.find((field) => field.kind === kind);
 
       if (existingField) {
