@@ -10,6 +10,7 @@ import type { PortfolioDocument } from "@/types/portfolio";
 
 type LoadingLocationState = {
   requestId?: string;
+  cardDesignId?: string;
 };
 
 export default function LoadingPage() {
@@ -18,7 +19,8 @@ export default function LoadingPage() {
   const lottieRef = useRef<LottieHandle>(null);
   const directionRef = useRef<"forward" | "reverse">("forward");
   const [error, setError] = useState("");
-  const requestId = (location.state as LoadingLocationState | null)?.requestId;
+  const loadingState = (location.state as LoadingLocationState | null) ?? null;
+  const requestId = loadingState?.requestId;
   const displayError = error || (!requestId ? "생성 요청을 찾을 수 없어요." : "");
 
   useEffect(() => {
@@ -29,7 +31,12 @@ export default function LoadingPage() {
       .then((document) => {
         if (!isCurrent) return;
         navigate("/preview", {
-          state: { document: document as PortfolioDocument },
+          state: {
+            document: {
+              ...(document as PortfolioDocument),
+              ...(loadingState?.cardDesignId ? { cardDesignId: loadingState.cardDesignId } : {}),
+            },
+          },
           replace: true,
         });
       })

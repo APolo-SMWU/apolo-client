@@ -41,7 +41,7 @@ function getHref(field: ProfileField) {
 
 export default function ProfileBlock({ profile, userType }: { profile: ProfileData; userType: ProfileUserType }) {
   return (
-    <section className="flex w-[150px] max-w-[150px] shrink-0 flex-col items-start gap-5 px-0 py-8" aria-label="Profile">
+    <section className="flex w-[200px] max-w-[200px] shrink-0 flex-col items-start gap-5 px-0 py-8" aria-label="Profile">
       <div className="flex size-[150px] items-center justify-center overflow-hidden rounded-full bg-focus text-display-02 font-bold text-primary">
         {profile.avatarUrl ? (
           <img className="size-full object-cover" src={profile.avatarUrl} alt={`${profile.name} 프로필`} />
