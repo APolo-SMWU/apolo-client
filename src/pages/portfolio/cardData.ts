@@ -20,9 +20,9 @@ export function getCardField(document: PortfolioDocument, kind: ProfileFieldKind
 }
 
 export function getCardName(document: PortfolioDocument) {
-  return document.card.name || document.profile.name;
+  return document.profile.name || document.card.name || "";
 }
 
 export function getCardJob(document: PortfolioDocument) {
-  return document.card.headline || document.profile.title;
+  return document.profile.title || document.card.headline || "";
 }

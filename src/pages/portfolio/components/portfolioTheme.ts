@@ -1,4 +1,4 @@
-export type PortfolioThemeId = "blue" | "mono" | "orange" | "purple" | "green";
+export type PortfolioThemeId = "blue" | "mono" | "orange" | "purple" | "green" | "default" | "bold";
 
 type PortfolioThemeColors = {
   background: string;
@@ -11,8 +11,10 @@ const portfolioThemeColors: Record<PortfolioThemeId, PortfolioThemeColors> = {
   orange: { background: "#FFF0CC", text: "#FFAD20" },
   purple: { background: "#F1DCFF", text: "#A020F0" },
   green: { background: "#F0FFDD", text: "#65B82B" },
+  default: { background: "#ECEEEF", text: "#222222" },
+  bold: { background: "#ECEEEF", text: "#222222" },
 };
 
 export function getPortfolioThemeColors(themeId: string): PortfolioThemeColors {
-  return portfolioThemeColors[themeId as PortfolioThemeId];
+  return portfolioThemeColors[themeId as PortfolioThemeId] ?? portfolioThemeColors.default;
 }

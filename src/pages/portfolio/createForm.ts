@@ -2,6 +2,7 @@ export type CreateTheme = "blue" | "mono" | "orange" | "purple" | "green";
 
 export type CreateCardRequest = {
   title: string;
+  cardDesignId: string;
   theme: CreateTheme;
   externalLinks: string[];
   requirements: string;
@@ -9,6 +10,7 @@ export type CreateCardRequest = {
 };
 
 export function buildCreateCardRequest(
+  cardDesignId: string,
   theme: CreateTheme,
   title: string,
   externalLinks: string[],
@@ -17,6 +19,7 @@ export function buildCreateCardRequest(
 ): CreateCardRequest {
   return {
     title: title.trim(),
+    cardDesignId,
     theme,
     externalLinks,
     requirements,
