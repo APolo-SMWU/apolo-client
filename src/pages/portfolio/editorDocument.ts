@@ -38,6 +38,9 @@ export function buildPortfolioUpdateRequest(
   if (originalDocument.card.email !== draftDocument.card.email) {
     card.email = draftDocument.card.email;
   }
+  if (originalDocument.card.tel !== draftDocument.card.tel) {
+    card.tel = draftDocument.card.tel ?? null;
+  }
   if (originalDocument.card.organizationAddress !== draftDocument.card.organizationAddress) {
     card.organizationAddress = draftDocument.card.organizationAddress;
   }

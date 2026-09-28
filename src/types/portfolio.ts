@@ -88,7 +88,7 @@ export type PortfolioDocument = {
     department?: string;
     major?: string;
     headline?: string;
-    tel?: string;
+    tel?: string | null;
     mobile?: string;
     /** Legacy response field; prefer mobile when both are present. */
     phone?: string;
