@@ -72,7 +72,7 @@ function HugInput({
       {...props}
       ref={inputRef}
       value={value}
-      style={{ ...props.style, width }}
+      style={{ ...props.style, width: width ?? "fit-content" }}
     />
   );
 }
@@ -397,12 +397,23 @@ function EditableTimeline({
           >
             <GripVertical className="size-5" aria-hidden="true" />
           </span>
-          <input
-            className={`${inputClass} h-fit w-[220px] self-start`}
-            placeholder="기간을 입력해주세요."
-            value={`${item.startDate}${item.endDate ? ` - ${item.endDate}` : ""}`}
-            onChange={(event) => onChange(index, "startDate", event.target.value)}
-          />
+          <div className="grid w-[220px] grid-cols-[1fr_auto_1fr] items-center gap-2 self-start">
+            <input
+              className={`${inputClass} min-w-0 text-right`}
+              placeholder="YYYY.MM"
+              value={item.startDate}
+              onChange={(event) => onChange(index, "startDate", event.target.value)}
+              aria-label="시작일"
+            />
+            <span className="shrink-0" aria-hidden="true">-</span>
+            <input
+              className={`${inputClass} min-w-0 text-left`}
+              placeholder="YYYY.MM"
+              value={item.endDate ?? ""}
+              onChange={(event) => onChange(index, "endDate", event.target.value)}
+              aria-label="종료일"
+            />
+          </div>
           <div className="flex max-w-[448px] flex-col gap-2">
             <input
               className={`${inputClass} text-title-02 !font-bold`}
@@ -910,7 +921,7 @@ function BlockEditor({
   );
 }
 
-function EditableFrontCard({ document, onProfileChange, onChange }: { document: PortfolioDocument; onProfileChange: (key: "name" | "title", value: string) => void; onChange: (kind: ProfileFieldKind, value: string) => void }) {
+function EditableFrontCard({ document, onProfileChange, onChange, onAddressChange }: { document: PortfolioDocument; onProfileChange: (key: "name" | "title", value: string) => void; onChange: (kind: ProfileFieldKind, value: string) => void; onAddressChange: (value: string) => void }) {
   const role = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
 
   return (
@@ -925,7 +936,7 @@ function EditableFrontCard({ document, onProfileChange, onChange }: { document: 
           <GoIcon className="size-4 md:size-5" aria-hidden="true" />
         <HugInput
           className={`${inputClass} !box-border !h-[1.2em] min-w-25 !rounded-sm !px-0 !py-0 !leading-[1.2] text-caption-01 text-right md:text-body-02`}
-          value={document.profile.title}
+          value={document.profile.title || getCardJob(document)}
           onChange={(event) => onProfileChange("title", event.target.value)}
           aria-label="직함"
         />
@@ -954,9 +965,12 @@ function EditableFrontCard({ document, onProfileChange, onChange }: { document: 
             />
           </label>
         ))}
-        {document.card.organizationAddress && (
-          <p className="text-caption-02 leading-[1.2]">{document.card.organizationAddress}</p>
-        )}
+        <HugInput
+          className={`${inputClass} h-fit min-w-25 !rounded-sm !px-0 !py-0 text-caption-02 leading-[1.2]`}
+          value={document.card.organizationAddress ?? ""}
+          onChange={(event) => onAddressChange(event.target.value)}
+          aria-label="주소"
+        />
       </div>
     </div>
   );
@@ -1018,6 +1032,13 @@ export default function EditorPage() {
 
   function updateProfileValue(key: "name" | "title", value: string) {
     updateDraft((current) => ({ ...current, profile: { ...current.profile, [key]: value } }));
+  }
+
+  function updateAddress(value: string) {
+    updateDraft((current) => ({
+      ...current,
+      card: { ...current.card, organizationAddress: value || null },
+    }));
   }
 
   async function handleAvatarChange(file: File) {
@@ -1199,7 +1220,7 @@ export default function EditorPage() {
                 }}
               >
                 {selectedBlockId === "profile" ? (
-                  <EditableFrontCard document={draftDocument} onProfileChange={updateProfileValue} onChange={updateField} />
+                  <EditableFrontCard document={draftDocument} onProfileChange={updateProfileValue} onChange={updateField} onAddressChange={updateAddress} />
                 ) : (
                   <ProfilePreviewCard document={draftDocument} />
                 )}
