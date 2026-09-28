@@ -107,20 +107,20 @@ export default function HomePage() {
       <main className="relative flex flex-1 flex-col items-start overflow-hidden px-8 md:py-16 py-8 gap-16">
         <div className="flex w-full items-center justify-between">
           <div className="flex flex-col items-start justify-center gap-2">
-            <h1 className="md:text-display-01 text-heading-03 font-bold text-focus leading-none">My Personal Card</h1>
-            <p className="md:text-body-02 text-caption-01 text-[#4DA3FF] leading-none">나의 온라인 명함을 관리할 수 있어요.</p>
+            <h1 className="md:text-display-01 text-heading-03 font-bold text-placeholder leading-none">My Personal Card</h1>
+            <p className="md:text-body-02 text-caption-01 text-primary leading-none">나의 온라인 명함을 관리할 수 있어요.</p>
             <div className="flex items-start justify-center gap-4">
               <div className="flex items-center justify-center gap-1">
                 <div className="w-[10px] h-[10px] rounded-full bg-danger" />
-                <p className="md:text-body-02 text-caption-01 text-surface leading-none">Delete</p>
+                <p className="md:text-body-02 text-caption-01 text-placeholder leading-none">Delete</p>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <div className="w-[10px] h-[10px] rounded-full bg-warn" />
-                <p className="md:text-body-02 text-caption-01 text-surface leading-none">Edit</p>
+                <p className="md:text-body-02 text-caption-01 text-placeholder leading-none">Edit</p>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <div className="w-[10px] h-[10px] rounded-full bg-success" />
-                <p className="md:text-body-02 text-caption-01 text-surface leading-none">Share</p>
+                <p className="md:text-body-02 text-caption-01 text-placeholder leading-none">Share</p>
               </div>
             </div>
           </div>

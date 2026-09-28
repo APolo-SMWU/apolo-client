@@ -38,6 +38,11 @@ export default function SelectPage() {
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
       <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-10">
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-placeholder/65">
+          <p className="text-[80px]">SELECT</p>
+          <p className="ml-44 text-[70px]">CARD DESIGN</p>
+        </div>
+
         <AppWindow className="relative z-10 w-[734px] max-w-full" title="Select">
           <div className="flex w-full flex-col gap-5">
             <div>
