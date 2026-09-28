@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
-import PersonalCard,  { type PersonalCardProps } from "../home/components/PersonalCard";
-import UncheckedIcon from '@/assets/Unchecked.svg?react';
-import CheckedIcon from '@/assets/Checked.svg?react';
+import Footer from "@/components/layout/Footer";
+import AppWindow from "@/components/AppWindow";
+import PersonalCard, { type PersonalCardProps } from "../home/components/PersonalCard";
 import CTAButton from "@/components/common/CTAButton";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -37,34 +37,48 @@ export default function SelectPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
-      <main className="relative flex flex-1 flex-col items-center justify-center gap-16 overflow-hidden px-4 py-10">
-        <h1 className="text-display-01 font-bold text-focus leading-[1.2]">원하는 디자인을 선택해주세요.</h1>
-        <div className="flex w-full max-w-[1040px] flex-wrap items-start justify-center gap-12 lg:gap-24">
-            {designs.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                aria-label={`${option.label} ${selectedDesign === option.id ? "선택됨" : "선택"}`}
-                aria-pressed={selectedDesign === option.id}
-                onClick={() => setSelectedDesign((current) => current === option.id ? null : option.id)}
-                className="flex flex-col items-center gap-6 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-              >
-                <span className={`flex items-center justify-center rounded-lg p-2 ${selectedDesign === option.id ? "bg-primary" : ""}`}>
-                  <PersonalCard
-                    {...sampleProfile}
-                    name={option.design === "bold" ? "A-Polo" : "아폴로"}
-                    design={option.design}
-                  />
-                </span>
-                <span className="text-body-02 font-bold text-focus">{option.label}</span>
-                {selectedDesign === option.id ? <CheckedIcon className="size-10" /> : <UncheckedIcon className="size-10" />}
-              </button>
-            ))}
-        </div>
-        <CTAButton disabled={!selectedDesign} onClick={handleNext}>
-          선택 완료
-        </CTAButton>
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-10">
+        <AppWindow className="relative z-10 w-[734px] max-w-full" title="Select">
+          <div className="flex w-full flex-col gap-5">
+            <div>
+              <h1 className="text-heading-01 font-bold leading-[1.1] text-ink">Select card design</h1>
+              <p className="mt-2 text-body-02 text-placeholder">원하는 명함 디자인을 선택해주세요.</p>
+            </div>
+
+            <div className="flex w-full flex-wrap items-start justify-between gap-4">
+              {designs.map((option) => {
+                const isSelected = selectedDesign === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-label={`${option.label} ${isSelected ? "선택됨" : "선택"}`}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedDesign((current) => current === option.id ? null : option.id)}
+                    className="h-[194px] w-[324px] max-w-full rounded-xl text-left outline-none"
+                  >
+                    <div className="h-[234px] w-[394px] origin-top-left scale-[0.82]">
+                      <PersonalCard
+                        {...sampleProfile}
+                        name={option.design === "bold" ? "A-Polo" : "아폴로"}
+                        design={option.design}
+                        isSelected={isSelected}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex w-full justify-end">
+              <CTAButton disabled={!selectedDesign} onClick={handleNext}>
+                선택하기
+              </CTAButton>
+            </div>
+          </div>
+        </AppWindow>
       </main>
+      <Footer />
     </div>
   )
 }

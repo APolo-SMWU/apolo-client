@@ -14,6 +14,7 @@ export type PersonalCardProps = {
   address: string;
   onGoto?: () => void;
   design?: PersonalCardDesign;
+  isSelected?: boolean;
 } & (
   | { role: "Student"; tel?: string }
   | { role: Exclude<Role, "Student">; tel: string }
@@ -81,9 +82,10 @@ function BoldPersonalCard({
   email = "",
   address = "",
   onGoto,
+  isSelected = false,
 }: PersonalCardProps) {
   return (
-    <div className="relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col rounded-xl border border-ink bg-white p-5 text-ink">
+    <div className={`relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col rounded-xl bg-white p-5 text-ink transition-transform motion-reduce:transition-none ${isSelected ? "scale-[1.02] border-2 border-primary" : "border border-ink"}`}>
       <div className="flex h-[100px] w-full flex-col justify-start gap-1">
         <div className="flex items-start justify-between">
           <p className="text-body-02 leading-[1.2]">{job}</p>
@@ -135,9 +137,10 @@ function DefaultPersonalCard({
   email = '',
   address = '',
   onGoto,
+  isSelected = false,
 }: PersonalCardProps) {
   return (
-    <div className="relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col rounded-xl border border-ink bg-white p-5">
+    <div className={`relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] flex-col rounded-xl bg-white p-5 transition-transform motion-reduce:transition-none ${isSelected ? "scale-[1.02] border-2 border-primary" : "border border-ink"}`}>
       <div className="flex h-[100px] w-full items-start justify-between">
         <div className="flex size-[80px] shrink-0 items-center justify-center overflow-hidden">
           {logoUrl ? (
