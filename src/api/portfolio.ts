@@ -28,7 +28,7 @@ export type UpdatePortfolioRequest = {
 
 type PortfolioResponse = { portfolio: PortfolioDocument };
 
-const PORTFOLIO_CREATION_TIMEOUT_MS = 30_000;
+const PORTFOLIO_CREATION_TIMEOUT_MS = 180_000;
 const portfolioCreationRequests = new Map<string, Promise<PortfolioDocument>>();
 
 function createRequestId() {
