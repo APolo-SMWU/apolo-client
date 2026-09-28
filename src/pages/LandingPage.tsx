@@ -11,7 +11,7 @@ export function LandingPage() {
       <Header/>
       <main className="relative flex flex-1 items-center justify-center overflow-hidden">
         {/* 배경글씨 */}
-        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-placeholder/65">
           <p className="text-[80px]">
             AI PERSONAL
           </p>

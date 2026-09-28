@@ -153,7 +153,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
     <div className="flex min-h-dvh flex-col bg-apolo">
       <Header />
       <main className="relative flex flex-1 items-start justify-center overflow-hidden py-10">
-        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-surface/65">
+        <div className="pointer-events-none absolute left-20 top-10 z-0 select-none leading-none text-placeholder/65">
           <p className="text-[80px]">CREATE</p>
           <p className="ml-44 text-[70px]">ONLINE CARD</p>
         </div>
@@ -238,7 +238,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
                     }
                   }}
                   className="min-w-0 flex-[1_1_180px] bg-transparent text-body-02 outline-none placeholder:text-placeholder"
-                  placeholder={links.length ? "" : "추가적인 링크가 있다면 첨부해주세요."}
+                  placeholder={links.length ? "" : "포트폴리오와 관련된 추가 링크를 첨부해주세요."}
                 />
               </div>
               {linkError && <p id="external-links-error" role="alert" className="text-caption-01 text-danger">{linkError}</p>}
