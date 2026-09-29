@@ -13,6 +13,17 @@ import type { PortfolioDocument } from "@/types/portfolio";
 import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
 import { getCardField, getCardJob, getCardName } from "./cardData";
 
+const blockNavigationLabels: Record<PortfolioDocument["blocks"][number]["type"], string> = {
+  about: "About",
+  education: "Education",
+  experience: "Experiences",
+  activities: "Activities",
+  awards: "Awards",
+  certification: "Certification",
+  works: "Projects",
+  skills: "Skills",
+};
+
 export default function PreviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -92,10 +103,13 @@ export default function PreviewPage() {
             <header className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01">
               <strong>{document.profile.name}</strong>
               <nav className="flex gap-8" aria-label="Website navigation">
-                <a href="#about">About</a>
-                <a href="#experience">Experiences</a>
-                <a href="#works">Projects</a>
-                <a href="#skills">Skills</a>
+                {document.blocks
+                  .filter((block) => block.visible)
+                  .map((block) => (
+                    <a href={`#${block.type}`} key={block.id}>
+                      {blockNavigationLabels[block.type]}
+                    </a>
+                  ))}
                 <a href="#cv">CV</a>
               </nav>
             </header>

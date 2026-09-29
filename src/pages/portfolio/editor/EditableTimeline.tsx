@@ -22,6 +22,14 @@ export function EditableTimeline({
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+  const descriptionPlaceholder =
+    block.type === "education"
+      ? "전공, 학업 내용 또는 주요 경험을 작성해주세요."
+      : block.type === "activities"
+        ? "활동 내용과 주요 역할을 작성해주세요."
+        : block.type === "experience"
+          ? "담당 업무와 주요 성과를 작성해주세요."
+          : "수상 또는 자격 내용을 작성해주세요.";
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,7 +80,7 @@ export function EditableTimeline({
           <div className={`grid w-[220px] items-center gap-2 self-start ${"date" in item ? "grid-cols-1" : "grid-cols-[1fr_auto_1fr]"}`}>
             <input
               className={`${inputClass} min-w-0 text-right`}
-              placeholder="YYYY.MM"
+              placeholder={"date" in item ? "날짜" : "시작일"}
               value={"date" in item ? item.date ?? "" : item.startDate ?? ""}
               onChange={(event) => onChange(index, "date" in item ? "date" : "startDate", event.target.value)}
               aria-label="시작일"
@@ -82,9 +90,12 @@ export function EditableTimeline({
                 <span className="shrink-0" aria-hidden="true">-</span>
                 <input
                   className={`${inputClass} min-w-0 text-left`}
-                  placeholder="YYYY.MM 또는 Present"
+                  placeholder="종료일"
                   value={item.endDate ?? ""}
                   onChange={(event) => onChange(index, "endDate", event.target.value)}
+                  onBlur={() => {
+                    if (!item.endDate?.trim()) onChange(index, "endDate", "Present");
+                  }}
                   aria-label="종료일"
                 />
               </>
@@ -105,7 +116,7 @@ export function EditableTimeline({
             />
             <input
               className={inputClass}
-              placeholder="경험에서 받은 일을 작성해주세요."
+              placeholder={descriptionPlaceholder}
               value={item.description ?? ""}
               onChange={(event) => onChange(index, "description", event.target.value)}
             />

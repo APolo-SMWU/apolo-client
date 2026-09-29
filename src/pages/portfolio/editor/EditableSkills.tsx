@@ -8,14 +8,16 @@ export function EditableSkills({
   block,
   isBlockSelected,
   onBlockSelect,
-  onChange,
+  onCategoryChange,
+  onItemsChange,
   onRemove,
   onReorder,
 }: {
   block: Extract<ContentBlock, { type: "skills" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
-  onChange: (categoryIndex: number, value: string) => void;
+  onCategoryChange: (categoryIndex: number, value: string) => void;
+  onItemsChange: (categoryIndex: number, value: string) => void;
   onRemove: (categoryIndex: number) => void;
   onReorder: (sourceIndex: number, targetIndex: number) => void;
 }) {
@@ -28,7 +30,7 @@ export function EditableSkills({
     <div className="flex flex-col gap-3">
       {block.categories.map((category, index) => (
         <div
-          key={category.category}
+          key={category.id}
           className={`relative grid items-center gap-2 rounded-xl border p-2 pl-10 sm:grid-cols-[130px_1fr] ${
             isBlockSelected && selectedCategoryIndex === index
               ? "border-primary"
@@ -70,9 +72,16 @@ export function EditableSkills({
           >
             <GripVertical className="size-5" aria-hidden="true" />
           </span>
-          <span className="text-body-02">{category.category}</span>
+          <input
+            className={`${inputClass} text-body-02 font-semibold`}
+            placeholder="카테고리명"
+            value={category.category}
+            onChange={(event) => onCategoryChange(index, event.target.value)}
+            aria-label="스킬 카테고리 제목"
+          />
           <input
             className={`${inputClass} self-center`}
+            placeholder="스킬을 쉼표로 구분해 입력해주세요."
             value={draftValues[index] ?? category.items.map((item) => item.name).join(", ")}
             onChange={(event) => {
               const value = event.target.value;
@@ -81,7 +90,7 @@ export function EditableSkills({
                 ...current,
                 [index]: value,
               }));
-              onChange(index, value);
+              onItemsChange(index, value);
             }}
             onBlur={() => {
               setDraftValues((current) => {
