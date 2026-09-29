@@ -94,3 +94,25 @@ export function buildBlocksPayload(blocks: Array<ContentBlock | ContentBlockInpu
     } as ContentBlockInput;
   }) as ContentBlockInput[];
 }
+
+export function resolveSavedWorkItemId(
+  draftDocument: PortfolioDocument,
+  savedDocument: PortfolioDocument,
+  itemId: string,
+) {
+  const draftBlockIndex = draftDocument.blocks.findIndex(
+    (block) => block.type === "works" && block.items.some((item) => item.id === itemId),
+  );
+  const draftBlock = draftDocument.blocks[draftBlockIndex];
+  if (!draftBlock || draftBlock.type !== "works") return itemId;
+
+  const draftItemIndex = draftBlock.items.findIndex((item) => item.id === itemId);
+  if (draftItemIndex < 0 || !itemId.startsWith("client-")) return itemId;
+
+  const savedBlock = draftBlock.id.startsWith("client-")
+    ? savedDocument.blocks[draftBlockIndex]
+    : savedDocument.blocks.find((block) => block.id === draftBlock.id);
+  return savedBlock?.type === "works"
+    ? savedBlock.items[draftItemIndex]?.id ?? itemId
+    : itemId;
+}

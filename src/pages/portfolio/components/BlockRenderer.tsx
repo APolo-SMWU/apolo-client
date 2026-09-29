@@ -100,16 +100,16 @@ function WorksContent({
             {item.links.some((link) => link.href) && (
               <div className="mt-2 flex gap-3">
                 {item.links.filter((link) => link.href).map((link) => (
-                <a
-                  key={link.href}
-                  className="inline-flex rounded-sm px-2 py-1 text-caption-01 font-semibold"
-                  style={{ backgroundColor: themeColors.background, color: themeColors.text }}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  [{link.label}]
-                </a>
+                  <a
+                    key={link.href}
+                    className="inline-flex text-body-02 font-normal"
+                    style={{ color: themeColors.text }}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    [{link.label}]
+                  </a>
                 ))}
               </div>
             )}

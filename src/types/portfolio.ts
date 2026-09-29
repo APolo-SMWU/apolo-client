@@ -32,7 +32,7 @@ export type TimelineItem = TimelineRangeItem | TimelineDateItem;
 export type WorkItem = {
   id: ItemId; entityId?: string; kind: "project" | "publication" | "opensource";
   title: string; role?: string; skills?: string[]; description: string;
-  imageUrl?: string; links: { label: string; href: string }[];
+  imageUrl?: string | null; links: { label: string; href: string }[];
 };
 export type WorksBlock = BaseBlock & { type: "works"; items: WorkItem[] };
 

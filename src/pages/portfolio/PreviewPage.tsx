@@ -1,10 +1,9 @@
 import Header from "@/components/layout/Header";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import PersonalCard from "@/pages/home/components/PersonalCard";
 import ProfileBlock from "@/pages/portfolio/components/ProfileBlock";
 import BlockRenderer from "@/pages/portfolio/components/BlockRenderer";
-import { mockPortfolio } from "@/data/mockPortfolio";
 import CardSideNavigation from "@/pages/portfolio/components/CardSideNavigation";
 import ModeButton from "@/pages/portfolio/components/ModeButton";
 import ShareButton from "@/pages/portfolio/components/ShareButton";
@@ -14,6 +13,7 @@ import Modal from "@/components/common/Modal";
 import LinkIcon from "@/assets/Link.svg?react";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
+import { normalizePortfolioDocument } from "@/api/portfolioMapper";
 import { getCardField, getCardJob, getCardName } from "./cardData";
 
 const blockNavigationLabels: Record<PortfolioDocument["blocks"][number]["type"], string> = {
@@ -28,12 +28,37 @@ const blockNavigationLabels: Record<PortfolioDocument["blocks"][number]["type"],
 };
 
 export default function PreviewPage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { shareId } = useParams();
-  const [side, setSide] = useState<"front" | "back">("front");
-  const locationState = (location.state as { document?: PortfolioDocument; portfolioId?: number | string } | null) ?? null;
-  const [document, setDocument] = useState<PortfolioDocument>(locationState?.document ?? mockPortfolio);
+  const locationState = (location.state as {
+    document?: PortfolioDocument;
+    portfolioId?: number | string;
+    side?: "front" | "back";
+  } | null) ?? null;
+  const hasDocumentSource = Boolean(
+    locationState?.document || locationState?.portfolioId !== undefined || shareId,
+  );
+  if (!hasDocumentSource) return <Navigate to="/home" replace />;
+
+  return <PreviewContent locationState={locationState} shareId={shareId} />;
+}
+
+function PreviewContent({
+  locationState,
+  shareId,
+}: {
+  locationState: {
+    document?: PortfolioDocument;
+    portfolioId?: number | string;
+    side?: "front" | "back";
+  } | null;
+  shareId?: string;
+}) {
+  const navigate = useNavigate();
+  const [side, setSide] = useState<"front" | "back">(locationState?.side ?? "front");
+  const [document, setDocument] = useState<PortfolioDocument | null>(
+    locationState?.document ? normalizePortfolioDocument(locationState.document) : null,
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCardFlipping, setIsCardFlipping] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -52,23 +77,32 @@ export default function PreviewPage() {
     }
   }, [locationState?.document, locationState?.portfolioId, shareId]);
 
+  if (!document) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-white text-body-01 text-placeholder" role="status">
+        불러오는 중...
+      </div>
+    );
+  }
+  const currentDocument = document;
+
   async function handleUpdateContent() {
-    if (typeof document.id !== "number") return;
+    if (typeof currentDocument.id !== "number") return;
     setIsUpdating(true);
     try {
-      setDocument(await updatePortfolioContent(document.id));
+      setDocument(await updatePortfolioContent(currentDocument.id));
     } finally {
       setIsUpdating(false);
     }
   }
 
   async function handleShare() {
-    if (typeof document.id !== "number") return;
+    if (typeof currentDocument.id !== "number") return;
     setIsShareModalOpen(true);
     setShareUrl("");
     setIsCopied(false);
     try {
-      const { shareUrl } = await sharePortfolio(document.id);
+      const { shareUrl } = await sharePortfolio(currentDocument.id);
       await navigator.clipboard.writeText(shareUrl);
       setShareUrl(shareUrl);
     } catch {

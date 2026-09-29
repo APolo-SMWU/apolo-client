@@ -150,6 +150,21 @@ export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) 
   }).then(mapPortfolioResponse);
 };
 
+export const uploadPortfolioWorkImage = (
+  portfolioId: number | string,
+  itemId: string,
+  file: File,
+) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}/works/${itemId}/image`, {
+    method: "POST",
+    auth: true,
+    body: formData,
+  }).then(mapPortfolioResponse);
+};
+
 export type SharePortfolioResponse = {
   shareId: string;
   shareUrl: string;

@@ -14,6 +14,10 @@ export function BlockEditor({
   onSelect,
   onChange,
   onRemove,
+  onImageSelect,
+  onImageDelete,
+  imagePreviews,
+  uploadingItemId,
   themeId,
 }: {
   block: ContentBlock;
@@ -21,6 +25,10 @@ export function BlockEditor({
   onSelect: () => void;
   onChange: (block: ContentBlock) => void;
   onRemove: () => void;
+  onImageSelect: (itemId: string, file: File) => void;
+  onImageDelete: (itemId: string) => void;
+  imagePreviews: Record<string, string>;
+  uploadingItemId: string | null;
   themeId: string;
 }) {
   const titleMap: Record<ContentBlock["type"], string> = {
@@ -188,6 +196,10 @@ export function BlockEditor({
               items.splice(targetIndex, 0, movedItem);
               onChange({ ...block, items });
             }}
+            onImageSelect={onImageSelect}
+            onImageDelete={onImageDelete}
+            imagePreviews={imagePreviews}
+            uploadingItemId={uploadingItemId}
             onRemove={(index) =>
               onChange({
                 ...block,
