@@ -9,6 +9,9 @@ import CardSideNavigation from "@/pages/portfolio/components/CardSideNavigation"
 import ModeButton from "@/pages/portfolio/components/ModeButton";
 import ShareButton from "@/pages/portfolio/components/ShareButton";
 import UpdateButton from "@/pages/portfolio/components/UpdateButton";
+import ShareQrCode from "@/pages/home/components/ShareQrCode";
+import Modal from "@/components/common/Modal";
+import LinkIcon from "@/assets/Link.svg?react";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
 import { getCardField, getCardJob, getCardName } from "./cardData";
@@ -33,7 +36,10 @@ export default function PreviewPage() {
   const [document, setDocument] = useState<PortfolioDocument>(locationState?.document ?? mockPortfolio);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCardFlipping, setIsCardFlipping] = useState(false);
-  const [shareMessage, setShareMessage] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const canCopyShareLink = shareUrl.startsWith("http");
 
   useEffect(() => {
     if (locationState?.document) return;
@@ -58,13 +64,15 @@ export default function PreviewPage() {
 
   async function handleShare() {
     if (typeof document.id !== "number") return;
+    setIsShareModalOpen(true);
+    setShareUrl("");
+    setIsCopied(false);
     try {
       const { shareUrl } = await sharePortfolio(document.id);
       await navigator.clipboard.writeText(shareUrl);
-      setShareMessage("공유 링크를 복사했어요.");
-      window.setTimeout(() => setShareMessage(""), 2000);
+      setShareUrl(shareUrl);
     } catch {
-      setShareMessage("공유 링크를 만들지 못했어요.");
+      setShareUrl("공유 링크를 생성하지 못했어요.");
     }
   }
   const cardRole = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
@@ -118,7 +126,7 @@ export default function PreviewPage() {
               <div className="flex min-w-0 flex-1 flex-col">
                 {document.blocks.map((block) => (
                   <div id={block.type} key={block.id}>
-                    <BlockRenderer block={block} themeId={document.cardDesignId} />
+                    <BlockRenderer block={block} themeId={document.siteDesignId} />
                   </div>
                 ))}
               </div>
@@ -126,7 +134,6 @@ export default function PreviewPage() {
           </div>
         )}
         <div className="relative sticky bottom-0 z-10 mx-auto flex w-full max-w-[1200px] items-center justify-center bg-transparent px-4 py-2">
-          {shareMessage && <p role="status" className="absolute bottom-full left-1/2 z-10 mb-3 -translate-x-1/2 rounded-full bg-focus px-3 py-2 text-center text-caption-01 text-primary">{shareMessage}</p>}
           <div className="flex items-center justify-center gap-4">
             <CardSideNavigation side={side} onSideChange={setSide} />
             {!shareId && (
@@ -142,6 +149,46 @@ export default function PreviewPage() {
           </div>
         </div>
       </main>
+      {isShareModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsShareModalOpen(false);
+          }}
+        >
+          <Modal
+            title="이 명함을 공유하시겠습니까?"
+            description="링크나 QR 코드로 명함을 공유할 수 있습니다."
+          >
+            <div className="flex w-full flex-col items-center justify-center gap-4">
+              <div className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-ml border border-primary px-3 ${isCopied ? "bg-focus" : "bg-white"}`}>
+                <p
+                  className="min-w-0 flex-1 truncate text-caption-01 text-ink"
+                  title={shareUrl || undefined}
+                  aria-live="polite"
+                >
+                  {shareUrl || "공유 링크를 생성하는 중…"}
+                </p>
+                <button
+                  type="button"
+                  aria-label={isCopied ? "링크 복사됨" : "링크 복사"}
+                  disabled={!canCopyShareLink}
+                  onClick={async () => {
+                    if (!canCopyShareLink) return;
+                    await navigator.clipboard.writeText(shareUrl);
+                    setIsCopied(true);
+                    window.setTimeout(() => setIsCopied(false), 1500);
+                  }}
+                  className="flex h-8 shrink-0 items-center justify-center rounded-md bg-transparent px-2 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default disabled:opacity-40 disabled:hover:text-ink"
+                >
+                  <LinkIcon className="size-5" />
+                </button>
+              </div>
+              <ShareQrCode value={canCopyShareLink ? shareUrl : ""} title={document.profile.name || "portfolio"} />
+            </div>
+          </Modal>
+        </div>
+      )}
     </div>
   )
 }

@@ -346,7 +346,7 @@ export default function EditorPage() {
                     onFieldReorder={reorderField}
                     onAvatarChange={(file) => void handleAvatarChange(file)}
                     isUploadingAvatar={isUploadingAvatar}
-                    themeId={draftDocument.cardDesignId}
+                    themeId={draftDocument.siteDesignId}
                   />
                 ) : (
                   <ProfileBlock profile={draftDocument.profile} userType={draftDocument.userType} />
@@ -423,10 +423,10 @@ export default function EditorPage() {
                         onSelect={() => setSelectedBlockId(block.id)}
                         onChange={updateBlock}
                         onRemove={() => removeBlock(block.id)}
-                        themeId={draftDocument.cardDesignId}
+                        themeId={draftDocument.siteDesignId}
                       />
                     ) : (
-                      <BlockRenderer block={block} themeId={draftDocument.cardDesignId} />
+                      <BlockRenderer block={block} themeId={draftDocument.siteDesignId} />
                     )}
                   </div>
                 ))}

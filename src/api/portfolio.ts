@@ -31,7 +31,8 @@ type PortfolioResponse = { portfolio: unknown };
 
 const mapPortfolioResponse = ({ portfolio }: PortfolioResponse) => normalizePortfolioDocument(portfolio);
 
-const PORTFOLIO_CREATION_TIMEOUT_MS = 180_000;
+const PORTFOLIO_CREATION_TIMEOUT_MS = 360_000;
+const PORTFOLIO_CONTENT_UPDATE_TIMEOUT_MS = 360_000;
 const portfolioCreationRequests = new Map<string, Promise<PortfolioDocument>>();
 
 function createRequestId() {
@@ -41,7 +42,7 @@ function createRequestId() {
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
   let timeoutId: number | undefined;
   const timeout = new Promise<T>((_, reject) => {
-    timeoutId = window.setTimeout(() => reject(new Error("생성 요청 시간이 초과되었어요.")), timeoutMs);
+    timeoutId = window.setTimeout(() => reject(new Error("요청 시간이 초과되었어요.")), timeoutMs);
   });
 
   return Promise.race([promise, timeout]).finally(() => {
@@ -130,10 +131,13 @@ export const deletePortfolio = (portfolioId: number | string) =>
 export const updatePortfolioContent = (
   portfolioId: number | string,
 ) =>
-  apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}/update-content`, {
-    method: "POST",
-    auth: true,
-  }).then(mapPortfolioResponse);
+  withTimeout(
+    apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}/update-content`, {
+      method: "POST",
+      auth: true,
+    }).then(mapPortfolioResponse),
+    PORTFOLIO_CONTENT_UPDATE_TIMEOUT_MS,
+  );
 
 export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) => {
   const formData = new FormData();

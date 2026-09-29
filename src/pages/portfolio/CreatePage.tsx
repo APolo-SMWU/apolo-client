@@ -132,7 +132,7 @@ export default function CreatePage({ onCreate }: CreatePageProps) {
         requestId = startPortfolioCreation({
           title: request.title,
           cardDesignId: request.cardDesignId,
-          siteDesignId: locationState?.siteDesignId ?? "classic",
+          siteDesignId: locationState?.siteDesignId ?? theme,
           externalLinks,
           attachments,
           ...(request.requirements ? { requirements: request.requirements } : {}),
