@@ -60,6 +60,7 @@ function normalizeBlock(raw: AnyRecord, index: number): ContentBlock {
   }
 
   if (type === "works") {
+    const projectLinkLabels = ["Link", "GitHub"];
     return {
       ...raw,
       id,
@@ -68,7 +69,10 @@ function normalizeBlock(raw: AnyRecord, index: number): ContentBlock {
       items: (raw.items ?? []).map((item: AnyRecord, itemIndex: number) => ({
         ...item,
         id: itemId(item, `${id}-item-${itemIndex + 1}`),
-        links: item.links ?? [],
+        links: (item.links ?? []).map((link: AnyRecord, linkIndex: number) => ({
+          ...link,
+          label: projectLinkLabels[linkIndex] ?? link.label ?? `Link ${linkIndex + 1}`,
+        })),
       })),
     };
   }

@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { useBlocker, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useBlocker, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import CardSideNavigation from "@/pages/portfolio/components/CardSideNavigation";
 import ModeButton from "@/pages/portfolio/components/ModeButton";
 import ProfileBlock from "@/pages/portfolio/components/ProfileBlock";
 import BlockRenderer from "@/pages/portfolio/components/BlockRenderer";
-import { mockPortfolio } from "@/data/mockPortfolio";
 import { isProfileFieldVisible, profileFieldOptions, requiredProfileKinds } from "@/pages/portfolio/components/profileFieldOptions";
 import type { ContentBlock, ProfileFieldKind, PortfolioDocument } from "@/types/portfolio";
 import AddIcon from "@/assets/portfolio/Add.svg?react";
 import Modal from "@/components/common/Modal";
-import { updatePortfolio, uploadPortfolioAvatar } from "@/api/portfolio";
-import { buildPortfolioUpdateRequest, hasDocumentChanged } from "./editorDocument";
+import { updatePortfolio, uploadPortfolioAvatar, uploadPortfolioWorkImage } from "@/api/portfolio";
+import { buildPortfolioUpdateRequest, hasDocumentChanged, resolveSavedWorkItemId } from "./editorDocument";
 import { createClientId } from "./editor/editorUtils";
 import { BlockEditor } from "./editor/BlockEditor";
 import { EditableFrontCard, ProfilePreviewCard } from "./editor/EditableFrontCard";
 import { EditableProfile } from "./editor/EditableProfile";
+import { usePendingWorkImages } from "./editor/usePendingWorkImages";
 
 const blockTypeOptions: Array<{ type: ContentBlock["type"]; label: string }> = [
   { type: "about", label: "About" },
@@ -40,6 +40,15 @@ function normalizeEditorDocument(document: PortfolioDocument) {
   };
 }
 
+function getEditorErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) return fallback;
+  const apiError = error as { message?: unknown; status?: unknown };
+  if (apiError.status === 401) return "로그인이 만료되었어요. 다시 로그인해주세요.";
+  if (apiError.status === 404) return "포트폴리오 또는 프로젝트를 찾을 수 없어요.";
+  if (apiError.status === 422) return "이미지 형식이나 요청 내용을 확인해주세요.";
+  return typeof apiError.message === "string" ? apiError.message : fallback;
+}
+
 function createEmptyBlock(type: ContentBlock["type"]): ContentBlock {
   const id = createClientId(`${type}-block`);
   if (type === "about") return { id, type, visible: true, description: "" };
@@ -52,16 +61,30 @@ function createEmptyBlock(type: ContentBlock["type"]): ContentBlock {
 }
 
 export default function EditorPage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const editorState = (location.state as {
     document?: PortfolioDocument;
     side?: "front" | "back";
   } | null) ?? null;
-  const forceMockDocument = import.meta.env.DEV && new URLSearchParams(location.search).get("mock") === "1";
-  const sourceDocument = forceMockDocument ? mockPortfolio : editorState?.document ?? mockPortfolio;
-  const initialDocument = normalizeEditorDocument(sourceDocument);
-  const [side, setSide] = useState<"front" | "back">(editorState?.side ?? "back");
+  if (!editorState?.document) return <Navigate to="/home" replace />;
+
+  return (
+    <EditorPageContent
+      initialDocument={normalizeEditorDocument(editorState.document)}
+      initialSide={editorState.side ?? "back"}
+    />
+  );
+}
+
+function EditorPageContent({
+  initialDocument,
+  initialSide,
+}: {
+  initialDocument: PortfolioDocument;
+  initialSide: "front" | "back";
+}) {
+  const navigate = useNavigate();
+  const [side, setSide] = useState<"front" | "back">(initialSide);
   const [originalDocument, setOriginalDocument] = useState<PortfolioDocument>(initialDocument);
   const [draftDocument, setDraftDocument] = useState<PortfolioDocument>(initialDocument);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
@@ -71,7 +94,9 @@ export default function EditorPage() {
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [uploadingWorkImageId, setUploadingWorkImageId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState("");
+  const { files: pendingWorkImages, previews: workImagePreviews, select: selectWorkImage, remove: removePendingWorkImage } = usePendingWorkImages();
   const allowNavigationRef = useRef(false);
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const blocker = useBlocker(() => isDirty && !isSaving && !allowNavigationRef.current);
@@ -124,14 +149,39 @@ export default function EditorPage() {
         profile: { ...current.profile, avatarUrl: savedDocument.profile.avatarUrl },
       }));
     } catch (error) {
-      const message =
-        typeof error === "object" && error !== null && "message" in error && typeof error.message === "string"
-          ? error.message
-          : "프로필 사진을 업로드하지 못했어요.";
+      const message = getEditorErrorMessage(error, "프로필 사진을 업로드하지 못했어요.");
       setSaveError(message);
     } finally {
       setIsUploadingAvatar(false);
     }
+  }
+
+  function handleWorkImageSelect(itemId: string, file: File) {
+    const validationError = selectWorkImage(itemId, file);
+    if (validationError) {
+      setSaveError(validationError);
+      return;
+    }
+
+    setSaveError("");
+    setIsDirty(true);
+  }
+
+  function handleWorkImageDelete(itemId: string) {
+    removePendingWorkImage(itemId);
+    updateDraft((current) => ({
+      ...current,
+      blocks: current.blocks.map((block) =>
+        block.type !== "works"
+          ? block
+          : {
+              ...block,
+              items: block.items.map((item) =>
+                item.id === itemId ? { ...item, imageUrl: null } : item,
+              ),
+            },
+      ),
+    }));
   }
 
   function updateField(kind: ProfileFieldKind, value: string) {
@@ -210,7 +260,8 @@ export default function EditorPage() {
   }
 
   async function saveDocument(shouldNavigate = true) {
-    if (!isDirty) {
+    const hasPendingWorkImages = Object.keys(pendingWorkImages).length > 0;
+    if (!isDirty && !hasPendingWorkImages) {
       if (shouldNavigate) {
         allowNavigationRef.current = true;
         navigate("/preview", { state: { document: draftDocument, side }, replace: true });
@@ -220,27 +271,40 @@ export default function EditorPage() {
 
     setIsSaving(true);
     setSaveError("");
+    let savedDocument = draftDocument;
     try {
-      const saved = await updatePortfolio(
-        draftDocument.id,
-        buildPortfolioUpdateRequest(originalDocument, draftDocument),
-      );
-      setOriginalDocument(saved);
-      setDraftDocument(saved);
+      if (isDirty) {
+        savedDocument = await updatePortfolio(
+          draftDocument.id,
+          buildPortfolioUpdateRequest(originalDocument, draftDocument),
+        );
+        setOriginalDocument(savedDocument);
+        setDraftDocument(savedDocument);
+        setIsDirty(false);
+      }
+
+      for (const [itemId, file] of Object.entries(pendingWorkImages)) {
+        setUploadingWorkImageId(itemId);
+        const savedItemId = resolveSavedWorkItemId(draftDocument, savedDocument, itemId);
+        savedDocument = await uploadPortfolioWorkImage(savedDocument.id, savedItemId, file);
+        setOriginalDocument(savedDocument);
+        setDraftDocument(savedDocument);
+        removePendingWorkImage(itemId);
+      }
+
       setIsDirty(false);
       if (shouldNavigate) {
         allowNavigationRef.current = true;
-        navigate("/preview", { state: { document: saved, side }, replace: true });
+        navigate("/preview", { state: { document: savedDocument, side }, replace: true });
       }
       return true;
     } catch (error) {
-      const message =
-        typeof error === "object" && error !== null && "message" in error && typeof error.message === "string"
-          ? error.message
-          : "저장하지 못했어요. 수정 내용은 유지됩니다.";
+      setIsDirty(true);
+      const message = getEditorErrorMessage(error, "저장하지 못했어요. 수정 내용은 유지됩니다.");
       setSaveError(message);
       return false;
     } finally {
+      setUploadingWorkImageId(null);
       setIsSaving(false);
     }
   }
@@ -423,6 +487,10 @@ export default function EditorPage() {
                         onSelect={() => setSelectedBlockId(block.id)}
                         onChange={updateBlock}
                         onRemove={() => removeBlock(block.id)}
+                        onImageSelect={handleWorkImageSelect}
+                        onImageDelete={handleWorkImageDelete}
+                        imagePreviews={workImagePreviews}
+                        uploadingItemId={uploadingWorkImageId}
                         themeId={draftDocument.siteDesignId}
                       />
                     ) : (
