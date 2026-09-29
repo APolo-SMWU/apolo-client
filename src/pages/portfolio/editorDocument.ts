@@ -1,5 +1,6 @@
 import type { PortfolioDocument } from "@/types/portfolio";
 import type { UpdatePortfolioRequest } from "@/api/portfolio";
+import type { ContentBlock, ContentBlockInput } from "@/types/portfolio";
 
 export function hasDocumentChanged(
   originalDocument: PortfolioDocument,
@@ -49,8 +50,47 @@ export function buildPortfolioUpdateRequest(
   }
 
   if (JSON.stringify(originalDocument.blocks) !== JSON.stringify(draftDocument.blocks)) {
-    request.blocks = draftDocument.blocks;
+    request.blocks = buildBlocksPayload(draftDocument.blocks);
   }
 
   return request;
+}
+
+export function buildBlocksPayload(blocks: Array<ContentBlock | ContentBlockInput>): ContentBlockInput[] {
+  const stripClientId = <T extends { id?: string }>(value: T) => {
+    if (!value.id?.startsWith("client-")) return value;
+    const withoutId = { ...value } as Partial<T>;
+    delete withoutId.id;
+    return withoutId as Omit<T, "id">;
+  };
+  const normalizeDate = (value: string | null | undefined) => value?.trim() ? value : null;
+
+  return blocks.map((block) => {
+    const blockWithoutClientId = stripClientId(block);
+    if (block.type === "about") return { ...blockWithoutClientId };
+    if (block.type === "skills") {
+      return {
+        ...blockWithoutClientId,
+        categories: block.categories.map((category) => ({
+          ...stripClientId(category),
+          items: category.items.map((item) => ({ ...stripClientId(item) })),
+        })),
+      };
+    }
+    if (block.type === "works") {
+      return { ...blockWithoutClientId, items: block.items.map((item) => ({ ...stripClientId(item) })) } as ContentBlockInput;
+    }
+    return {
+      ...blockWithoutClientId,
+      items: block.items.map((item) => {
+        const normalizedItem = stripClientId(item);
+        if ("date" in item) return { ...normalizedItem, date: normalizeDate(item.date) };
+        return {
+          ...normalizedItem,
+          startDate: normalizeDate(item.startDate),
+          endDate: item.endDate === "Present" ? "Present" : normalizeDate(item.endDate),
+        };
+      }),
+    } as ContentBlockInput;
+  }) as ContentBlockInput[];
 }

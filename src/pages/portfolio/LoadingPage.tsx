@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getPortfolioCreation } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
+import { getNextLoadingAnimationDirection } from "./loadingAnimation";
 
 type LoadingLocationState = {
   requestId?: string;
@@ -21,6 +22,7 @@ export default function LoadingPage() {
   const [error, setError] = useState("");
   const loadingState = (location.state as LoadingLocationState | null) ?? null;
   const requestId = loadingState?.requestId;
+  const cardDesignId = loadingState?.cardDesignId;
   const displayError = error || (!requestId ? "생성 요청을 찾을 수 없어요." : "");
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function LoadingPage() {
           state: {
             document: {
               ...(document as PortfolioDocument),
-              ...(loadingState?.cardDesignId ? { cardDesignId: loadingState.cardDesignId } : {}),
+              ...(cardDesignId ? { cardDesignId } : {}),
             },
           },
           replace: true,
@@ -48,16 +50,14 @@ export default function LoadingPage() {
     return () => {
       isCurrent = false;
     };
-  }, [navigate, requestId]);
+  }, [cardDesignId, navigate, requestId]);
 
   function handleAnimationFrame({ currentFrame }: { currentFrame: number }) {
-    const isMovingForward = directionRef.current === "forward";
-    const isAtDirectionEnd = isMovingForward ? currentFrame >= 78 : currentFrame <= 2;
-
-    if (isAtDirectionEnd) {
-      const nextDirection = isMovingForward ? "reverse" : "forward";
+    const nextDirection = getNextLoadingAnimationDirection(directionRef.current, currentFrame);
+    if (nextDirection) {
       directionRef.current = nextDirection;
       lottieRef.current?.setDirection(nextDirection);
+      lottieRef.current?.play();
     }
   }
 

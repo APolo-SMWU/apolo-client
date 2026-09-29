@@ -35,6 +35,12 @@ import { getPortfolioThemeColors } from "./components/portfolioTheme";
 const inputClass = "w-full border-0 bg-transparent px-0 py-0 font-[inherit] text-inherit leading-[inherit] tracking-[inherit] caret-primary outline-none";
 const panelClass = "rounded-xl border border-transparent p-3";
 const projectLinkLabels = ["Link", "GitHub"];
+let clientEntitySequence = 0;
+
+function createClientId(kind: string) {
+  clientEntitySequence += 1;
+  return `client-${kind}-${clientEntitySequence}`;
+}
 
 function getField(document: PortfolioDocument, kind: ProfileFieldKind) {
   const profileValue = document.profile.fields.find((field) => field.kind === kind)?.value;
@@ -261,13 +267,13 @@ function EditableAbout({ block, onChange }: { block: Extract<ContentBlock, { typ
     if (!textarea) return;
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [block.body]);
+  }, [block.description]);
 
   return (
     <textarea
       ref={textareaRef}
       className={`${inputClass} min-h-28 resize-none overflow-hidden leading-normal`}
-      value={block.body}
+      value={block.description}
       onChange={(event) => onChange(event.target.value)}
     />
   );
@@ -343,7 +349,7 @@ function EditableTimeline({
   block: Extract<ContentBlock, { type: "education" | "experience" | "activities" | "awards" | "certification" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
-  onChange: (index: number, key: "startDate" | "endDate" | "organization" | "role" | "description", value: string) => void;
+  onChange: (index: number, key: "startDate" | "endDate" | "date" | "organization" | "role" | "description", value: string) => void;
   onRemove: (index: number) => void;
   onReorder: (sourceId: string, targetId: string) => void;
 }) {
@@ -397,22 +403,26 @@ function EditableTimeline({
           >
             <GripVertical className="size-5" aria-hidden="true" />
           </span>
-          <div className="grid w-[220px] grid-cols-[1fr_auto_1fr] items-center gap-2 self-start">
+          <div className={`grid w-[220px] items-center gap-2 self-start ${"date" in item ? "grid-cols-1" : "grid-cols-[1fr_auto_1fr]"}`}>
             <input
               className={`${inputClass} min-w-0 text-right`}
               placeholder="YYYY.MM"
-              value={item.startDate}
-              onChange={(event) => onChange(index, "startDate", event.target.value)}
+              value={"date" in item ? item.date ?? "" : item.startDate ?? ""}
+              onChange={(event) => onChange(index, "date" in item ? "date" : "startDate", event.target.value)}
               aria-label="시작일"
             />
-            <span className="shrink-0" aria-hidden="true">-</span>
-            <input
-              className={`${inputClass} min-w-0 text-left`}
-              placeholder="YYYY.MM"
-              value={item.endDate ?? ""}
-              onChange={(event) => onChange(index, "endDate", event.target.value)}
-              aria-label="종료일"
-            />
+            {!("date" in item) && (
+              <>
+                <span className="shrink-0" aria-hidden="true">-</span>
+                <input
+                  className={`${inputClass} min-w-0 text-left`}
+                  placeholder="YYYY.MM 또는 Present"
+                  value={item.endDate ?? ""}
+                  onChange={(event) => onChange(index, "endDate", event.target.value)}
+                  aria-label="종료일"
+                />
+              </>
+            )}
           </div>
           <div className="flex max-w-[448px] flex-col gap-2">
             <input
@@ -663,7 +673,7 @@ function EditableSkills({
           <span className="text-body-02">{category.category}</span>
           <input
             className={`${inputClass} self-center`}
-            value={draftValues[index] ?? category.items.join(", ")}
+            value={draftValues[index] ?? category.items.map((item) => item.name).join(", ")}
             onChange={(event) => {
               const value = event.target.value;
 
@@ -706,12 +716,14 @@ function BlockEditor({
   isSelected,
   onSelect,
   onChange,
+  onRemove,
   themeId,
 }: {
   block: ContentBlock;
   isSelected: boolean;
   onSelect: () => void;
   onChange: (block: ContentBlock) => void;
+  onRemove: () => void;
   themeId: string;
 }) {
   const titleMap: Record<ContentBlock["type"], string> = {
@@ -729,20 +741,16 @@ function BlockEditor({
 
   function addTimelineItem() {
     if (!("items" in block)) return;
-    const newItem: TimelineItem = {
-      id: `${block.type}-${block.items.length + 1}`,
-      startDate: "",
-      organization: "",
-      role: "",
-      description: "",
-    };
+    const newItem: TimelineItem = ["awards", "certification"].includes(block.type)
+      ? { id: createClientId(`${block.type}-item`), date: null, organization: "", role: "", description: "" }
+      : { id: createClientId(`${block.type}-item`), startDate: null, endDate: null, organization: "", role: "", description: "" };
     onChange({ ...block, items: [...block.items, newItem] } as ContentBlock);
   }
 
   function addWorksItem() {
     if (block.type !== "works") return;
     const newItem: WorkItem = {
-      id: `${block.type}-${block.items.length + 1}`,
+      id: createClientId(`${block.type}-item`),
       kind: "project",
       title: "",
       role: "",
@@ -758,7 +766,7 @@ function BlockEditor({
       ...block,
       categories: [
         ...block.categories,
-        { category: "New Category", items: [] },
+        { id: createClientId(`${block.type}-category`), category: "New Category", items: [] },
       ],
     });
   }
@@ -778,25 +786,38 @@ function BlockEditor({
     >
       <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: themeColors.text }}>
         <h2 className="text-title-01 font-bold">{title}</h2>
-        {block.type !== "about" && (
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            className="text-primary"
-            onClick={
-              block.type === "works"
-                ? addWorksItem
-                : block.type === "skills"
-                  ? addSkillCategory
-                  : addTimelineItem
-            }
-            aria-label={`${title} 항목 추가`}
+            className="text-caption-01 text-primary"
+            onClick={() => onChange({ ...block, visible: !block.visible })}
+            aria-label={`${title} ${block.visible ? "숨기기" : "보이기"}`}
           >
-            <AddIcon className="size-6" aria-hidden="true" />
+            {block.visible ? "숨김" : "표시"}
           </button>
-        )}
+          {block.type !== "about" && (
+            <button
+              type="button"
+              className="text-primary"
+              onClick={
+                block.type === "works"
+                  ? addWorksItem
+                  : block.type === "skills"
+                    ? addSkillCategory
+                    : addTimelineItem
+              }
+              aria-label={`${title} 항목 추가`}
+            >
+              <AddIcon className="size-6" aria-hidden="true" />
+            </button>
+          )}
+          <button type="button" className="text-danger" onClick={onRemove} aria-label={`${title} 블록 삭제`}>
+            <DeleteIcon className="size-6" aria-hidden="true" />
+          </button>
+        </div>
       </div>
       <div className="pt-3">
-        {block.type === "about" && <EditableAbout block={block} onChange={(body) => onChange({ ...block, body })} />}
+        {block.type === "about" && <EditableAbout block={block} onChange={(description) => onChange({ ...block, description })} />}
         {["education", "experience", "activities", "awards", "certification"].includes(block.type) && (
           <EditableTimeline
             block={block as Extract<ContentBlock, { type: "education" | "experience" | "activities" | "awards" | "certification" }>}
@@ -892,7 +913,11 @@ function BlockEditor({
                         items: value
                           .split(",")
                           .map((item) => item.trim())
-                          .filter(Boolean),
+                          .filter(Boolean)
+                          .map((name, itemIndex) => ({
+                            ...(category.items[itemIndex] ?? { id: createClientId(`${category.id}-item`) }),
+                            name,
+                          })),
                       }
                     : category,
                 ),
@@ -1071,6 +1096,17 @@ function normalizeEditorDocument(document: PortfolioDocument) {
   };
 }
 
+function createEmptyBlock(type: ContentBlock["type"]): ContentBlock {
+  const id = createClientId(`${type}-block`);
+  if (type === "about") return { id, type, visible: true, description: "" };
+  if (type === "skills") return { id, type, visible: true, categories: [] };
+  if (type === "works") return { id, type, visible: true, items: [] };
+  if (type === "awards" || type === "certification") {
+    return { id, type, visible: true, items: [] };
+  }
+  return { id, type, visible: true, items: [] };
+}
+
 export default function EditorPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1085,6 +1121,7 @@ export default function EditorPage() {
   const [originalDocument, setOriginalDocument] = useState<PortfolioDocument>(initialDocument);
   const [draftDocument, setDraftDocument] = useState<PortfolioDocument>(initialDocument);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [newBlockType, setNewBlockType] = useState<ContentBlock["type"]>("experience");
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -1278,6 +1315,20 @@ export default function EditorPage() {
     }));
   }
 
+  function removeBlock(blockId: string) {
+    updateDraft((current) => ({
+      ...current,
+      blocks: current.blocks.filter((block) => block.id !== blockId),
+    }));
+    setSelectedBlockId((current) => current === blockId ? null : current);
+  }
+
+  function addBlock() {
+    const block = createEmptyBlock(newBlockType);
+    updateDraft((current) => ({ ...current, blocks: [...current.blocks, block] }));
+    setSelectedBlockId(block.id);
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       <Header />
@@ -1363,6 +1414,7 @@ export default function EditorPage() {
                         isSelected
                         onSelect={() => setSelectedBlockId(block.id)}
                         onChange={updateBlock}
+                        onRemove={() => removeBlock(block.id)}
                         themeId={draftDocument.cardDesignId}
                       />
                     ) : (
@@ -1370,6 +1422,28 @@ export default function EditorPage() {
                     )}
                   </div>
                 ))}
+                <div className="flex items-center justify-end gap-2 rounded-xl border border-dashed border-placeholder p-3">
+                  <label className="sr-only" htmlFor="new-block-type">추가할 블록</label>
+                  <select
+                    id="new-block-type"
+                    className="rounded-md border border-placeholder bg-white px-2 py-1 text-caption-01"
+                    value={newBlockType}
+                    onChange={(event) => setNewBlockType(event.target.value as ContentBlock["type"])}
+                  >
+                    <option value="about">About</option>
+                    <option value="education">Education</option>
+                    <option value="experience">Experience</option>
+                    <option value="activities">Activities</option>
+                    <option value="awards">Awards</option>
+                    <option value="certification">Certification</option>
+                    <option value="works">Projects</option>
+                    <option value="skills">Skills</option>
+                  </select>
+                  <button type="button" className="inline-flex items-center gap-1 text-caption-01 text-primary" onClick={addBlock}>
+                    <AddIcon className="size-5" aria-hidden="true" />
+                    블록 추가
+                  </button>
+                </div>
               </div>
             </div>
           )}
