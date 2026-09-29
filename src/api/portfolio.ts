@@ -1,5 +1,6 @@
 import { apiFetch } from "./api";
-import type { ContentBlock, PortfolioDocument, ProfileData } from "@/types/portfolio";
+import type { ContentBlockInput, PortfolioDocument, ProfileData } from "@/types/portfolio";
+import { normalizePortfolioDocument } from "./portfolioMapper";
 
 export type PortfolioSummary = Pick<
   PortfolioDocument,
@@ -21,12 +22,14 @@ export type UpdatePortfolioRequest = {
   title?: string;
   card?: Partial<PortfolioDocument["card"]>;
   profile?: Partial<ProfileData>;
-  blocks?: ContentBlock[];
+  blocks?: ContentBlockInput[];
   cardDesignId?: string;
   siteDesignId?: string;
 };
 
-type PortfolioResponse = { portfolio: PortfolioDocument };
+type PortfolioResponse = { portfolio: unknown };
+
+const mapPortfolioResponse = ({ portfolio }: PortfolioResponse) => normalizePortfolioDocument(portfolio);
 
 const PORTFOLIO_CREATION_TIMEOUT_MS = 180_000;
 const portfolioCreationRequests = new Map<string, Promise<PortfolioDocument>>();
@@ -60,7 +63,7 @@ export const createPortfolio = (body: CreatePortfolioRequest) => {
     method: "POST",
     auth: true,
     body: formData,
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 };
 
 export const startPortfolioCreation = (body: CreatePortfolioRequest) => {
@@ -101,12 +104,12 @@ export const getPortfolio = (portfolioId: number | string) =>
   apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}`, {
     method: "GET",
     auth: true,
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 
 export const getSharedPortfolio = (shareId: string) =>
   apiFetch<PortfolioResponse>(`/share/${encodeURIComponent(shareId)}`, {
     method: "GET",
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 
 export const updatePortfolio = (
   portfolioId: number | string,
@@ -116,7 +119,7 @@ export const updatePortfolio = (
     method: "PATCH",
     auth: true,
     body: JSON.stringify(body),
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 
 export const deletePortfolio = (portfolioId: number | string) =>
   apiFetch<void>(`/portfolios/${portfolioId}`, {
@@ -130,7 +133,7 @@ export const updatePortfolioContent = (
   apiFetch<PortfolioResponse>(`/portfolios/${portfolioId}/update-content`, {
     method: "POST",
     auth: true,
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 
 export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) => {
   const formData = new FormData();
@@ -140,7 +143,7 @@ export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) 
     method: "POST",
     auth: true,
     body: formData,
-  }).then(({ portfolio }) => portfolio);
+  }).then(mapPortfolioResponse);
 };
 
 export type SharePortfolioResponse = {

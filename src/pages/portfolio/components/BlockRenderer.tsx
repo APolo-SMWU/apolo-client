@@ -25,9 +25,7 @@ function Section({
 }
 
 function AboutContent({ block }: { block: Extract<ContentBlock, { type: "about" }> }) {
-  return (
-    <p className="whitespace-pre-line text-body-01 leading-normal">{block.body}</p>
-  );
+  return <p className="whitespace-pre-line text-body-01 leading-normal">{block.description}</p>;
 }
 
 function TimelineContent({ block }: { block: Extract<ContentBlock, { type: "education" | "experience" | "activities" | "awards" | "certification" }> }) {
@@ -39,8 +37,8 @@ function TimelineContent({ block }: { block: Extract<ContentBlock, { type: "educ
           className="grid gap-2 px-4 sm:grid-cols-[220px_1fr]"
         >
           <p className="whitespace-nowrap text-body-01">
-            {item.startDate}
-            {item.endDate ? ` - ${item.endDate}` : ""}
+            {"date" in item ? item.date : item.startDate}
+            {!(("date" in item) || !item.endDate) ? ` - ${item.endDate}` : ""}
           </p>
           <div>
             <h3 className="text-title-02 font-bold">{item.organization}</h3>
@@ -136,11 +134,11 @@ function SkillsContent({ block, themeId }: { block: Extract<ContentBlock, { type
           <div className="flex flex-wrap gap-2">
             {category.items.map((item) => (
               <span
-                key={item}
+                key={item.id}
                 className="rounded-sm px-2 py-1 text-caption-01"
                 style={{ backgroundColor: themeColors.background, color: themeColors.text }}
               >
-                {item}
+                {item.name}
               </span>
             ))}
           </div>
