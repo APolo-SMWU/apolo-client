@@ -33,7 +33,7 @@ export const mockPortfolio: PortfolioDocument = {
       id: "about",
       type: "about",
       visible: true,
-      body: "사용자 경험을 세심하게 설계하고, 팀이 오래 유지할 수 있는 인터페이스를 만드는 프론트엔드 개발자입니다. React와 TypeScript를 중심으로 서비스의 문제를 발견하고, 작은 개선을 빠르게 제품에 반영하는 일을 좋아합니다.\n\n새로운 기술을 목적에 맞게 선택하며 디자이너와 백엔드 개발자 사이의 협업 방식을 개선해왔습니다. 안정적인 UI와 명확한 코드로 사용자가 자연스럽게 서비스를 사용할 수 있도록 만드는 것을 중요하게 생각합니다.",
+      description: "사용자 경험을 세심하게 설계하고, 팀이 오래 유지할 수 있는 인터페이스를 만드는 프론트엔드 개발자입니다. React와 TypeScript를 중심으로 서비스의 문제를 발견하고, 작은 개선을 빠르게 제품에 반영하는 일을 좋아합니다.\n\n새로운 기술을 목적에 맞게 선택하며 디자이너와 백엔드 개발자 사이의 협업 방식을 개선해왔습니다. 안정적인 UI와 명확한 코드로 사용자가 자연스럽게 서비스를 사용할 수 있도록 만드는 것을 중요하게 생각합니다.",
     },
     {
       id: "experience",
@@ -42,7 +42,7 @@ export const mockPortfolio: PortfolioDocument = {
       items: [
         {
           id: "experience-1",
-          startDate: "Mar. 2026",
+          startDate: "2026.03",
           endDate: "Present",
           organization: "COTATO",
           role: "Frontend Team Leader",
@@ -50,16 +50,16 @@ export const mockPortfolio: PortfolioDocument = {
         },
         {
           id: "experience-2",
-          startDate: "Mar. 2024",
-          endDate: "Feb. 2026",
+          startDate: "2024.03",
+          endDate: "2026.02",
           organization: "DACOS",
           role: "Admin, Head of PR Team",
           description: "서비스 운영과 팀 협업 프로세스를 개선하고, 사용자 피드백을 제품에 반영했습니다.",
         },
         {
           id: "experience-3",
-          startDate: "Mar. 2021",
-          endDate: "Feb. 2027",
+          startDate: "2021.03",
+          endDate: "2027.02",
           organization: "Sookmyung Women’s University, South Korea",
           role: "Software Convergence",
           description: "소프트웨어 개발의 기본기를 쌓고 다양한 팀 프로젝트를 진행했습니다.",
@@ -104,9 +104,9 @@ export const mockPortfolio: PortfolioDocument = {
       type: "skills",
       visible: true,
       categories: [
-        { category: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "TailwindCSS", "HTML", "CSS", "React Native"] },
-        { category: "State / Data", items: ["React Query", "Zustand", "Context API", "Supabase"] },
-        { category: "Tools", items: ["GitHub", "Vercel", "Figma", "AWS"] },
+        { id: "skills-frontend", category: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "TailwindCSS", "HTML", "CSS", "React Native"].map((name, index) => ({ id: `skill-frontend-${index}`, name })) },
+        { id: "skills-state", category: "State / Data", items: ["React Query", "Zustand", "Context API", "Supabase"].map((name, index) => ({ id: `skill-state-${index}`, name })) },
+        { id: "skills-tools", category: "Tools", items: ["GitHub", "Vercel", "Figma", "AWS"].map((name, index) => ({ id: `skill-tools-${index}`, name })) },
       ],
     },
   ],
