@@ -17,6 +17,17 @@ import { BlockEditor } from "./editor/BlockEditor";
 import { EditableFrontCard, ProfilePreviewCard } from "./editor/EditableFrontCard";
 import { EditableProfile } from "./editor/EditableProfile";
 
+const blockTypeOptions: Array<{ type: ContentBlock["type"]; label: string }> = [
+  { type: "about", label: "About" },
+  { type: "education", label: "Education" },
+  { type: "experience", label: "Experiences" },
+  { type: "activities", label: "Activities" },
+  { type: "awards", label: "Awards" },
+  { type: "certification", label: "Certification" },
+  { type: "works", label: "Projects" },
+  { type: "skills", label: "Skills" },
+];
+
 function normalizeEditorDocument(document: PortfolioDocument) {
   if (document.profile.title || !document.card.headline) return document;
 
@@ -54,12 +65,15 @@ export default function EditorPage() {
   const [originalDocument, setOriginalDocument] = useState<PortfolioDocument>(initialDocument);
   const [draftDocument, setDraftDocument] = useState<PortfolioDocument>(initialDocument);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-  const [newBlockType, setNewBlockType] = useState<ContentBlock["type"]>("experience");
+  const [isBlockMenuOpen, setIsBlockMenuOpen] = useState(false);
+  const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
+  const [dragOverBlockId, setDragOverBlockId] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [saveError, setSaveError] = useState("");
   const allowNavigationRef = useRef(false);
+  const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const blocker = useBlocker(() => isDirty && !isSaving && !allowNavigationRef.current);
 
   useEffect(() => {
@@ -72,6 +86,11 @@ export default function EditorPage() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
+
+  useEffect(() => {
+    if (!selectedBlockId || selectedBlockId === "profile") return;
+    blockRefs.current[selectedBlockId]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedBlockId]);
 
   function updateDraft(updater: (current: PortfolioDocument) => PortfolioDocument) {
     const nextDocument = updater(draftDocument);
@@ -227,7 +246,11 @@ export default function EditorPage() {
   }
 
   function moveBlock(sourceId: string, targetId: string) {
-    if (sourceId === targetId) return;
+    if (sourceId === targetId) {
+      setDraggedBlockId(null);
+      setDragOverBlockId(null);
+      return;
+    }
     updateDraft((current) => {
       const sourceIndex = current.blocks.findIndex((block) => block.id === sourceId);
       const targetIndex = current.blocks.findIndex((block) => block.id === targetId);
@@ -237,6 +260,8 @@ export default function EditorPage() {
       blocks.splice(targetIndex, 0, moved);
       return { ...current, blocks };
     });
+    setDraggedBlockId(null);
+    setDragOverBlockId(null);
   }
 
   function updateBlock(nextBlock: ContentBlock) {
@@ -256,10 +281,17 @@ export default function EditorPage() {
     setSelectedBlockId((current) => current === blockId ? null : current);
   }
 
-  function addBlock() {
-    const block = createEmptyBlock(newBlockType);
+  const availableBlockTypes = blockTypeOptions.filter(
+    ({ type }) => !draftDocument.blocks.some((block) => block.type === type),
+  );
+
+  function addBlock(type: ContentBlock["type"]) {
+    if (draftDocument.blocks.some((block) => block.type === type)) return;
+
+    const block = createEmptyBlock(type);
     updateDraft((current) => ({ ...current, blocks: [...current.blocks, block] }));
     setSelectedBlockId(block.id);
+    setIsBlockMenuOpen(false);
   }
 
   return (
@@ -321,22 +353,65 @@ export default function EditorPage() {
                 )}
               </div>
               <div className={`flex min-w-0 flex-1 flex-col gap-6 ${isSaving ? "pointer-events-none opacity-60" : ""}`}>
+                <div className="relative flex justify-end">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 text-body-02 text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => setIsBlockMenuOpen((current) => !current)}
+                    disabled={availableBlockTypes.length === 0}
+                    aria-expanded={isBlockMenuOpen}
+                    aria-haspopup="menu"
+                  >
+                    <AddIcon className="size-6" aria-hidden="true" />
+                    블록 추가
+                  </button>
+                  {isBlockMenuOpen && availableBlockTypes.length > 0 && (
+                    <div
+                      className="absolute right-0 top-full z-20 mt-2 flex min-w-44 flex-col rounded-lg border border-placeholder bg-white p-1 shadow-lg"
+                      role="menu"
+                      aria-label="추가할 블록"
+                    >
+                      {availableBlockTypes.map(({ type, label }) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className="rounded-md px-3 py-2 text-left text-caption-01 hover:bg-focus"
+                          onClick={() => addBlock(type)}
+                          role="menuitem"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {draftDocument.blocks.map((block) => (
                   <div
                     key={block.id}
+                    ref={(element) => {
+                      blockRefs.current[block.id] = element;
+                    }}
                     draggable
-                    onDragStart={(event) => event.dataTransfer.setData("text/plain", block.id)}
-                    onDragOver={(event) => event.preventDefault()}
+                    onDragStart={(event) => {
+                      setDraggedBlockId(block.id);
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", block.id);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setDragOverBlockId(block.id);
+                    }}
+                    onDragLeave={() => setDragOverBlockId(null)}
                     onDrop={(event) => {
                       event.preventDefault();
                       moveBlock(event.dataTransfer.getData("text/plain"), block.id);
                     }}
-                    className="cursor-grab active:cursor-grabbing"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectedBlockId(block.id);
+                    onDragEnd={() => {
+                      setDraggedBlockId(null);
+                      setDragOverBlockId(null);
                     }}
-                    onPointerDown={(event) => {
+                    className={`cursor-grab rounded-xl active:cursor-grabbing ${draggedBlockId === block.id ? "opacity-60" : ""} ${dragOverBlockId === block.id ? "ring-2 ring-primary" : ""}`}
+                    onClick={(event) => {
                       event.stopPropagation();
                       setSelectedBlockId(block.id);
                     }}
@@ -355,28 +430,6 @@ export default function EditorPage() {
                     )}
                   </div>
                 ))}
-                <div className="flex items-center justify-end gap-2 rounded-xl border border-dashed border-placeholder p-3">
-                  <label className="sr-only" htmlFor="new-block-type">추가할 블록</label>
-                  <select
-                    id="new-block-type"
-                    className="rounded-md border border-placeholder bg-white px-2 py-1 text-caption-01"
-                    value={newBlockType}
-                    onChange={(event) => setNewBlockType(event.target.value as ContentBlock["type"])}
-                  >
-                    <option value="about">About</option>
-                    <option value="education">Education</option>
-                    <option value="experience">Experience</option>
-                    <option value="activities">Activities</option>
-                    <option value="awards">Awards</option>
-                    <option value="certification">Certification</option>
-                    <option value="works">Projects</option>
-                    <option value="skills">Skills</option>
-                  </select>
-                  <button type="button" className="inline-flex items-center gap-1 text-caption-01 text-primary" onClick={addBlock}>
-                    <AddIcon className="size-5" aria-hidden="true" />
-                    블록 추가
-                  </button>
-                </div>
               </div>
             </div>
           )}

@@ -110,6 +110,7 @@ export function BlockEditor({
           )}
           <button type="button" className="text-danger" onClick={onRemove} aria-label={`${title} 블록 삭제`}>
             <DeleteIcon className="size-6" aria-hidden="true" />
+            <span className="sr-only">블록 삭제</span>
           </button>
         </div>
       </div>
@@ -200,7 +201,15 @@ export function BlockEditor({
             block={block}
             isBlockSelected={isSelected}
             onBlockSelect={onSelect}
-            onChange={(index, value) =>
+            onCategoryChange={(index, value) =>
+              onChange({
+                ...block,
+                categories: block.categories.map((category, categoryIndex) =>
+                  categoryIndex === index ? { ...category, category: value } : category,
+                ),
+              })
+            }
+            onItemsChange={(index, value) =>
               onChange({
                 ...block,
                 categories: block.categories.map((category, categoryIndex) =>
