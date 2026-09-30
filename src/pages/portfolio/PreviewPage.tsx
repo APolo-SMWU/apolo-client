@@ -126,7 +126,7 @@ function PreviewContent({
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
-      <Header />
+      {!shareId && <Header />}
       <main className={`relative flex min-h-0 flex-1 flex-col overflow-auto text-focus ${side === "front" ? "bg-apolo px-6 pt-8 pb-0" : "bg-white p-0"}`}>
         {side === "front" ? (
           <div className="flex flex-1 items-center justify-center [perspective:1200px]">
@@ -154,31 +154,33 @@ function PreviewContent({
             </div>
           </div>
         ) : (
-          <div className="flex w-full flex-1 flex-col bg-white text-ink">
-            <header className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01">
-              <strong>{document.profile.name}</strong>
-              <nav className="flex gap-8" aria-label="Website navigation">
-                {document.blocks
-                  .filter((block) => block.visible)
-                  .map((block) => (
-                    <a href={`#${block.type}`} key={block.id}>
-                      {blockNavigationLabels[block.type]}
-                    </a>
-                  ))}
-                <a href="#cv">CV</a>
-              </nav>
-            </header>
-            <div className="flex w-full min-w-0 flex-1 items-start justify-between gap-8 p-4">
+          <>
+            {shareId && (
+              <header className="fixed inset-x-0 top-0 z-20 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01 text-ink">
+                <strong>{document.profile.name}</strong>
+                <nav className="flex gap-8" aria-label="Website navigation">
+                  {document.blocks
+                    .filter((block) => block.visible)
+                    .map((block) => (
+                      <a href={`#${block.type}`} key={block.id}>
+                        {blockNavigationLabels[block.type]}
+                      </a>
+                    ))}
+                  <a href="#cv">CV</a>
+                </nav>
+              </header>
+            )}
+            <div className={`flex w-full min-w-0 flex-1 items-start justify-between gap-8 p-4 ${shareId ? "pt-[72px]" : ""}`}>
               <ProfileBlock profile={document.profile} userType={document.userType} />
               <div className="flex min-w-0 flex-1 flex-col">
                 {document.blocks.map((block) => (
-                  <div id={block.type} key={block.id}>
+                  <div id={block.type} className="scroll-mt-16" key={block.id}>
                     <BlockRenderer block={block} themeId={document.siteDesignId} />
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          </>
         )}
         <div className="relative sticky bottom-0 z-10 mx-auto flex w-full max-w-[1200px] items-center justify-center bg-transparent px-4 py-2">
           <div className="flex items-center justify-center gap-4">
