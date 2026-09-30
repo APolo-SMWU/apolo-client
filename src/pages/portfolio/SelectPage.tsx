@@ -60,9 +60,9 @@ export default function SelectPage() {
                     aria-label={`${option.label} ${isSelected ? "선택됨" : "선택"}`}
                     aria-pressed={isSelected}
                     onClick={() => setSelectedDesign((current) => current === option.id ? null : option.id)}
-                    className="h-[194px] w-[324px] max-w-full rounded-xl text-left outline-none"
+                    className="h-[178px] w-[320px] max-w-full rounded-xl text-left outline-none"
                   >
-                    <div className="h-[234px] w-[394px] origin-top-left scale-[0.82]">
+                    <div className="h-[217px] w-[390px] origin-top-left scale-[0.82]">
                       <PersonalCard
                         {...sampleProfile}
                         name={option.design === "bold" ? "A-Polo" : "아폴로"}

@@ -1,4 +1,4 @@
-import ShareIcon from '@/assets/portfolio/Share.svg?react';
+import { Download } from "lucide-react";
 import Button from '@/components/common/Button';
 
 type ShareButtonProps = {
@@ -9,10 +9,10 @@ export default function ShareButton({ onClick }: ShareButtonProps) {
   return (
     <Button
       onClick={onClick}
-      aria-label="온라인 명함 공유"
+      aria-label="명함 이미지 추출"
       className="group h-10! w-10! px-0"
     >
-      <ShareIcon className="size-6 opacity-60 grayscale transition group-hover:brightness-0 group-hover:opacity-100 group-hover:grayscale-0 group-hover:invert" />
+      <Download className="size-6 opacity-60 transition group-hover:opacity-100" aria-hidden="true" />
     </Button>
   )
 }
