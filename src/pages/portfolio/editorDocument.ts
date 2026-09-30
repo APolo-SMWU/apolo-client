@@ -1,6 +1,6 @@
 import type { PortfolioDocument } from "@/types/portfolio";
 import type { UpdatePortfolioRequest } from "@/api/portfolio";
-import type { ContentBlock, ContentBlockInput } from "@/types/portfolio";
+import type { ActivitiesItem, ContentBlock, ContentBlockInput, ExperienceItem } from "@/types/portfolio";
 
 export function hasDocumentChanged(
   originalDocument: PortfolioDocument,
@@ -56,7 +56,7 @@ export function buildPortfolioUpdateRequest(
   return request;
 }
 
-export function buildBlocksPayload(blocks: Array<ContentBlock | ContentBlockInput>): ContentBlockInput[] {
+export function buildBlocksPayload(blocks: ContentBlock[]): ContentBlockInput[] {
   const stripClientId = <T extends { id?: string }>(value: T) => {
     if (!value.id?.startsWith("client-")) return value;
     const withoutId = { ...value } as Partial<T>;
@@ -64,6 +64,10 @@ export function buildBlocksPayload(blocks: Array<ContentBlock | ContentBlockInpu
     return withoutId as Omit<T, "id">;
   };
   const normalizeDate = (value: string | null | undefined) => value?.trim() ? value : null;
+  const baseItem = (item: { id?: string; entityId?: string }) => ({
+    ...stripClientId(item),
+    ...(item.entityId ? { entityId: item.entityId } : {}),
+  });
 
   return blocks.map((block) => {
     const blockWithoutClientId = stripClientId(block);
@@ -80,15 +84,47 @@ export function buildBlocksPayload(blocks: Array<ContentBlock | ContentBlockInpu
     if (block.type === "works") {
       return { ...blockWithoutClientId, items: block.items.map((item) => ({ ...stripClientId(item) })) } as ContentBlockInput;
     }
+    if (block.type === "awards") {
+      return {
+        ...blockWithoutClientId,
+        items: block.items.map((item) => ({
+          ...baseItem(item),
+          title: item.title,
+          issuer: item.issuer ?? null,
+          date: normalizeDate(item.date),
+        })),
+      } as ContentBlockInput;
+    }
+    if (block.type === "certification") {
+      return {
+        ...blockWithoutClientId,
+        items: block.items.map((item) => ({
+          ...baseItem(item),
+          title: item.title,
+          grade: item.grade ?? null,
+          issuer: item.issuer ?? null,
+          date: normalizeDate(item.date),
+        })),
+      } as ContentBlockInput;
+    }
     return {
       ...blockWithoutClientId,
       items: block.items.map((item) => {
-        const normalizedItem = stripClientId(item);
-        if ("date" in item) return { ...normalizedItem, date: normalizeDate(item.date) };
-        return {
-          ...normalizedItem,
+        const range = {
+          ...baseItem(item),
           startDate: normalizeDate(item.startDate),
           endDate: item.endDate === "Present" ? "Present" : normalizeDate(item.endDate),
+        };
+        if (block.type === "education") {
+          return { ...range, organization: item.organization, ...(item.role ? { role: item.role } : {}) };
+        }
+        const descriptiveItem = item as ExperienceItem | ActivitiesItem;
+        return {
+          ...range,
+          ...(descriptiveItem.organization ? { organization: descriptiveItem.organization } : { organization: null }),
+          ...(descriptiveItem.role ? { role: descriptiveItem.role } : { role: null }),
+          ...(descriptiveItem.description ? { description: descriptiveItem.description } : { description: null }),
+          ...(descriptiveItem.kind !== undefined ? { kind: descriptiveItem.kind } : {}),
         };
       }),
     } as ContentBlockInput;

@@ -8,11 +8,9 @@ import CardSideNavigation from "@/pages/portfolio/components/CardSideNavigation"
 import ModeButton from "@/pages/portfolio/components/ModeButton";
 import ShareButton from "@/pages/portfolio/components/ShareButton";
 import UpdateButton from "@/pages/portfolio/components/UpdateButton";
-import ShareQrCode from "@/pages/home/components/ShareQrCode";
 import Modal from "@/components/common/Modal";
-import LinkIcon from "@/assets/Link.svg?react";
 import type { PortfolioDocument } from "@/types/portfolio";
-import { getPortfolio, getSharedPortfolio, sharePortfolio, updatePortfolioContent } from "@/api/portfolio";
+import { exportPortfolioFrontImage, getPortfolio, getSharedPortfolio, updatePortfolioContent } from "@/api/portfolio";
 import { normalizePortfolioDocument } from "@/api/portfolioMapper";
 import { getCardField, getCardJob, getCardName } from "./cardData";
 
@@ -61,10 +59,9 @@ function PreviewContent({
   );
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCardFlipping, setIsCardFlipping] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const canCopyShareLink = shareUrl.startsWith("http");
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractError, setExtractError] = useState("");
 
   useEffect(() => {
     if (locationState?.document) return;
@@ -96,17 +93,33 @@ function PreviewContent({
     }
   }
 
-  async function handleShare() {
-    if (typeof currentDocument.id !== "number") return;
+  async function handleExtract() {
     setIsShareModalOpen(true);
-    setShareUrl("");
-    setIsCopied(false);
+    setExtractError("");
+  }
+
+  async function handleDownloadImages() {
+    if (typeof currentDocument.id !== "number" && typeof currentDocument.id !== "string") return;
+    setIsExtracting(true);
+    setExtractError("");
     try {
-      const { shareUrl } = await sharePortfolio(currentDocument.id);
-      await navigator.clipboard.writeText(shareUrl);
-      setShareUrl(shareUrl);
+      const imageBlob = await exportPortfolioFrontImage(currentDocument.id);
+      const imageUrl = URL.createObjectURL(imageBlob);
+      const link = window.document.createElement("a");
+      link.href = imageUrl;
+      link.download = `${currentDocument.profile.name || "online-card"}-front.png`;
+      link.style.display = "none";
+      window.document.body.appendChild(link);
+      link.click();
+      window.setTimeout(() => {
+        link.remove();
+        URL.revokeObjectURL(imageUrl);
+      }, 100);
+      setIsShareModalOpen(false);
     } catch {
-      setShareUrl("공유 링크를 생성하지 못했어요.");
+      setExtractError("명함 앞면 이미지를 생성하지 못했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsExtracting(false);
     }
   }
   const cardRole = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
@@ -127,16 +140,16 @@ function PreviewContent({
               style={isCardFlipping ? { transform: "rotateY(-180deg)", opacity: 0 } : undefined}
             >
               <PersonalCard
-                role={cardRole}
-                name={getCardName(document)}
-                job={getCardJob(document)}
-                logoUrl={document.card.logoUrl}
-                tel={getCardField(document, "tel")}
-                phone={getCardField(document, "phone")}
-                email={getCardField(document, "email")}
-                address={document.card.organizationAddress ?? ""}
-                design={document.cardDesignId === "bold" ? "bold" : "default"}
-                onGoto={() => setIsCardFlipping(true)}
+                  role={cardRole}
+                  name={getCardName(document)}
+                  job={getCardJob(document)}
+                  logoUrl={document.card.logoUrl}
+                  tel={getCardField(document, "tel")}
+                  phone={getCardField(document, "phone")}
+                  email={getCardField(document, "email")}
+                  address={document.card.organizationAddress ?? ""}
+                  design={document.cardDesignId === "bold" ? "bold" : "default"}
+                  onGoto={() => setIsCardFlipping(true)}
               />
             </div>
           </div>
@@ -177,7 +190,7 @@ function PreviewContent({
                   mode="preview"
                   onClick={() => navigate("/editor", { state: { document, side } })}
                 />
-                <ShareButton onClick={() => void handleShare()} />
+                <ShareButton onClick={() => void handleExtract()} />
               </>
             )}
           </div>
@@ -191,34 +204,16 @@ function PreviewContent({
           }}
         >
           <Modal
-            title="이 명함을 공유하시겠습니까?"
-            description="링크나 QR 코드로 명함을 공유할 수 있습니다."
+            title="명함 이미지를 저장할까요?"
+            description={"실제 명함 발주 시 앞면은 이 명함 이미지로 사용해주세요.\n뒷면 QR 이미지는 QR 저장 기능에서 따로 저장할 수 있어요."}
+            onCancel={() => setIsShareModalOpen(false)}
+            onConfirm={() => void handleDownloadImages()}
+            cancelLabel="취소"
+            confirmLabel={isExtracting ? "저장 중…" : "이미지 저장"}
           >
             <div className="flex w-full flex-col items-center justify-center gap-4">
-              <div className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-ml border border-primary px-3 ${isCopied ? "bg-focus" : "bg-white"}`}>
-                <p
-                  className="min-w-0 flex-1 truncate text-caption-01 text-ink"
-                  title={shareUrl || undefined}
-                  aria-live="polite"
-                >
-                  {shareUrl || "공유 링크를 생성하는 중…"}
-                </p>
-                <button
-                  type="button"
-                  aria-label={isCopied ? "링크 복사됨" : "링크 복사"}
-                  disabled={!canCopyShareLink}
-                  onClick={async () => {
-                    if (!canCopyShareLink) return;
-                    await navigator.clipboard.writeText(shareUrl);
-                    setIsCopied(true);
-                    window.setTimeout(() => setIsCopied(false), 1500);
-                  }}
-                  className="flex h-8 shrink-0 items-center justify-center rounded-md bg-transparent px-2 text-ink transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default disabled:opacity-40 disabled:hover:text-ink"
-                >
-                  <LinkIcon className="size-5" />
-                </button>
-              </div>
-              <ShareQrCode value={canCopyShareLink ? shareUrl : ""} title={document.profile.name || "portfolio"} />
+              {isExtracting && <p className="text-caption-01 text-placeholder">명함 앞면 이미지를 준비하는 중…</p>}
+              {extractError && <p className="text-body-02 text-danger" role="alert">{extractError}</p>}
             </div>
           </Modal>
         </div>

@@ -10,7 +10,7 @@ export function EditableFrontCard({ document, onProfileChange, onChange, onAddre
   const isBold = document.cardDesignId === "bold";
 
   return (
-    <div className="relative flex h-[230px] w-[390px] max-w-[calc(100vw-2rem)] shrink-0 flex-col rounded-xl border border-ink bg-white p-5 text-ink">
+    <div className="relative flex h-[217px] w-[390px] max-w-[calc(100vw-2rem)] shrink-0 flex-col rounded-xl border border-ink bg-white p-5 text-ink">
       {isBold ? (
         <div className="flex h-[100px] w-full flex-col justify-start gap-1">
           <div className="flex items-start justify-between">
