@@ -223,8 +223,11 @@ export function EditableWorks({
               value={item.description}
               onChange={(event) => onChange(index, "description", event.target.value)}
             />
-            {projectLinkLabels.map((label, linkIndex) => {
-              const link = item.links[linkIndex];
+            {(item.links.length > 0
+              ? item.links
+              : projectLinkLabels.map((label) => ({ label, href: "" }))
+            ).map((link, linkIndex) => {
+              const label = link.label || projectLinkLabels[linkIndex] || `Link ${linkIndex + 1}`;
 
               return (
               <label key={label} className="flex items-center gap-3 text-body-02 font-semibold">

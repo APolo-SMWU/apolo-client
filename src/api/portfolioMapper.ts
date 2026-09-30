@@ -116,7 +116,7 @@ function normalizeBlock(raw: AnyRecord, index: number): ContentBlock {
         id: itemId(item, `${id}-item-${itemIndex + 1}`),
         links: (item.links ?? []).map((link: AnyRecord, linkIndex: number) => ({
           ...link,
-          label: projectLinkLabels[linkIndex] ?? link.label ?? `Link ${linkIndex + 1}`,
+          label: link.label ?? projectLinkLabels[linkIndex] ?? `Link ${linkIndex + 1}`,
         })),
       })),
     };

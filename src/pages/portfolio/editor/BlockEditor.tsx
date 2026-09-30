@@ -182,7 +182,7 @@ export function BlockEditor({
                   if (key === "link" && linkIndex !== undefined) {
                     const links = [...item.links];
                     links[linkIndex] = {
-                      label: projectLinkLabels[linkIndex] ?? `Link ${linkIndex + 1}`,
+                      label: links[linkIndex]?.label ?? projectLinkLabels[linkIndex] ?? `Link ${linkIndex + 1}`,
                       href: value,
                     };
 
