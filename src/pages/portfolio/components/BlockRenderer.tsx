@@ -41,13 +41,19 @@ function TimelineContent({ block }: { block: Extract<ContentBlock, { type: "educ
             {!(("date" in item) || !item.endDate) ? ` - ${item.endDate}` : ""}
           </p>
           <div>
-            <h3 className="text-title-02 font-bold">{item.organization}</h3>
-            {item.role && (
+            <h3 className="text-title-02 font-bold">{"title" in item ? item.title : item.organization}</h3>
+            {"title" in item && item.issuer && (
+              <p className="text-body-01">{item.issuer}</p>
+            )}
+            {"title" in item && "grade" in item && item.grade && (
+              <p className="text-body-01">{item.grade}</p>
+            )}
+            {!(("title" in item)) && item.role && (
               <p className={block.type === "education" ? "text-body-02" : "text-body-01"}>
                 {item.role}
               </p>
             )}
-            {item.description && (
+            {"description" in item && item.description && (
               <p className="mt-1 text-body-01">{item.description}</p>
             )}
           </div>

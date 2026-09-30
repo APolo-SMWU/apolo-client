@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { GripVertical } from "lucide-react";
 import DeleteIcon from "@/assets/portfolio/Delete.svg?react";
-import type { ContentBlock } from "@/types/portfolio";
+import type { AwardItem, CertificationItem, ContentBlock, EducationItem, ExperienceItem, ActivitiesItem } from "@/types/portfolio";
 import { inputClass } from "./editorUtils";
 
 export function EditableTimeline({
@@ -15,22 +15,13 @@ export function EditableTimeline({
   block: Extract<ContentBlock, { type: "education" | "experience" | "activities" | "awards" | "certification" }>;
   isBlockSelected: boolean;
   onBlockSelect: () => void;
-  onChange: (index: number, key: "startDate" | "endDate" | "date" | "organization" | "role" | "description", value: string) => void;
+  onChange: (index: number, key: "startDate" | "endDate" | "date" | "organization" | "role" | "description" | "title" | "grade" | "issuer", value: string) => void;
   onRemove: (index: number) => void;
   onReorder: (sourceId: string, targetId: string) => void;
 }) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
-  const descriptionPlaceholder =
-    block.type === "education"
-      ? "전공, 학업 내용 또는 주요 경험을 작성해주세요."
-      : block.type === "activities"
-        ? "활동 내용과 주요 역할을 작성해주세요."
-        : block.type === "experience"
-          ? "담당 업무와 주요 성과를 작성해주세요."
-          : "수상 또는 자격 내용을 작성해주세요.";
-
   return (
     <div className="flex flex-col gap-4">
       {block.items.map((item, index) => (
@@ -102,24 +93,102 @@ export function EditableTimeline({
             )}
           </div>
           <div className="flex max-w-[448px] flex-col gap-2">
-            <input
-              className={`${inputClass} text-title-02 !font-bold`}
-              placeholder="기관 또는 회사"
-              value={item.organization}
-              onChange={(event) => onChange(index, "organization", event.target.value)}
-            />
-            <input
-              className={inputClass}
-              placeholder="역할"
-              value={item.role ?? ""}
-              onChange={(event) => onChange(index, "role", event.target.value)}
-            />
-            <input
-              className={inputClass}
-              placeholder={descriptionPlaceholder}
-              value={item.description ?? ""}
-              onChange={(event) => onChange(index, "description", event.target.value)}
-            />
+            {block.type === "awards" && (
+              <>
+                {(() => {
+                  const award = item as AwardItem;
+                  return <>
+                <input
+                  className={`${inputClass} text-title-02 !font-bold`}
+                  placeholder="수상명"
+                  value={award.title}
+                  onChange={(event) => onChange(index, "title", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="수여 기관"
+                  value={award.issuer ?? ""}
+                  onChange={(event) => onChange(index, "issuer", event.target.value)}
+                />
+                  </>;
+                })()}
+              </>
+            )}
+            {block.type === "certification" && (
+              <>
+                {(() => {
+                  const certification = item as CertificationItem;
+                  return <>
+                <input
+                  className={`${inputClass} text-title-02 !font-bold`}
+                  placeholder="자격증명"
+                  value={certification.title}
+                  onChange={(event) => onChange(index, "title", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="등급·점수"
+                  value={certification.grade ?? ""}
+                  onChange={(event) => onChange(index, "grade", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="발급 기관"
+                  value={certification.issuer ?? ""}
+                  onChange={(event) => onChange(index, "issuer", event.target.value)}
+                />
+                  </>;
+                })()}
+              </>
+            )}
+            {block.type === "education" && (
+              <>
+                {(() => {
+                  const education = item as EducationItem;
+                  return <>
+                <input
+                  className={`${inputClass} text-title-02 !font-bold`}
+                  placeholder="학교명"
+                  value={education.organization}
+                  onChange={(event) => onChange(index, "organization", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="전공·학위"
+                  value={education.role ?? ""}
+                  onChange={(event) => onChange(index, "role", event.target.value)}
+                />
+                  </>;
+                })()}
+              </>
+            )}
+            {(block.type === "experience" || block.type === "activities") && (
+              <>
+                {(() => {
+                  const timelineItem = item as ExperienceItem | ActivitiesItem;
+                  return <>
+                <input
+                  className={`${inputClass} text-title-02 !font-bold`}
+                  placeholder={block.type === "experience" ? "기관 또는 회사" : "활동명·기관명"}
+                  value={timelineItem.organization ?? ""}
+                  onChange={(event) => onChange(index, "organization", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="역할"
+                  value={timelineItem.role ?? ""}
+                  onChange={(event) => onChange(index, "role", event.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder={block.type === "experience" ? "담당 업무와 주요 성과" : "활동 내용과 주요 역할"}
+                  value={timelineItem.description ?? ""}
+                  onChange={(event) => onChange(index, "description", event.target.value)}
+                />
+                  </>;
+                })()}
+              </>
+            )}
           </div>
           {isBlockSelected && selectedItemId === item.id && (
             <button

@@ -1,6 +1,6 @@
 import AddIcon from "@/assets/portfolio/Add.svg?react";
 import DeleteIcon from "@/assets/portfolio/Delete.svg?react";
-import type { ContentBlock, TimelineBlock, TimelineItem, WorkItem } from "@/types/portfolio";
+import type { ContentBlock, TimelineBlock, WorkItem } from "@/types/portfolio";
 import { getPortfolioThemeColors } from "../components/portfolioTheme";
 import { createClientId, panelClass, projectLinkLabels } from "./editorUtils";
 import { EditableAbout } from "./EditableAbout";
@@ -46,10 +46,18 @@ export function BlockEditor({
 
   function addTimelineItem() {
     if (!("items" in block)) return;
-    const newItem: TimelineItem = ["awards", "certification"].includes(block.type)
-      ? { id: createClientId(`${block.type}-item`), date: null, organization: "", role: "", description: "" }
-      : { id: createClientId(`${block.type}-item`), startDate: null, endDate: null, organization: "", role: "", description: "" };
-    onChange({ ...block, items: [...block.items, newItem] } as ContentBlock);
+    const id = createClientId(`${block.type}-item`);
+    if (block.type === "awards") {
+      onChange({ ...block, items: [...block.items, { id, title: "", issuer: null, date: null }] });
+    } else if (block.type === "certification") {
+      onChange({ ...block, items: [...block.items, { id, title: "", grade: null, issuer: null, date: null }] });
+    } else if (block.type === "education") {
+      onChange({ ...block, items: [...block.items, { id, startDate: null, endDate: null, organization: "", role: undefined }] });
+    } else if (block.type === "experience") {
+      onChange({ ...block, items: [...block.items, { id, startDate: null, endDate: null, organization: null, role: null, description: null }] });
+    } else if (block.type === "activities") {
+      onChange({ ...block, items: [...block.items, { id, startDate: null, endDate: null, organization: "", role: null, description: null }] });
+    }
   }
 
   function addWorksItem() {

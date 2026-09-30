@@ -14,18 +14,35 @@ export type AboutBlock = BaseBlock & { type: "about"; description: string };
 type BaseTimelineItem = {
   id: ItemId;
   entityId?: string;
+};
+type TimelineRange = { startDate: string | null; endDate: string | null | "Present" };
+type TimelineDate = { date: string | null };
+
+export type EducationItem = BaseTimelineItem & TimelineRange & {
   organization: string;
   role?: string;
-  description?: string;
-  kind?: "fulltime" | "intern" | "research" | "exchange" | "volunteer" | "club" | "program" | "talk";
 };
-export type TimelineRangeItem = BaseTimelineItem & { startDate: string | null; endDate: string | null | "Present" };
-export type TimelineDateItem = BaseTimelineItem & { date: string | null };
-export type EducationBlock = BaseBlock & { type: "education"; items: TimelineRangeItem[] };
-export type ExperienceBlock = BaseBlock & { type: "experience"; items: TimelineRangeItem[] };
-export type ActivitiesBlock = BaseBlock & { type: "activities"; items: TimelineRangeItem[] };
-export type AwardsBlock = BaseBlock & { type: "awards"; items: TimelineDateItem[] };
-export type CertificationBlock = BaseBlock & { type: "certification"; items: TimelineDateItem[] };
+export type ExperienceItem = BaseTimelineItem & TimelineRange & {
+  organization?: string | null;
+  role?: string | null;
+  description?: string | null;
+  kind?: "fulltime" | "contract" | "intern" | "research";
+};
+export type ActivitiesItem = BaseTimelineItem & TimelineRange & {
+  organization: string;
+  role?: string | null;
+  description?: string | null;
+  kind?: "club" | "volunteer" | "program" | "talk";
+};
+export type AwardItem = BaseTimelineItem & TimelineDate & { title: string; issuer?: string | null };
+export type CertificationItem = BaseTimelineItem & TimelineDate & { title: string; grade?: string | null; issuer?: string | null };
+export type TimelineRangeItem = EducationItem | ExperienceItem | ActivitiesItem;
+export type TimelineDateItem = AwardItem | CertificationItem;
+export type EducationBlock = BaseBlock & { type: "education"; items: EducationItem[] };
+export type ExperienceBlock = BaseBlock & { type: "experience"; items: ExperienceItem[] };
+export type ActivitiesBlock = BaseBlock & { type: "activities"; items: ActivitiesItem[] };
+export type AwardsBlock = BaseBlock & { type: "awards"; items: AwardItem[] };
+export type CertificationBlock = BaseBlock & { type: "certification"; items: CertificationItem[] };
 export type TimelineBlock = EducationBlock | ExperienceBlock | ActivitiesBlock | AwardsBlock | CertificationBlock;
 export type TimelineItem = TimelineRangeItem | TimelineDateItem;
 
