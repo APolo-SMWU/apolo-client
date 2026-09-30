@@ -53,7 +53,7 @@ export type WorkItem = {
 };
 export type WorksBlock = BaseBlock & { type: "works"; items: WorkItem[] };
 
-export type SkillItem = { id: ItemId; entityId?: string; name: string };
+export type SkillItem = { id: ItemId; entityId?: string; entityIds?: string[]; name: string };
 export type SkillCategory = { id: string; category: string; items: SkillItem[] };
 export type SkillsBlock = BaseBlock & { type: "skills"; categories: SkillCategory[] };
 export type ContentBlock = AboutBlock | TimelineBlock | WorksBlock | SkillsBlock;

@@ -44,4 +44,39 @@ describe("normalizePortfolioDocument", () => {
     expect(document.blocks[0]).not.toMatchObject({ items: [{ description: expect.anything() }] });
     expect(document.blocks[1]).toMatchObject({ items: [{ organization: "Company", role: "Engineer", description: "impact" }] });
   });
+
+  it("preserves grouped skill entity ids and normalizes legacy entity ids", () => {
+    const document = normalizePortfolioDocument({
+      blocks: [
+        {
+          type: "skills",
+          categories: [
+            {
+              category: "Cloud",
+              items: [
+                { name: "Azure", entityIds: ["kg-id-1", "kg-id-2"] },
+                { name: "AWS", entityId: "legacy-id" },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(document.blocks[0]).toEqual({
+      id: "skills-block-1",
+      type: "skills",
+      visible: true,
+      categories: [
+        {
+          id: "skills-block-1-category-1",
+          category: "Cloud",
+          items: [
+            { id: "skills-block-1-category-1-item-1", name: "Azure", entityIds: ["kg-id-1", "kg-id-2"] },
+            { id: "skills-block-1-category-1-item-2", name: "AWS", entityId: "legacy-id", entityIds: ["legacy-id"] },
+          ],
+        },
+      ],
+    });
+  });
 });

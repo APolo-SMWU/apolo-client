@@ -74,10 +74,20 @@ export function buildBlocksPayload(blocks: ContentBlock[]): ContentBlockInput[] 
     if (block.type === "about") return { ...blockWithoutClientId };
     if (block.type === "skills") {
       return {
-        ...blockWithoutClientId,
+        ...(block.id.startsWith("client-") ? {} : { id: block.id }),
+        type: block.type,
+        visible: block.visible,
         categories: block.categories.map((category) => ({
-          ...stripClientId(category),
-          items: category.items.map((item) => ({ ...stripClientId(item) })),
+          ...(category.id.startsWith("client-") ? {} : { id: category.id }),
+          category: category.category,
+          items: category.items.map((item) => {
+            const entityIds = item.entityIds ?? (item.entityId ? [item.entityId] : undefined);
+            return {
+              ...(item.id.startsWith("client-") ? {} : { id: item.id }),
+              name: item.name,
+              ...(entityIds !== undefined ? { entityIds } : {}),
+            };
+          }),
         })),
       };
     }
