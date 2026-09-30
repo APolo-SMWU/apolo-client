@@ -139,6 +139,13 @@ export const updatePortfolioContent = (
     PORTFOLIO_CONTENT_UPDATE_TIMEOUT_MS,
   );
 
+export const exportPortfolioFrontImage = (portfolioId: number | string) =>
+  apiFetch<Blob>(`/portfolios/${portfolioId}/export/front-image`, {
+    method: "POST",
+    auth: true,
+    responseType: "blob",
+  });
+
 export const uploadPortfolioAvatar = (portfolioId: number | string, file: File) => {
   const formData = new FormData();
   formData.append("file", file);

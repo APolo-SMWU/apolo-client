@@ -7,6 +7,8 @@ export type ModalProps =  {
   children?: ReactNode;
   onCancel?: () => void;
   onConfirm?: () => void;
+  cancelLabel?: string;
+  confirmLabel?: string;
 }
 export default function Modal({
   title= '',
@@ -14,6 +16,8 @@ export default function Modal({
   children,
   onCancel,
   onConfirm,
+  cancelLabel = "아니요",
+  confirmLabel = "네",
 }: ModalProps) {
   return (
     <AppWindow
@@ -24,7 +28,7 @@ export default function Modal({
           {title}
         </h1>
         {description ? (
-          <p className="text-body-02 text-placeholder leading-[1.2]">{description}</p>
+          <p className="whitespace-pre-line text-body-02 text-placeholder leading-[1.2]">{description}</p>
         ) : null}
       </div>
       
@@ -37,14 +41,14 @@ export default function Modal({
             className="flex h-10 w-50 items-center justify-center rounded-ml border border-danger bg-white text-body-02 font-bold text-placeholder hover:bg-danger hover:text-white"
             onClick={onCancel}
           >
-            아니요
+            {cancelLabel}
           </button>
           <button
             type="button"
             className="flex h-10 w-50 items-center justify-center rounded-ml border border-primary bg-white text-body-02 font-bold text-placeholder hover:bg-primary hover:text-white"
             onClick={onConfirm}
           >
-            네
+            {confirmLabel}
           </button>
         </div>
       ) : null}

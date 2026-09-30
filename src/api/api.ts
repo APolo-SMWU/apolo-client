@@ -14,6 +14,7 @@ export type ApiErrorResponse = {
 
 export type ApiFetchOptions = RequestInit & {
   auth?: boolean;
+  responseType?: "json" | "blob";
 };
 
 async function reissueAccessToken() {
@@ -50,7 +51,9 @@ export async function apiFetch<T>(
     if (refreshedToken) response = await request(refreshedToken);
   }
 
-  const data = await response.json().catch(() => null);
+  const data = options?.responseType === "blob"
+    ? await response.blob()
+    : await response.json().catch(() => null);
 
   if (!response.ok) {
     throw {
