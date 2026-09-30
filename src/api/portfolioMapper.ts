@@ -88,7 +88,17 @@ function normalizeBlock(raw: AnyRecord, index: number): ContentBlock {
       category: category.category ?? "",
       items: (category.items ?? []).map((item: string | AnyRecord, itemIndex: number): SkillItem => {
         const normalized = typeof item === "string" ? { name: item } : item;
-        return { ...normalized, id: itemId(normalized, `${id}-category-${categoryIndex + 1}-item-${itemIndex + 1}`), name: normalized.name ?? "" };
+        const entityIds = Array.isArray(normalized.entityIds)
+          ? normalized.entityIds.filter((entityId: unknown): entityId is string => typeof entityId === "string" && entityId.trim().length > 0)
+          : typeof normalized.entityId === "string" && normalized.entityId.trim()
+            ? [normalized.entityId]
+            : undefined;
+        return {
+          id: itemId(normalized, `${id}-category-${categoryIndex + 1}-item-${itemIndex + 1}`),
+          name: normalized.name ?? "",
+          ...(typeof normalized.entityId === "string" ? { entityId: normalized.entityId } : {}),
+          ...(entityIds !== undefined ? { entityIds } : {}),
+        };
       }),
     }));
     return { id, type, visible: raw.visible !== false, categories };
