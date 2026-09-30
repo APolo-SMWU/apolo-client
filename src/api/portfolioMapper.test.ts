@@ -79,4 +79,31 @@ describe("normalizePortfolioDocument", () => {
       ],
     });
   });
+
+  it("keeps project link labels from the backend without using their array indexes", () => {
+    const document = normalizePortfolioDocument({
+      blocks: [
+        {
+          type: "works",
+          items: [
+            {
+              title: "Project",
+              links: [{ label: "GitHub", href: "https://github.com/example/project" }],
+            },
+            {
+              title: "Legacy project",
+              links: [{ href: "https://example.com" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(document.blocks[0]).toMatchObject({
+      items: [
+        { links: [{ label: "GitHub", href: "https://github.com/example/project" }] },
+        { links: [{ label: "Link", href: "https://example.com" }] },
+      ],
+    });
+  });
 });

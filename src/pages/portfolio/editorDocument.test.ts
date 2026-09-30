@@ -77,4 +77,40 @@ describe("buildBlocksPayload", () => {
       },
     ]);
   });
+
+  it("keeps project link labels paired with their hrefs when saving", () => {
+    const payload = buildBlocksPayload([
+      {
+        id: "works-block",
+        type: "works",
+        visible: true,
+        items: [
+          {
+            id: "work-1",
+            kind: "project",
+            title: "Project",
+            description: "Description",
+            links: [{ label: "GitHub", href: "https://github.com/example/project" }],
+          },
+        ],
+      },
+    ]);
+
+    expect(payload).toEqual([
+      {
+        id: "works-block",
+        type: "works",
+        visible: true,
+        items: [
+          {
+            id: "work-1",
+            kind: "project",
+            title: "Project",
+            description: "Description",
+            links: [{ label: "GitHub", href: "https://github.com/example/project" }],
+          },
+        ],
+      },
+    ]);
+  });
 });

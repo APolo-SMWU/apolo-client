@@ -1,0 +1,28 @@
+{"kind":"deck","id":"pr/y8oggi","name":"Deck"}
+{"kind":"layout","layoutId":"41943b82-9b86-41c1-8943-4aabda86af15","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"8dde7146-70fc-4b36-a198-63fde09c9c49","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/c945qf","slide":1,"title":"USER VALUE","textShapes":17}
+{"kind":"textbox","id":"sh/i1gf6dw7","slide":1,"text":"USER VALUE","textPreview":"USER VALUE","textChars":10,"textLines":1,"bbox":[72,46,180,26]}
+{"kind":"textbox","id":"sh/547ehsvi","slide":1,"text":"정리된 경력 데이터는 필요한 순간에 다시 쓰입니다.","textPreview":"정리된 경력 데이터는 필요한 순간에 다시 쓰입니다.","textChars":28,"textLines":1,"bbox":[72,78,1070,62]}
+{"kind":"textbox","id":"sh/43yx8nex","slide":1,"text":"생성 이후에도 직접 편집하고, 목적에 맞게 공개하고, 경험이 쌓일수록 업데이트합니다.","textPreview":"생성 이후에도 직접 편집하고, 목적에 맞게 공개하고, 경험이 쌓일수록 업데이트합니다.","textChars":47,"textLines":1,"bbox":[74,147,900,28]}
+{"kind":"textbox","id":"sh/r69gjido","slide":1,"text":"APolo","textPreview":"APolo","textChars":5,"textLines":1,"bbox":[1080,52,128,32]}
+{"kind":"shape","id":"sh/650fadw3","slide":1,"bbox":[154,333,972,4]}
+{"kind":"shape","id":"sh/t8rylsvu","slide":1,"bbox":[170,292,84,84]}
+{"kind":"textbox","id":"sh/s7ixcne9","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[170,302,84,62]}
+{"kind":"textbox","id":"sh/7a5w7ydk","slide":1,"text":"직접 편집","textPreview":"직접 편집","textChars":5,"textLines":1,"bbox":[125,404,174,34]}
+{"kind":"textbox","id":"sh/m9wfytwz","slide":1,"text":"AI 결과를 내 표현과\n목적에 맞게 다듬습니다.","textPreview":"AI 결과를 내 표현과 | 목적에 맞게 다듬습니다.","textChars":26,"textLines":2,"bbox":[115,446,194,54]}
+{"kind":"shape","id":"sh/gbepkjqp","slide":1,"bbox":[430,292,84,84]}
+{"kind":"textbox","id":"sh/hcn6dora","slide":1,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[430,302,84,62]}
+{"kind":"textbox","id":"sh/u9w7i98j","slide":1,"text":"공개 범위 선택","textPreview":"공개 범위 선택","textChars":8,"textLines":1,"bbox":[385,404,174,34]}
+{"kind":"textbox","id":"sh/fa5obe94","slide":1,"text":"필요한 경험만 골라\n나만의 페이지로 공개합니다.","textPreview":"필요한 경험만 골라 | 나만의 페이지로 공개합니다.","textChars":26,"textLines":2,"bbox":[375,446,194,54]}
+{"kind":"shape","id":"sh/4zypojql","slide":1,"bbox":[690,292,84,84]}
+{"kind":"textbox","id":"sh/p076hor6","slide":1,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[690,302,84,62]}
+{"kind":"textbox","id":"sh/2dg7mt8v","slide":1,"text":"링크·QR 공유","textPreview":"링크·QR 공유","textChars":8,"textLines":1,"bbox":[645,404,174,34]}
+{"kind":"textbox","id":"sh/3ypofe90","slide":1,"text":"지원과 네트워킹에서\n바로 전달할 수 있습니다.","textPreview":"지원과 네트워킹에서 | 바로 전달할 수 있습니다.","textChars":25,"textLines":2,"bbox":[635,446,194,54]}
+{"kind":"shape","id":"sh/k3u5czqh","slide":1,"bbox":[950,292,84,84]}
+{"kind":"textbox","id":"sh/543654r2","slide":1,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[950,302,84,62]}
+{"kind":"textbox","id":"sh/l0vm9gjq","slide":1,"text":"계속 업데이트","textPreview":"계속 업데이트","textChars":7,"textLines":1,"bbox":[905,404,174,34]}
+{"kind":"textbox","id":"sh/kzml0v25","slide":1,"text":"새로운 경험을 추가하면\n기존 결과물에도 반영됩니다.","textPreview":"새로운 경험을 추가하면 | 기존 결과물에도 반영됩니다.","textChars":28,"textLines":2,"bbox":[895,446,194,54]}
+{"kind":"shape","id":"sh/zyd47q1k","slide":1,"bbox":[72,590,1136,74]}
+{"kind":"textbox","id":"sh/yx43ylkf","slide":1,"text":"문서 하나를 만드는 서비스가 아니라, 경력을 계속 사용하는 서비스입니다.","textPreview":"문서 하나를 만드는 서비스가 아니라, 경력을 계속 사용하는 서비스입니다.","textChars":40,"textLines":1,"bbox":[110,603,1060,48]}
+{"kind":"notes","id":"nt/c945qf","slide":1,"text":"APolo 사용자 가치: 생성 이후 편집, 공개 범위 선택, 링크·QR 공유, 지속 업데이트가 이어진다."}
