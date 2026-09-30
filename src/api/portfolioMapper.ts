@@ -1,10 +1,13 @@
 import type {
+  ActivitiesItem,
+  AwardItem,
   ContentBlock,
+  CertificationItem,
+  EducationItem,
+  ExperienceItem,
   PortfolioDocument,
   SkillCategory,
   SkillItem,
-  TimelineDateItem,
-  TimelineRangeItem,
 } from "@/types/portfolio";
 
 // The API is intentionally normalized at this boundary because older responses
@@ -16,26 +19,58 @@ function nullableDate(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
 }
 
+function nullableText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
 function itemId(raw: AnyRecord, fallback: string) {
   return typeof raw.id === "string" && raw.id ? raw.id : fallback;
 }
 
-function normalizeTimelineItem(raw: AnyRecord, type: ContentBlock["type"], index: number): TimelineRangeItem | TimelineDateItem {
-  const base = {
-    ...raw,
-    id: itemId(raw, `${type}-item-${index + 1}`),
-    organization: raw.organization ?? "",
+function normalizeTimelineItem(raw: AnyRecord, type: ContentBlock["type"], index: number): EducationItem | ExperienceItem | ActivitiesItem | AwardItem | CertificationItem {
+  const id = itemId(raw, `${type}-item-${index + 1}`);
+  const entityId = typeof raw.entityId === "string" ? raw.entityId : undefined;
+
+  if (type === "awards") {
+    return {
+      id,
+      ...(entityId ? { entityId } : {}),
+      title: raw.title ?? raw.organization ?? "",
+      issuer: nullableText(raw.issuer ?? raw.role),
+      date: nullableDate(raw.date),
+    };
+  }
+
+  if (type === "certification") {
+    return {
+      id,
+      ...(entityId ? { entityId } : {}),
+      title: raw.title ?? raw.organization ?? "",
+      grade: nullableText(raw.grade ?? raw.role),
+      issuer: nullableText(raw.issuer),
+      date: nullableDate(raw.date),
+    };
+  }
+
+  const range = {
+    id,
+    ...(entityId ? { entityId } : {}),
+    startDate: nullableDate(raw.startDate),
+    endDate: raw.endDate === "Present" ? "Present" : nullableDate(raw.endDate),
   };
 
-  if (type === "awards" || type === "certification") {
-    return { ...base, date: nullableDate(raw.date) } as TimelineDateItem;
+  if (type === "education") {
+    return { ...range, organization: raw.organization ?? "", role: nullableText(raw.role) ?? undefined };
   }
 
   return {
-    ...base,
-    startDate: nullableDate(raw.startDate),
-    endDate: raw.endDate === "Present" ? "Present" : nullableDate(raw.endDate),
-  } as TimelineRangeItem;
+    ...range,
+    organization: nullableText(raw.organization),
+    role: nullableText(raw.role),
+    description: nullableText(raw.description),
+    ...(type === "experience" && ["fulltime", "contract", "intern", "research"].includes(raw.kind) ? { kind: raw.kind } : {}),
+    ...(type === "activities" && ["club", "volunteer", "program", "talk"].includes(raw.kind) ? { kind: raw.kind } : {}),
+  } as ExperienceItem | ActivitiesItem;
 }
 
 function normalizeBlock(raw: AnyRecord, index: number): ContentBlock {
