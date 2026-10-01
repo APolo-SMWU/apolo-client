@@ -29,10 +29,26 @@ export type UpdatePortfolioRequest = {
 
 type PortfolioResponse = { portfolio: unknown };
 
+export type PortfolioCvStatus = {
+  exists: boolean;
+  stale: boolean;
+  generatedAt: string | null;
+};
+
+export type PortfolioCvResponse = {
+  url: string;
+  generatedAt: string;
+  regenerated: boolean;
+};
+
+type PortfolioCvStatusResponse = { cv: PortfolioCvStatus };
+type PortfolioCvGenerationResponse = { cv: PortfolioCvResponse };
+
 const mapPortfolioResponse = ({ portfolio }: PortfolioResponse) => normalizePortfolioDocument(portfolio);
 
 const PORTFOLIO_CREATION_TIMEOUT_MS = 360_000;
 const PORTFOLIO_CONTENT_UPDATE_TIMEOUT_MS = 360_000;
+const PORTFOLIO_CV_TIMEOUT_MS = 90_000;
 const portfolioCreationRequests = new Map<string, Promise<PortfolioDocument>>();
 
 function createRequestId() {
@@ -106,6 +122,25 @@ export const getPortfolio = (portfolioId: number | string) =>
     method: "GET",
     auth: true,
   }).then(mapPortfolioResponse);
+
+export const getPortfolioCvStatus = (portfolioId: number | string) =>
+  apiFetch<PortfolioCvStatusResponse>(`/portfolios/${portfolioId}/cv`, {
+    method: "GET",
+    auth: true,
+  }).then(({ cv }) => cv);
+
+export const generatePortfolioCv = (
+  portfolioId: number | string,
+  force = false,
+) =>
+  withTimeout(
+    apiFetch<PortfolioCvGenerationResponse>(`/portfolios/${portfolioId}/cv`, {
+      method: "POST",
+      auth: true,
+      body: JSON.stringify(force ? { force: true } : {}),
+    }).then(({ cv }) => cv),
+    PORTFOLIO_CV_TIMEOUT_MS,
+  );
 
 export const getSharedPortfolio = (shareId: string) =>
   apiFetch<PortfolioResponse>(`/share/${encodeURIComponent(shareId)}`, {

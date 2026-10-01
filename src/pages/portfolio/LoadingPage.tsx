@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getPortfolioCreation } from "@/api/portfolio";
 import type { PortfolioDocument } from "@/types/portfolio";
 import { getNextLoadingAnimationDirection } from "./loadingAnimation";
+import { sortPortfolioTimelineBlocks } from "./components/timelineSort";
 
 type LoadingLocationState = {
   requestId?: string;
@@ -32,12 +33,13 @@ export default function LoadingPage() {
     getPortfolioCreation(requestId)
       .then((document) => {
         if (!isCurrent) return;
+        const initialDocument = sortPortfolioTimelineBlocks({
+          ...(document as PortfolioDocument),
+          ...(cardDesignId ? { cardDesignId } : {}),
+        });
         navigate("/preview", {
           state: {
-            document: {
-              ...(document as PortfolioDocument),
-              ...(cardDesignId ? { cardDesignId } : {}),
-            },
+            document: initialDocument,
           },
           replace: true,
         });
