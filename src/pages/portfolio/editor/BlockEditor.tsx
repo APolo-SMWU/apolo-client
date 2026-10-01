@@ -79,7 +79,7 @@ export function BlockEditor({
       ...block,
       categories: [
         ...block.categories,
-        { id: createClientId(`${block.type}-category`), category: "New Category", items: [] },
+        { id: createClientId(`${block.type}-category`), category: "", items: [] },
       ],
     });
   }

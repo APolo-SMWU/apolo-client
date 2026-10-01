@@ -74,7 +74,7 @@ export function EditableSkills({
           </span>
           <input
             className={`${inputClass} text-body-02 font-semibold`}
-            placeholder="카테고리명"
+            placeholder="Category"
             value={category.category}
             onChange={(event) => onCategoryChange(index, event.target.value)}
             aria-label="스킬 카테고리 제목"
