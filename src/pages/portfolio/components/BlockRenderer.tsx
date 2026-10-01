@@ -134,13 +134,13 @@ function SkillsContent({ block, themeId }: { block: Extract<ContentBlock, { type
   const themeColors = getPortfolioThemeColors(themeId);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="grid gap-x-2 gap-y-3 sm:grid-cols-[max-content_minmax(0,1fr)]">
       {block.categories.map((category) => (
         <div
           key={category.category}
-          className="grid gap-2 px-4 sm:grid-cols-[130px_1fr]"
+          className="grid gap-2 px-4 sm:col-span-2 sm:grid-cols-subgrid"
         >
-          <p className="font-medium">{category.category}</p>
+          <p className="whitespace-nowrap font-medium">{category.category}</p>
           <div className="flex flex-wrap gap-2">
             {category.items.map((item) => (
               <span
