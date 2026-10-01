@@ -102,7 +102,11 @@ function WorksContent({
                 ))}
               </div>
             )}
-            {item.description && <p className="text-body-02">{item.description}</p>}
+            {item.description && (
+              <p className="whitespace-pre-line text-body-02">
+                {item.description.replace(/[^\S\r\n]+-(?=[^\S\r\n]+\S)/g, "\n-")}
+              </p>
+            )}
             {item.links.some((link) => link.href) && (
               <div className="mt-2 flex gap-3">
                 {item.links.filter((link) => link.href).map((link) => (
