@@ -1,6 +1,7 @@
 import Header from "@/components/layout/Header";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
+import { LoaderCircle } from "lucide-react";
 import PersonalCard from "@/pages/home/components/PersonalCard";
 import ProfileBlock from "@/pages/portfolio/components/ProfileBlock";
 import BlockRenderer from "@/pages/portfolio/components/BlockRenderer";
@@ -10,7 +11,9 @@ import ShareButton from "@/pages/portfolio/components/ShareButton";
 import UpdateButton from "@/pages/portfolio/components/UpdateButton";
 import Modal from "@/components/common/Modal";
 import type { PortfolioDocument } from "@/types/portfolio";
-import { exportPortfolioFrontImage, getPortfolio, getSharedPortfolio, updatePortfolioContent } from "@/api/portfolio";
+import type { ApiErrorResponse } from "@/api/api";
+import { exportPortfolioFrontImage, generatePortfolioCv, getPortfolio, getPortfolioCvStatus, getSharedPortfolio, updatePortfolioContent } from "@/api/portfolio";
+import type { PortfolioCvStatus } from "@/api/portfolio";
 import { normalizePortfolioDocument } from "@/api/portfolioMapper";
 import { getCardField, getCardJob, getCardName } from "./cardData";
 
@@ -62,6 +65,9 @@ function PreviewContent({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractError, setExtractError] = useState("");
+  const [cvStatus, setCvStatus] = useState<PortfolioCvStatus | null>(null);
+  const [isGeneratingCv, setIsGeneratingCv] = useState(false);
+  const [cvError, setCvError] = useState("");
 
   useEffect(() => {
     if (locationState?.document) return;
@@ -73,6 +79,13 @@ function PreviewContent({
       void getPortfolio(locationState.portfolioId).then(setDocument);
     }
   }, [locationState?.document, locationState?.portfolioId, shareId]);
+
+  useEffect(() => {
+    if (shareId || !document?.id) return;
+    void getPortfolioCvStatus(document.id)
+      .then(setCvStatus)
+      .catch(() => setCvStatus(null));
+  }, [document?.id, shareId]);
 
   if (!document) {
     return (
@@ -122,11 +135,84 @@ function PreviewContent({
       setIsExtracting(false);
     }
   }
+
+  async function handleCvClick() {
+    if (isGeneratingCv) return;
+    setIsGeneratingCv(true);
+    setCvError("");
+    try {
+      const cv = await generatePortfolioCv(currentDocument.id);
+      setCvStatus({ exists: true, stale: false, generatedAt: cv.generatedAt });
+      window.open(cv.url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      const apiError = error as Partial<ApiErrorResponse>;
+      const messages: Record<string, string> = {
+        PORTFOLIO_NOT_FOUND: "포트폴리오를 찾을 수 없어요.",
+        CV_KG_NOT_READY: "포트폴리오를 먼저 생성해주세요.",
+        CV_EMPTY: "CV에 넣을 항목이 없어요.",
+        CV_REGENERATE_TOO_SOON: "최신 CV는 1분 이내에 다시 생성할 수 없어요.",
+        CV_PDF_GENERATION_FAILED: "PDF를 생성하지 못했어요. 잠시 후 다시 시도해주세요.",
+        CV_S3_SAVE_FAILED: "PDF를 저장하지 못했어요. 잠시 후 다시 시도해주세요.",
+        AI_SERVER_ERROR: "AI 서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.",
+        AI_TIMEOUT: "AI 응답 시간이 초과됐어요. 잠시 후 다시 시도해주세요.",
+      };
+      setCvError(messages[apiError.code ?? ""] ?? "CV를 준비하지 못했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsGeneratingCv(false);
+    }
+  }
+
+  function handleBlockNavigation(event: MouseEvent<HTMLAnchorElement>, blockType: string) {
+    if (shareId) return;
+    event.preventDefault();
+    window.document.getElementById(blockType)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   const cardRole = document.userType === "student" ? "Student" : document.userType === "professor" ? "Professor" : "Professional";
+  const portfolioHeader = side === "back" ? (
+    <header
+      className={`z-20 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01 text-ink ${shareId ? "fixed inset-x-0 top-0" : "relative"}`}
+    >
+      <strong>{document.profile.name}</strong>
+      <nav className="flex items-center gap-8" aria-label="Website navigation">
+        {document.blocks
+          .filter((block) => block.visible)
+          .map((block) => (
+            <a
+              href={`#${block.type}`}
+              key={block.id}
+              onClick={(event) => handleBlockNavigation(event, block.type)}
+            >
+              {blockNavigationLabels[block.type]}
+            </a>
+          ))}
+        {shareId ? (
+          <a href="#cv">CV</a>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void handleCvClick()}
+            disabled={isGeneratingCv}
+            aria-label={cvStatus?.exists && !cvStatus.stale ? "CV 열기" : "CV 생성 및 열기"}
+            className="disabled:cursor-wait disabled:opacity-50"
+                  >
+                    {isGeneratingCv ? (
+                      <>
+                        <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
+                        <span className="sr-only">CV 생성 중</span>
+                      </>
+                    ) : "CV"}
+                  </button>
+        )}
+      </nav>
+      {!shareId && cvError && <p className="absolute right-7 top-full mt-2 text-caption-01 text-danger" role="alert">{cvError}</p>}
+    </header>
+  ) : null;
 
   return (
     <div className="flex min-h-dvh flex-col bg-white">
       {!shareId && <Header />}
+      {portfolioHeader}
       <main className={`relative flex min-h-0 flex-1 flex-col overflow-auto text-focus ${side === "front" ? "bg-apolo px-6 pt-8 pb-0" : "bg-white p-0"}`}>
         {side === "front" ? (
           <div className="flex flex-1 items-center justify-center [perspective:1200px]">
@@ -155,21 +241,6 @@ function PreviewContent({
           </div>
         ) : (
           <>
-            {shareId && (
-              <header className="fixed inset-x-0 top-0 z-20 flex shrink-0 items-center justify-between border-b border-ink bg-white px-7 py-4 text-body-01 text-ink">
-                <strong>{document.profile.name}</strong>
-                <nav className="flex gap-8" aria-label="Website navigation">
-                  {document.blocks
-                    .filter((block) => block.visible)
-                    .map((block) => (
-                      <a href={`#${block.type}`} key={block.id}>
-                        {blockNavigationLabels[block.type]}
-                      </a>
-                    ))}
-                  <a href="#cv">CV</a>
-                </nav>
-              </header>
-            )}
             <div className={`flex w-full min-w-0 flex-1 items-start justify-between gap-8 p-4 ${shareId ? "pt-[72px]" : ""}`}>
               <ProfileBlock profile={document.profile} userType={document.userType} />
               <div className="flex min-w-0 flex-1 flex-col">
