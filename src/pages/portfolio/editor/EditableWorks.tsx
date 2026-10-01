@@ -217,8 +217,8 @@ export function EditableWorks({
               onChange={(skills) => onChange(index, "skills", JSON.stringify(skills))}
               themeId={themeId}
             />
-            <input
-              className={inputClass}
+            <textarea
+              className={`${inputClass} min-h-20 resize-y`}
               placeholder="프로젝트 설명"
               value={item.description}
               onChange={(event) => onChange(index, "description", event.target.value)}
