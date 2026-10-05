@@ -1,75 +1,164 @@
-# React + TypeScript + Vite
+# APOLO
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+흩어진 기록을 연결해 온라인 명함과 포트폴리오를 만들고 관리하는 서비스, **APOLO**의 프론트엔드입니다.
+외부 링크와 첨부 자료를 바탕으로 AI 포트폴리오 생성을 요청하고, 생성된 내용을 편집하거나 링크와 QR 코드로 공유할 수 있습니다.
 
-Currently, two official plugins are available:
+## 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **회원 및 프로필 관리**: 이메일 회원가입·로그인, 학생·교수·직장인 유형별 온보딩, 프로필 수정
+- **포트폴리오 생성**: 명함 디자인과 테마 선택, 외부 링크·첨부 파일·요청 사항 입력, 생성 진행 화면
+- **포트폴리오 편집**: 명함, 프로필, 소개, 학력, 경력, 활동, 수상, 자격증, 작업물, 기술 블록 편집
+- **명함 관리**: 생성한 명함 목록 조회, 제목 수정, 삭제
+- **공유 및 내보내기**: 공유 링크·QR 코드, 공개 포트폴리오 조회, 명함 앞면 이미지 내보내기, CV 생성
+- **콘텐츠 업데이트**: 연결된 자료를 기반으로 포트폴리오 콘텐츠 업데이트 요청
 
-## React Compiler
+회원 인증, 포트폴리오 생성·저장, CV 생성 등은 별도의 백엔드 API와 연동됩니다. 이 저장소에는 프론트엔드 코드가 포함되어 있습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 기술 스택
 
-## Expanding the ESLint configuration
+| 구분 | 기술 |
+| --- | --- |
+| UI | React 19, TypeScript 6 |
+| 빌드 | Vite 8 |
+| 라우팅 | React Router 7 |
+| 스타일 | Tailwind CSS 4 |
+| API 통신 | Fetch API |
+| 애니메이션 | Lottie |
+| 아이콘 및 SVG | Lucide React, Iconify, SVGR |
+| QR 코드 | qrcode |
+| 코드 검사 | ESLint, TypeScript |
+| 테스트 도구 | Vitest, jsdom |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 시작하기
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 1. 개발 환경
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js `20.19 이상인 20.x` 또는 `22.12 이상` — 현재 Vite 및 React 플러그인의 요구 버전 기준
+- npm
+- 접근 가능한 APOLO 백엔드 API
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. 의존성 설치
 
+저장소 루트에서 실행합니다.
+
+```bash
+npm ci
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. 환경 변수 설정
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+저장소 루트에 `.env.development.local` 파일을 만들고 아래 값을 설정합니다.
+기존 파일이 있다면 필요한 값만 수정합니다.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```dotenv
+VITE_API_BASE_URL=/api
+VITE_API_PROXY_TARGET=http://localhost:3000
 ```
+
+`http://localhost:3000`은 예시이며, 실제 사용하는 백엔드 주소로 변경해야 합니다.
+
+| 변수 | 설명 |
+| --- | --- |
+| `VITE_API_BASE_URL` | 클라이언트 API 요청의 기본 주소. 로컬 개발에서 프록시를 사용하려면 `/api`로 설정 |
+| `VITE_API_PROXY_TARGET` | Vite 개발 서버가 API 요청을 전달할 백엔드 주소 |
+
+개발 서버는 `/api`로 시작하는 요청을 백엔드로 전달하며, 전달할 때 `/api` 접두사를 제거합니다.
+예를 들어 `/api/auth/login` 요청은 백엔드의 `/auth/login`으로 전달됩니다.
+환경 변수를 변경한 뒤에는 개발 서버를 다시 시작합니다.
+
+### 4. 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+터미널에 표시되는 로컬 주소로 접속합니다.
+
+## 실행 명령어
+
+| 명령어 | 설명 |
+| --- | --- |
+| `npm run dev` | Vite 개발 서버 실행 |
+| `npm run build` | TypeScript 검사 후 프로덕션 빌드 (`dist/`) |
+| `npm run preview` | 빌드 결과 로컬 미리보기 |
+| `npm run lint` | ESLint 코드 검사 |
+| `npm test` | Vitest 실행 (`jsdom` 환경) |
+
+현재 저장소에는 테스트 실행 스크립트가 등록되어 있지만, 테스트 파일은 포함되어 있지 않습니다.
+
+## 사용자 흐름
+
+1. 회원가입 및 로그인 후 사용자 유형에 맞는 프로필을 등록합니다.
+2. 홈에서 새 명함 만들기를 시작하고 디자인과 테마를 선택합니다.
+3. 외부 링크, 첨부 자료, 요청 사항을 입력해 포트폴리오 생성을 요청합니다.
+4. 생성된 명함과 포트폴리오를 미리 보고 필요한 내용을 편집합니다.
+5. 링크 또는 QR 코드로 공유하고, 명함 이미지와 CV를 활용합니다.
+
+## 주요 페이지
+
+| 경로 | 화면 |
+| --- | --- |
+| `/` | 서비스 소개 |
+| `/signup` | 회원가입 |
+| `/login` | 로그인 |
+| `/onboarding` | 초기 프로필 설정 |
+| `/home` | 내 명함 목록 및 관리 |
+| `/select` | 명함 디자인 선택 |
+| `/create` | 포트폴리오 생성 자료 입력 |
+| `/loading` | 생성 진행 및 오류 안내 |
+| `/preview` | 명함·포트폴리오 미리보기 |
+| `/editor` | 명함·포트폴리오 편집 |
+| `/share/:shareId` | 공유된 포트폴리오 조회 |
+| `/mypage` | 내 프로필 관리 |
+
+생성·편집 화면 중 일부는 이전 화면에서 전달한 상태를 사용하므로, 홈 화면에서 흐름에 따라 진입합니다.
+
+## 프로젝트 구조
+
+```text
+src/
+├── api/                # 인증, 사용자, 포트폴리오 API와 응답 정규화
+├── assets/             # 이미지, SVG, Lottie 리소스
+├── components/
+│   ├── common/         # 공통 버튼, 모달, 프로필 폼
+│   └── layout/         # 헤더, 푸터
+├── pages/
+│   ├── auth/           # 회원가입, 로그인, 온보딩
+│   ├── home/           # 명함 목록, 공유 UI
+│   ├── mypage/         # 프로필 관리
+│   └── portfolio/
+│       ├── components/ # 포트폴리오 표시 컴포넌트
+│       └── editor/     # 블록별 편집 UI
+├── types/              # 포트폴리오 데이터 타입 등
+├── App.tsx             # 라우트 정의
+├── routeModules.ts     # 페이지 지연 로딩
+├── main.tsx            # 앱 진입점
+└── index.css           # 전역 스타일
+```
+
+`@/` 경로 별칭은 `src/`를 가리킵니다.
+
+## API 연동 구조
+
+- `src/api/api.ts`: 공통 요청, 인증 헤더, 오류 응답 처리
+- `src/api/auth.ts`: 회원가입, 로그인, 로그아웃, 사용자 인증 정보 조회
+- `src/api/user.ts`: 온보딩 및 프로필 조회·수정
+- `src/api/portfolio.ts`: 생성, 조회, 수정, 삭제, 공유, 이미지 업로드, CV 및 이미지 내보내기
+- `src/api/portfolioMapper.ts`: 서버 응답을 프론트엔드 포트폴리오 데이터로 정규화
+
+인증 요청은 `localStorage`의 액세스 토큰을 Bearer 헤더에 포함합니다.
+인증 요청에서 `401` 응답을 받으면 `/auth/reissue`로 토큰 재발급을 시도한 후 원래 요청을 한 번 재시도합니다.
+공통 API 요청에는 쿠키 전송을 위한 `credentials: "include"`가 설정되어 있습니다.
+
+## 배포 설정
+
+```bash
+npm run build
+```
+
+생성된 `dist/` 디렉터리를 정적 호스팅에 배포합니다.
+
+- 빌드 환경의 `VITE_API_BASE_URL`을 실제 API 주소 또는 배포 서버의 API 프록시 경로로 설정합니다.
+- Vite 개발 서버의 `/api` 프록시는 프로덕션 빌드에 포함되지 않습니다. 배포 환경에서 `/api`를 사용하려면 별도의 프록시 설정이 필요합니다.
+- React Router의 브라우저 라우팅을 사용하므로 `/share/:shareId` 등으로 직접 접속해도 `index.html`을 반환하도록 SPA fallback을 설정합니다.
+- 프론트엔드와 API의 출처가 다르면 백엔드의 CORS 및 쿠키 설정이 배포 환경과 일치해야 합니다.
