@@ -142,12 +142,12 @@ export function EditableWorks({
             <GripVertical className="size-5" aria-hidden="true" />
           </span>
           <div
-            className="w-[145px] shrink-0"
+            className="w-[200px] shrink-0"
             onClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => event.stopPropagation()}
           >
             <div
-              className="relative size-[145px] overflow-hidden rounded-md border bg-focus"
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-md border bg-focus"
               style={{ borderColor: themeColors.text }}
             >
               <label
