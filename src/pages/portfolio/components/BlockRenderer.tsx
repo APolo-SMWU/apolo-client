@@ -78,7 +78,7 @@ function WorksContent({
         <article key={item.id} className="flex gap-4 px-4">
           {item.imageUrl && (
             <div
-              className="size-[145px] shrink-0 overflow-hidden rounded-md border bg-focus"
+              className="aspect-[4/3] w-[200px] shrink-0 self-start overflow-hidden rounded-md border bg-focus"
               style={{ borderColor: themeColors.text }}
             >
               <img className="size-full object-cover" src={item.imageUrl} alt="" />
